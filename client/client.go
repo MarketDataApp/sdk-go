@@ -39,8 +39,7 @@ type MarketDataClient struct {
 	rateLimitReset     time.Time
 	host               string
 	protocol           string
-
-	mu sync.Mutex
+	mu                 sync.Mutex
 }
 
 func (c *MarketDataClient) String() string {

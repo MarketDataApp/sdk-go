@@ -27,7 +27,7 @@ func GenerateDateKeys(start, end time.Time, keyType string) ([]string, error) {
 		// If the keyType is not recognized, return an error
 		return nil, fmt.Errorf("invalid keyType: %s", keyType)
 	}
-	
+
 	return keys, nil
 }
 
@@ -247,4 +247,28 @@ func FromYearlyDateKey(key string, loc *time.Location) (DateRange, error) {
 	endDate := time.Date(year, time.December, 31, 23, 59, 59, 999999999, loc)
 
 	return DateRange{StartDate: startDate, EndDate: endDate}, nil
+}
+
+// DateKeyToDateRange creates a new DateRange instance from a date key.
+// It accepts a date key of type string and an optional time zone.
+// If the time zone is not provided, the default time zone is used.
+// The function returns a pointer to the new DateRange instance and any errors that occurred during the creation.
+func DateKeyToDateRange(dateKey string, tz ...*time.Location) (*DateRange, error) {
+	// Define the location
+	var loc *time.Location
+	if len(tz) > 0 {
+		loc = tz[0]
+	} else {
+		loc = DefaultTZ // replace with your default time zone
+	}
+
+	// Create a new DateRange instance
+	dateRange := &DateRange{}
+	// Set the DateRange from the date key
+	err := dateRange.SetFromDateKey(dateKey, loc)
+	if err != nil {
+		return nil, err
+	}
+
+	return dateRange, nil
 }

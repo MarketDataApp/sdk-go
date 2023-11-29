@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+// ToDayString takes an interface and returns the date in YYYY-MM-DD format and an error
+func ToDayString(dateInput interface{}, tz ...*time.Location) (string, error) {
+	parsedDate, _, err := ParseDateInput(dateInput, tz...)
+	if err != nil {
+		return "", err
+	}
+	return parsedDate.Format("2006-01-02"), nil
+}
+
+
 // ToTime takes an interface and returns just the time.Time and an error
 func ToTime(dateInput interface{}, tz ...*time.Location) (time.Time, error) {
 	parsedDate, _, err := ParseDateInput(dateInput, tz...)

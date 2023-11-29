@@ -1,19 +1,23 @@
+// Package stocks provides the /stocks endpoints
 package stocks
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
-	"time"
-	"encoding/csv"
 	"os"
 	"sort"
+	"strings"
+	"time"
 
 	md "github.com/MarketDataApp/sdk-go/client"
 	"github.com/MarketDataApp/sdk-go/helpers/endpoints"
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
+
 )
 
+// TickerInfo represents the information of a ticker.
 type TickerInfo struct {
 	Symbol        string
 	Name          string
@@ -26,6 +30,7 @@ type TickerInfo struct {
 	Updated       *time.Time
 }
 
+// String returns a string representation of TickerInfo.
 func (ti *TickerInfo) String() string {
 	updated := ""
 	if ti.Updated != nil {
@@ -34,6 +39,7 @@ func (ti *TickerInfo) String() string {
 	return fmt.Sprintf("TickerInfo{Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s, Updated: %s}", ti.Symbol, ti.Name, ti.Type, ti.Currency, ti.Exchange, ti.FigiShares, ti.FigiComposite, ti.Cik, updated)
 }
 
+// TickersResponse represents the response from the /stocks/tickers endpoint.
 type TickersResponse struct {
 	Symbol        []string `json:"symbol"`
 	Name          []string `json:"name,omitempty"`
@@ -46,6 +52,7 @@ type TickersResponse struct {
 	Updated       *[]int64 `json:"updated,omitempty"`
 }
 
+// String returns a string representation of TickersResponse.
 func (tr *TickersResponse) String() string {
 	var str strings.Builder
 	str.WriteString("TickersResponse{\n")
@@ -61,6 +68,7 @@ func (tr *TickersResponse) String() string {
 	return str.String()
 }
 
+// ToMap converts TickersResponse to a map with the symbol as the key.
 func (tr *TickersResponse) ToMap() (map[string]TickerInfo, error) {
 	tickerInfos, err := tr.Unpack()
 	if err != nil {
@@ -74,6 +82,7 @@ func (tr *TickersResponse) ToMap() (map[string]TickerInfo, error) {
 	return tickerMap, nil
 }
 
+// Unpack converts TickersResponse to a slice of TickerInfo.
 func (tr *TickersResponse) Unpack() ([]TickerInfo, error) {
 	if tr == nil {
 		return nil, fmt.Errorf("TickersResponse is nil")
@@ -102,10 +111,13 @@ func (tr *TickersResponse) Unpack() ([]TickerInfo, error) {
 	return tickerInfos, nil
 }
 
+// TickersParams represents the parameters for the /stocks/tickers endpoint.
 type TickersParams struct {
 	Date string `path:"date" validate:"required"`
 	Err  error
 }
+
+// String returns a string representation of TickersParams.
 func (tp *TickersParams) String() string {
 	if tp.Err != nil {
 		return fmt.Sprintf("Date: %s, Error: %v", tp.Date, tp.Err)
@@ -113,21 +125,23 @@ func (tp *TickersParams) String() string {
 	return fmt.Sprintf("Date: %s", tp.Date)
 }
 
-
+// TickersPath is the path for the /stocks/tickers endpoint.
 const (
 	TickersPath = "/v2/stocks/tickers/{date}/"
 )
 
+// TickersRequest represents a request to the /stocks/tickers endpoint.
 type TickersRequest struct {
 	Path   string
 	Params *TickersParams
 }
+
+// String returns a string representation of TickersRequest.
 func (tr *TickersRequest) String() string {
 	return fmt.Sprintf("TickersRequest:\nPath: %s\nParams: %s", tr.Path, tr.Params.String())
 }
 
-
-
+// GetPath returns the path for the TickersRequest.
 func (tr *TickersRequest) GetPath() (string, error) {
 	path, err := endpoints.BuildPath(tr.Path, tr.Params)
 	if err != nil {
@@ -136,26 +150,23 @@ func (tr *TickersRequest) GetPath() (string, error) {
 	return path, nil
 }
 
+// GetQuery returns the query string for the TickersRequest.
 func (tr *TickersRequest) GetQuery() (string, error) {
 	return "", nil
 }
 
+// Date sets the date parameter for the TickersRequest.
 func (tr *TickersRequest) Date(q interface{}) *TickersRequest {
-	switch v := q.(type) {
-	case time.Time:
-		tr.Params.Date = v.Format("2006-01-02")
-	case string:
-		if _, err := time.Parse("2006-01-02", v); err != nil {
-			tr.Params.Err = err
-		} else {
-			tr.Params.Date = v
-		}
-	default:
-		tr.Params.Err = fmt.Errorf("invalid type for date: %T", q)
+	dateString, err := dates.ToDayString(q)
+	if err != nil {
+		tr.Params.Err = err
+	} else {
+		tr.Params.Date = dateString
 	}
 	return tr
 }
 
+// New creates a new TickersRequest.
 func New(dates ...string) (*TickersRequest, error) {
 	tr := &TickersRequest{
 		Path:   TickersPath,
@@ -174,6 +185,8 @@ func New(dates ...string) (*TickersRequest, error) {
 
 	return tr, nil
 }
+
+// GetTickers sends the TickersRequest and returns the TickersResponse.
 func (tr *TickersRequest) GetTickers() (*TickersResponse, error) {
 	client, err := md.GetClient("dev")
 	if err != nil {
@@ -198,7 +211,7 @@ func (tr *TickersRequest) GetTickers() (*TickersResponse, error) {
 	return &trResp, nil
 }
 
-
+// CombineTickerResponses combines multiple TickersResponses into a single map.
 func CombineTickerResponses(responses []*TickersResponse) (map[string]TickerInfo, error) {
 	tickerMap := make(map[string]TickerInfo)
 	for _, response := range responses {
@@ -213,6 +226,7 @@ func CombineTickerResponses(responses []*TickersResponse) (map[string]TickerInfo
 	return tickerMap, nil
 }
 
+// SaveToCSV saves the ticker map to a CSV file.
 func SaveToCSV(tickerMap map[string]TickerInfo, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
@@ -244,6 +258,7 @@ func SaveToCSV(tickerMap map[string]TickerInfo, filename string) error {
 	return nil
 }
 
+// MapToTickersResponse converts a map of TickerInfo to a TickersResponse.
 func MapToTickersResponse(tickerMap map[string]TickerInfo) *TickersResponse {
     var tr TickersResponse
     keys := make([]string, 0, len(tickerMap))
