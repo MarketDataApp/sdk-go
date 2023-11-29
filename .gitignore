@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+# Environment variables
+.env
+
+# Compiled binaries
+sdk-go
+
+# CSV files
+*.csv
