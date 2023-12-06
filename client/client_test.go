@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"testing"
 	"time"
@@ -37,11 +36,11 @@ func TestRateLimit(t *testing.T) {
 	}
 
 	// Check initial rate limit limit and reset time
-	initialLimit := client.GetRateLimitLimit()
+	initialLimit := client.RateLimitLimit
 	if initialLimit <= 0 {
 		t.Errorf("Expected positive rate limit limit, but got %d", initialLimit)
 	}
-	resetTime := client.GetRateLimitReset()
+	resetTime := client.RateLimitReset
 	if time.Now().After(resetTime) {
 		t.Errorf("Expected reset time in the future, but got %v", resetTime)
 	}
@@ -51,34 +50,24 @@ func TestRateLimit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("Headers after AAPL request:", resp.Header)
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println("Status code after AAPL request:", resp.StatusCode)
+	fmt.Println("Headers after AAPL request:", resp.Header())
+	body := resp.Body()
+	fmt.Println("Status code after AAPL request:", resp.StatusCode())
 	fmt.Println("Body after AAPL request:", string(body))
-	initialRemaining := client.GetRateLimitRemaining()
-	rateLimitConsumed, err := GetRateLimitConsumed(resp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println("Rate limit consumed after AAPL request:", rateLimitConsumed)
-	resp.Body.Close()
+	initialRemaining := client.RateLimitRemaining
+	fmt.Println("Rate limit consumed after AAPL request:", resp.RateLimitConsumed)
 
 	// Request to https://api.marketdata.app/stocks/quotes/SPY/
-	resp, err = client.Get("/v1/stocks/quotes/SPY/")
+	resp, err = client.Get("https://api.marketdata.app/v1/stocks/quotes/SPY/")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("Headers after SPY request:", resp.Header)
-	body, _ = io.ReadAll(resp.Body)
-	fmt.Println("Status code after SPY request:", resp.StatusCode)
+	fmt.Println("Headers after SPY request:", resp.Header())
+	body = resp.Body()
+	fmt.Println("Status code after SPY request:", resp.StatusCode())
 	fmt.Println("Body after SPY request:", string(body))
-	afterRequestRemaining := client.GetRateLimitRemaining()
-	rateLimitConsumed, err = GetRateLimitConsumed(resp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println("Rate limit consumed after SPY request:", rateLimitConsumed)
-	resp.Body.Close()
+	afterRequestRemaining := client.RateLimitRemaining
+	fmt.Println("Rate limit consumed after SPY request:", resp.RateLimitConsumed)
 
 	if afterRequestRemaining != initialRemaining-1 {
 		t.Errorf("Expected remaining rate limit to decrease by 1, but got %d", initialRemaining-afterRequestRemaining)

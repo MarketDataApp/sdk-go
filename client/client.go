@@ -1,22 +1,26 @@
 package client
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 const Version = "1.0.0"
 
 const (
+	ProdEnv = "prod"
+	TestEnv = "test"
+	DevEnv  = "dev"
+
 	ProdHost = "api.marketdata.app"
 	TestHost = "tst.marketdata.app"
 	DevHost  = "localhost"
@@ -26,38 +30,77 @@ const (
 	DevProtocol  = "http"
 )
 
-type roundTripperFunc func(*http.Request) (*http.Response, error)
-
-func (fn roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return fn(req)
+type MarketDataClient struct {
+	*resty.Client
+	RateLimitLimit     int
+	RateLimitRemaining int
+	RateLimitReset     time.Time
+	mu                 sync.Mutex
+	Error              error
 }
 
-type MarketDataClient struct {
-	*http.Client
-	rateLimitLimit     int
-	rateLimitRemaining int
-	rateLimitReset     time.Time
-	host               string
-	protocol           string
-	mu                 sync.Mutex
+// MarketDataResponse represents the response from the Market Data API.
+// It embeds the resty.Response and includes additional fields for RayID and RateLimitConsumed.
+type MarketDataResponse struct {
+	*resty.Response          // The response from the resty client
+	RayID             string // The Ray ID from the HTTP response
+	RateLimitConsumed int    // The number of requests consumed from the rate limit
+	Delay             int64  // The time (in miliseconds) between the request and the server's response.
+}
+
+func (mdr *MarketDataResponse) setLatency() {
+	trace := mdr.Request.TraceInfo()
+	mdr.Delay = trace.ServerTime.Milliseconds()
+}
+
+// GetRateLimitConsumed retrieves the number of requests consumed from the HTTP response.
+// It sets the number of requests consumed to the struct and returns an error if any.
+func (mdr *MarketDataResponse) setRateLimitConsumed() error {
+	rateLimitConsumed, err := strconv.Atoi(mdr.Response.Header().Get("X-Api-RateLimit-Consumed"))
+	if err != nil {
+		return err
+	}
+	mdr.RateLimitConsumed = rateLimitConsumed
+	return nil
+}
+
+// GetRayID retrieves the Cf-Ray ID from the HTTP response.
+// It sets the Cf-Ray ID to the struct and returns an error if any.
+func (mdr *MarketDataResponse) setRayID() error {
+	rayID := mdr.Response.Header().Get("Cf-Ray")
+	if rayID == "" {
+		return errors.New("Cf-Ray header not found")
+	}
+	mdr.RayID = rayID
+	return nil
+}
+
+func (c *MarketDataClient) GetEnv() string {
+	u, err := url.Parse(c.Client.HostURL)
+	if err != nil {
+		log.Printf("Error parsing host URL: %v", err)
+		return "Unknown"
+	}
+	switch u.Hostname() {
+	case ProdHost:
+		return ProdEnv
+	case TestHost:
+		return TestEnv
+	case DevHost:
+		return DevEnv
+	default:
+		return "Unknown"
+	}
 }
 
 func (c *MarketDataClient) String() string {
-	clientType := "Unknown"
-	switch c.host {
-	case ProdHost:
-		clientType = "Production"
-	case TestHost:
-		clientType = "Test"
-	case DevHost:
-		clientType = "Development"
-	}
-	return fmt.Sprintf("ClientType: %s, RateLimitLimit: %d, RateLimitRemaining: %d, RateLimitReset: %v", clientType, c.rateLimitLimit, c.rateLimitRemaining, c.rateLimitReset)
+	clientType := c.GetEnv()
+	return fmt.Sprintf("ClientType: %s, RateLimitLimit: %d, RateLimitRemaining: %d, RateLimitReset: %v", clientType, c.RateLimitLimit, c.RateLimitRemaining, c.RateLimitReset)
 }
 
 var marketDataClient *MarketDataClient
 
-func (c *MarketDataClient) SetDefaultResetTime() {
+func (c *MarketDataClient) setDefaultResetTime() {
 	// Get current time in Eastern Time Zone
 	location, _ := time.LoadLocation("America/New_York")
 	now := time.Now().In(location)
@@ -71,175 +114,143 @@ func (c *MarketDataClient) SetDefaultResetTime() {
 		defaultReset = time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 9, 30, 0, 0, location)
 	}
 
-	c.rateLimitReset = defaultReset
+	c.RateLimitReset = defaultReset
 }
 
-func getEnvironmentDetails(env string) (string, string, error) {
-	switch env {
-	case "prod":
-		return ProdHost, ProdProtocol, nil
-	case "test":
-		return TestHost, TestProtocol, nil
-	case "dev":
-		return DevHost, DevProtocol, nil
-	default:
-		return "", "", fmt.Errorf("invalid environment: %s", env)
+func NewClient() *MarketDataClient {
+	client := &MarketDataClient{
+		Client: resty.New(),
 	}
+
+	client.setDefaultResetTime()
+
+	// Set default environment to prod using the built-in method
+	client.Env(ProdEnv)
+
+	// Set the "User-Agent" header
+	client.Client.SetHeader("User-Agent", "sdk-go/"+Version)
+
+	// Enable client trace
+	client.Client.EnableTrace()
+
+	// Set the OnAfterResponse hook
+	client.Client.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
+		log.Printf("Sent request URL: %s", resp.Request.URL) // Debug print
+		client.updateRateLimit(resp)
+		return nil
+	})
+
+	return client
 }
 
-func NewClient(bearerToken string) (*MarketDataClient, error) {
-	baseReq, _ := http.NewRequest("GET", "", nil)
+func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
+	// Lock the mutex before updating the shared rate limit fields
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	// Set the headers
-	baseReq.Header.Add("Authorization", "Bearer "+bearerToken)
-	baseReq.Header.Add("User-Agent", "MarketDataGoSDK/"+Version)
+	limitHeader := resp.Header().Get("X-Api-Ratelimit-Limit")
+	remainingHeader := resp.Header().Get("X-Api-Ratelimit-Remaining")
+	resetHeader := resp.Header().Get("X-Api-Ratelimit-Reset")
 
-	// Define client before the function
-	client := &MarketDataClient{}
-	client.SetDefaultResetTime()
+	if limitHeader == "" || remainingHeader == "" || resetHeader == "" {
+		log.Printf("URL of the request made: %v", resp.Request.URL)
+		log.Println("Error: missing rate limit headers")
+		return
+	}
 
-	// Set default environment to prod
-	host, protocol, err := getEnvironmentDetails("prod")
+	limitVal, err := strconv.Atoi(limitHeader)
 	if err != nil {
-		return nil, err
-	}
-	client.host = host
-	client.protocol = protocol
-
-	client.Client = &http.Client{
-		Transport: roundTripperFunc(func(req *http.Request) (*http.Response, error) {
-			req = req.WithContext(context.Background())
-			req.Header = baseReq.Header.Clone()
-			resp, err := http.DefaultTransport.RoundTrip(req)
-			if err != nil {
-				return nil, err
-			}
-
-			// Lock the mutex before updating the shared rate limit fields
-			client.mu.Lock()
-			limit, remaining, reset, err := extractRateLimitHeaders(resp)
-			if err != nil {
-				log.Printf("Error extracting rate limit headers: %v", err)
-				// handle error
-			} else {
-				client.rateLimitLimit = *limit
-				client.rateLimitRemaining = *remaining
-				client.rateLimitReset = time.Unix(*reset, 0)
-			}
-			client.mu.Unlock()
-			// Unlock the mutex and return the response
-
-			return resp, nil
-		}),
+		log.Printf("Error converting limit header to int: %v", err)
+		return
 	}
 
-	// Make an initial request to authorize the token and load the rate limit information
-	req, _ := http.NewRequest("GET", "https://api.marketdata.app/v1/stocks/candles/D/SPY/?from=2020-01-01&to=2020-01-31", nil)
-	resp, err := client.Do(req)
+	remainingVal, err := strconv.Atoi(remainingHeader)
 	if err != nil {
-		return nil, err
+		log.Printf("Error converting remaining header to int: %v", err)
+		return
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-OK status: %s", resp.Status)
-	}
-	defer resp.Body.Close()
 
-	limit, remaining, reset, err := extractRateLimitHeaders(resp)
+	resetVal, err := strconv.ParseInt(resetHeader, 10, 64)
 	if err != nil {
-		log.Printf("Error extracting rate limit headers: %v", err)
-		// handle error
-	} else {
-		client.rateLimitLimit = *limit
-		client.rateLimitRemaining = *remaining
-		client.rateLimitReset = time.Unix(*reset, 0)
+		log.Printf("Error converting reset header to int64: %v", err)
+		return
 	}
 
-	return client, nil
+	c.RateLimitLimit = limitVal
+	c.RateLimitRemaining = remainingVal
+	c.RateLimitReset = time.Unix(resetVal, 0)
 }
 
-func (c *MarketDataClient) GetRateLimitLimit() int {
-	return c.rateLimitLimit
-}
-
-func (c *MarketDataClient) GetRateLimitRemaining() int {
-	return c.rateLimitRemaining
-}
-
-func (c *MarketDataClient) GetRateLimitReset() time.Time {
-	return c.rateLimitReset
-}
-
-func (c *MarketDataClient) GetFromRequest(mdr MarketDataRequest) (*http.Response, error) {
-	if c.rateLimitRemaining < 0 {
+func (c *MarketDataClient) GetFromRequest(mdr MarketDataRequest, result interface{}) (*MarketDataResponse, error) {
+	if c.RateLimitRemaining < 0 {
 		return nil, errors.New("rate limit exceeded")
 	}
+	req := mdr.GetResty().SetResult(result)
 
-	// Validate the path using helper function
-	path, err := mdr.GetPath()
-	if err != nil {
-		return nil, err
-	}
-	path, err = validatePath(path)
-	if err != nil {
-		return nil, err
+	// Parse the parameters from the request
+	paramsSlice := mdr.GetParams()
+	for _, param := range paramsSlice {
+		err := param.SetParams(req)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// Validate the query using helper function
-	query, err := mdr.GetQuery()
-	if err != nil {
-		return nil, err
-	}
-	query, err = validateQuery(query)
-	if err != nil {
+	path := mdr.GetPath()
+
+	if err := mdr.GetError(); err != nil {
 		return nil, err
 	}
 
-	// Parse and validate the path
-	parsedPath, err := url.Parse(path)
+	resp, err := c.WrapResponse(req, path) // Must run GET after setting all params.
 	if err != nil {
-		return nil, err
+		log.Printf("Error sending request: %v", err) // Debug print
+		return resp, err
 	}
 
-	// Parse and validate the query
-	parsedQuery, err := url.Parse(query)
-	if err != nil {
-		return nil, err
-	}
-
-	// If no host is provided, use the default host and protocol
-	if parsedPath.Host == "" {
-		parsedPath.Host = c.host
-		parsedPath.Scheme = c.protocol
-	}
-
-	// Join the validated path and query
-	urlStr := parsedPath.String() + parsedQuery.String()
-
-	return c.Get(urlStr)
-}
-
-func (c *MarketDataClient) Get(urlStr string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", urlStr, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return nil, err
+	if !resp.IsSuccess() {
+		log.Printf("Received non-OK status: %s", resp.Status()) // Debug print
+		return resp, fmt.Errorf("received non-OK status: %s", resp.Status())
 	}
 
 	return resp, nil
 }
 
-// GetClient is a function that takes a variable number of string arguments (token) and returns a pointer to a MarketDataClient and an error.
-// If the marketDataClient is not nil, it returns the existing marketDataClient and no error.
-func GetClient(token ...string) (*MarketDataClient, error) {
-	if marketDataClient != nil {
-		return marketDataClient, nil
+func (c *MarketDataClient) Get(path string) (*MarketDataResponse, error) {
+	req := c.Client.R()
+	return c.WrapResponse(req, path)
+}
+
+func (c *MarketDataClient) WrapResponse(req *resty.Request, path string) (*MarketDataResponse, error) {
+	resp, err := req.Get(path) // Must run GET after setting all params.
+	if err != nil {
+		return nil, err
 	}
 
+	mdr := &MarketDataResponse{Response: resp}
+	err = mdr.setRateLimitConsumed()
+	if err != nil {
+		return nil, err
+	}
+
+	err = mdr.setRayID()
+	if err != nil {
+		return nil, err
+	}
+
+	mdr.setLatency()
+
+	return mdr, nil
+}
+
+func GetClient(token ...string) (*MarketDataClient, error) {
 	if len(token) == 0 {
+		if marketDataClient != nil {
+			if marketDataClient.Error != nil {
+				return nil, marketDataClient.Error
+			}
+			return marketDataClient, nil
+		}
 		token = append(token, os.Getenv("MARKETDATA_TOKEN"))
 	}
 
@@ -247,28 +258,69 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 		return nil, errors.New("no token provided")
 	}
 
-	client, err := NewClient(token[0])
-	if err != nil {
-		return nil, err
+	// Always create a new client when a token is provided
+	client := NewClient()
+	if client.Error != nil {
+		return nil, client.Error
 	}
 
+	client.Token(token[0])
+	if client.Error != nil {
+		return nil, client.Error
+	}
+
+	// Save the new client to the global variable if no errors are present
 	marketDataClient = client
-	return marketDataClient, nil
+
+	return client, nil
 }
 
-func SetEnvironment(env string) error {
-	client, err := GetClient()
-	if err != nil {
-		return err
+func (c *MarketDataClient) Env(env string) *MarketDataClient {
+	var baseURL string
+	switch env {
+	case ProdEnv:
+		baseURL = ProdProtocol + "://" + ProdHost
+	case TestEnv:
+		baseURL = TestProtocol + "://" + TestHost
+	case DevEnv:
+		baseURL = DevProtocol + "://" + DevHost
+	default:
+		c.Error = fmt.Errorf("invalid environment: %s", env)
+		return c
 	}
 
-	host, protocol, err := getEnvironmentDetails(env)
+	c.Client.SetBaseURL(baseURL)
+
+	return c
+}
+
+func init() {
+	token := os.Getenv("MARKETDATA_TOKEN")
+	env := os.Getenv("DEFAULT_ENV")
+
+	if token != "" && env != "" {
+		marketDataClient = NewClient().Env(env).Token(token)
+	}
+}
+
+func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
+	// Set the authentication scheme to "Bearer"
+	c.Client.SetAuthScheme("Bearer")
+
+	// Set the authentication token
+	c.Client.SetAuthToken(bearerToken)
+
+	// Make an initial request to authorize the token and load the rate limit information
+	resp, err := c.Client.R().Get("https://api.marketdata.app/v1/stocks/candles/D/SPY/?from=2020-01-01&to=2020-01-31")
 	if err != nil {
-		return err
+		c.Error = err
+		return c
+	}
+	if !resp.IsSuccess() {
+		err = fmt.Errorf("received non-OK status: %s", resp.Status())
+		c.Error = err
+		return c
 	}
 
-	client.host = host
-	client.protocol = protocol
-
-	return nil
+	return c
 }

@@ -88,3 +88,46 @@ func TestGenerateDateKeys(t *testing.T) {
 		})
 	}
 }
+
+
+func TestIsValidDateKey(t *testing.T) {
+	tests := []struct {
+		name     string
+		dateKey  string
+		expected bool
+	}{
+		{
+			name:     "Valid daily date key",
+			dateKey:  "2022-01-01",
+			expected: true,
+		},
+		{
+			name:     "Valid weekly date key",
+			dateKey:  "2022-W01",
+			expected: true,
+		},
+		{
+			name:     "Valid monthly date key",
+			dateKey:  "2022-01",
+			expected: true,
+		},
+		{
+			name:     "Valid yearly date key",
+			dateKey:  "2022",
+			expected: true,
+		},
+		{
+			name:     "Invalid date key",
+			dateKey:  "invalid-key",
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsValidDateKey(tt.dateKey); got != tt.expected {
+				t.Errorf("IsValidDateKey() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

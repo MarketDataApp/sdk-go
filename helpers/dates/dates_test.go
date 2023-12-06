@@ -624,3 +624,56 @@ func TestCombineDateRanges(t *testing.T) {
 		t.Errorf("Expected end date to be %v, but got %v", dr3.EndDate, combined.EndDate)
 	}
 }
+
+func TestGetDateKeyType(t *testing.T) {
+	tests := []struct {
+		name     string
+		dateKey  string
+		want     string
+		wantErr  bool
+	}{
+		{
+			name:     "Test daily date key",
+			dateKey:  "2022-01-01",
+			want:     "days",
+			wantErr:  false,
+		},
+		{
+			name:     "Test weekly date key",
+			dateKey:  "2022-W01",
+			want:     "weeks",
+			wantErr:  false,
+		},
+		{
+			name:     "Test monthly date key",
+			dateKey:  "2022-01",
+			want:     "months",
+			wantErr:  false,
+		},
+		{
+			name:     "Test yearly date key",
+			dateKey:  "2022",
+			want:     "years",
+			wantErr:  false,
+		},
+		{
+			name:     "Test invalid date key",
+			dateKey:  "invalid",
+			want:     "",
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetDateKeyType(tt.dateKey)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetDateKeyType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetDateKeyType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

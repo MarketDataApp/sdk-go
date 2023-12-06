@@ -2,104 +2,16 @@ package client
 
 import (
 	"errors"
-	"net/http"
-	"net/url"
-	"strconv"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
-func extractRateLimitHeaders(resp *http.Response) (limit *int, remaining *int, reset *int64, err error) {
-	limitHeader := resp.Header.Get("X-Api-Ratelimit-Limit")
-	remainingHeader := resp.Header.Get("X-Api-Ratelimit-Remaining")
-	resetHeader := resp.Header.Get("X-Api-Ratelimit-Reset")
-
-	if limitHeader == "" || remainingHeader == "" || resetHeader == "" {
-		fmt.Println("URL of the request made: ", resp.Request.URL)
-		return nil, nil, nil, errors.New("missing rate limit headers")
-	}
-
-	limitVal, err := strconv.Atoi(limitHeader)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	remainingVal, err := strconv.Atoi(remainingHeader)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	resetVal, err := strconv.ParseInt(resetHeader, 10, 64)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return &limitVal, &remainingVal, &resetVal, nil
-}
-
-func GetRateLimitConsumed(resp *http.Response) (int, error) {
-	rateLimitConsumed, err := strconv.Atoi(resp.Header.Get("X-Api-RateLimit-Consumed"))
-	if err != nil {
-		return 0, err
-	}
-	return rateLimitConsumed, nil
-}
-
-func validatePath(path string) (string, error) {
-	// Ensure the path starts with a "/"
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-
-	// Ensure the path ends with a "/"
-	if !strings.HasSuffix(path, "/") {
-		path = path + "/"
-	}
-
-	// Parse and validate the path
-	parsedPath, err := url.Parse(path)
-	if err != nil {
-		return "", err
-	}
-
-	return parsedPath.String(), nil
-}
-
-func validateQuery(query string) (string, error) {
-	// Ensure the query does not start with a "/"
-	query = strings.TrimPrefix(query, "/")
-	
-	// Ensure the query starts with a "?"
-	if !strings.HasPrefix(query, "?") && query != "" {
-		query = "?" + query
-	}
-
-	// Parse and validate the query
-	parsedQuery, err := url.Parse(query)
-	if err != nil {
-		return "", err
-	}
-
-	// Parse the query parameters into a map
-	values, err := url.ParseQuery(parsedQuery.RawQuery)
-	if err != nil {
-		return "", err
-	}
-
-	// Iterate over the map and delete keys with no value
-	for key, value := range values {
-		if len(value) == 0 || value[0] == "" {
-			delete(values, key)
-		}
-	}
-
-	// Encode the map back into a query string
-	parsedQuery.RawQuery = values.Encode()
-
-	return parsedQuery.String(), nil
-}
-
+// DecodeDate decodes a date from an interface{} type.
+// It supports time.Time and string types and returns the date in "YYYY-MM-DD" format and any error encountered.
 func DecodeDate(date interface{}) (string, error) {
 	switch v := date.(type) {
 	case time.Time:
@@ -113,4 +25,85 @@ func DecodeDate(date interface{}) (string, error) {
 	default:
 		return "", errors.New("date must be a time.Time object or a YYYY-MM-DD string")
 	}
+}
+
+// ParseParams takes a slice of structs and returns two maps: one for path parameters and one for query parameters.
+// It returns an error if a required parameter has a zero value.
+func ParseParams(paramsSlice []interface{}) (map[string]string, map[string]string, error) {
+	pathParams := make(map[string]string)
+	queryParams := make(map[string]string)
+
+	for _, params := range paramsSlice {
+		v := reflect.ValueOf(params)
+
+		// Check if the params is a pointer and dereference it
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+
+		t := v.Type()
+
+		// Iterate over the fields of the struct.
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			value := v.Field(i)
+
+			// Get the field tag value.
+			tag := field.Tag
+
+			// Check if the field is required and has a zero value.
+			if (strings.Contains(tag.Get("path"), "required") || strings.Contains(tag.Get("query"), "required")) && value.IsZero() {
+				return nil, nil, fmt.Errorf("required parameter %s has a zero value", field.Name)
+			}
+
+			// Add the field to the appropriate map if it is not a zero value.
+			if !value.IsZero() {
+				if pathTag := tag.Get("path"); pathTag != "" {
+					pathParams[pathTag] = fmt.Sprint(value.Interface())
+				} else if queryTag := tag.Get("query"); queryTag != "" {
+					queryParams[queryTag] = fmt.Sprint(value.Interface())
+				}
+			}
+		}
+	}
+
+	return pathParams, queryParams, nil
+}
+
+// ParseAndSetParams takes a struct and a Resty request, parses the struct into path and query parameters, and sets them to the request.
+// It returns an error if a required parameter has a zero value.
+func ParseAndSetParams(params MarketDataParam, request *resty.Request) error {
+	v := reflect.ValueOf(params)
+
+	// Check if the params is a pointer and dereference it
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	t := v.Type()
+
+	// Iterate over the fields of the struct.
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		// Get the field tag value.
+		tag := field.Tag
+
+		// Check if the field is required and has a zero value.
+		if (strings.Contains(tag.Get("path"), "required") || strings.Contains(tag.Get("query"), "required")) && value.IsZero() {
+			return fmt.Errorf("required parameter %s has a zero value", field.Name)
+		}
+
+		// Set the field to the appropriate part of the request if it is not a zero value.
+		if !value.IsZero() {
+			if pathTag := tag.Get("path"); pathTag != "" {
+				request.SetPathParam(pathTag, fmt.Sprint(value.Interface()))
+			} else if queryTag := tag.Get("query"); queryTag != "" {
+				request.SetQueryParam(queryTag, fmt.Sprint(value.Interface()))
+			}
+		}
+	}
+
+	return nil
 }

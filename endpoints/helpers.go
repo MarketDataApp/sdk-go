@@ -2,8 +2,6 @@ package endpoints
 
 import (
 	"reflect"
-	"fmt"
-	"strings"
 	"time"
 )
 
@@ -47,28 +45,4 @@ func IsAlpha(s string) bool {
 		}
 	}
 	return true
-}
-
-
-func BuildPath(pathTemplate string, params interface{}) (string, error) {
-	v := reflect.ValueOf(params)
-
-	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		return "", fmt.Errorf("params must be a pointer to a struct")
-	}
-
-	s := v.Elem()
-
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		tag := s.Type().Field(i).Tag.Get("path")
-		if tag != "" && f.CanInterface() {
-			value := f.Interface()
-			if value != nil && !IsZeroValue(value) {
-				pathTemplate = strings.Replace(pathTemplate, "{"+tag+"}", fmt.Sprintf("%v", value), -1)
-			}
-		}
-	}
-
-	return pathTemplate, nil
 }

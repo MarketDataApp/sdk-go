@@ -272,3 +272,36 @@ func DateKeyToDateRange(dateKey string, tz ...*time.Location) (*DateRange, error
 
 	return dateRange, nil
 }
+
+// GetDateKeyType identifies the type of the date key.
+// It accepts a date key of type string.
+// The function returns the type of the date key and any errors that occurred during the identification.
+// The possible types are "days", "months", "years", and "weeks".
+// If the date key is not valid or its type is unknown, an error is returned.
+func GetDateKeyType(dateKey string) (string, error) {
+	if !IsValidDateKey(dateKey) {
+		return "", fmt.Errorf("invalid date key")
+	}
+	switch {
+	case len(dateKey) == 10 && dateKey[4] == '-' && dateKey[7] == '-':
+		return "days", nil
+	case len(dateKey) == 7 && dateKey[4] == '-':
+		return "months", nil
+	case len(dateKey) == 4:
+		return "years", nil
+	case len(dateKey) > 4 && strings.Contains(dateKey, "-W"):
+		return "weeks", nil
+	default:
+		return "", fmt.Errorf("unknown date key type")
+	}
+}
+
+// IsValidDateKey checks if the provided date key is valid.
+// It accepts a date key of type string.
+// The function returns true if the date key is valid, false otherwise.
+func IsValidDateKey(dateKey string) bool {
+	// Try to convert the date key into a DateRange
+	_, err := DateKeyToDateRange(dateKey)
+	// If the conversion is successful, the date key is valid
+	return err == nil
+}

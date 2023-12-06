@@ -6,55 +6,31 @@ import (
 	"sort"
 	"time"
 
-	"github.com/MarketDataApp/sdk-go/client"
-	"github.com/MarketDataApp/sdk-go/endpoints/markets"
-	"github.com/MarketDataApp/sdk-go/endpoints/stocks"
+	api "github.com/MarketDataApp/sdk-go/endpoints"
 )
 
 func marketstatusExample() {
 
-	status, err := markets.New()
-	if err != nil {
-		log.Fatalf("Failed to create new status: %v", err)
-	}
-
-	result, _ := status.Country("US").From("2022-01-01").To("2022-12-31").GetMarketStatus()
-	fmt.Println(result)
+	msr, _ := api.MarketStatus().Country("US").From("2022-01-01").To("2022-12-31").Get()
+	fmt.Println(msr)
 
 }
 
 func stocksTickersExample() {
-	client.SetEnvironment("dev")
-	tickers, err := stocks.New()
-	if err != nil {
-		log.Fatalf("Failed to create new tickers: %v", err)
-	}
-
-	result, _ := tickers.Date("2023-01-05").GetTickers()
-	fmt.Println(result)
-	result, _ = tickers.Date("2023-01-06").GetTickers()
-	fmt.Println(result)
-
+	tickers, _ := api.StockTickers().Date("2023-01-05").Get()
+	fmt.Println(tickers)
 }
 
 func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	// Initialize the markets client
-	client.SetEnvironment("dev")
 
-	marketStatus, err := markets.New()
-	if err != nil {
-		log.Fatalf("Failed to create new market status: %v", err)
-	}
-
-	marketStatus.From(startDate).To(endDate)
-	// Get all open dates between start and end date
-	marketStatusResp, err := marketStatus.GetMarketStatus()
+	marketStatusResp, err := api.MarketStatus().From(startDate).To(endDate).Get()
 	if err != nil {
 		log.Fatalf("Failed to get market status: %v", err)
 	}
 	// Print out marketStatusResp for test run visibility
 	fmt.Printf("Market Status Response: %v\n", marketStatusResp)
-	
+
 	openDates, err := marketStatusResp.GetOpenDates()
 	if err != nil {
 		log.Fatalf("Failed to get open dates: %v", err)
@@ -71,19 +47,16 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	})
 
 	// Initialize the stocks client
-	tickers, err := stocks.New()
-	if err != nil {
-		log.Fatalf("Failed to create new tickers: %v", err)
-	}
+	tickers := api.StockTickers()
 
 	// Get TickersResponse for each date and combine them into a map
-	tickerMap := make(map[string]stocks.TickerInfo)
+	tickerMap := make(map[string]api.TickerObj)
 	for _, date := range openDates {
 		// Convert date to string in the format "YYYY-MM-DD"
 		dateStr := date.Format("2006-01-02")
 
 		// Get the TickersResponse for the date
-		response, err := tickers.Date(dateStr).GetTickers()
+		response, err := tickers.Date(dateStr).Get()
 		if err != nil {
 			return err
 		}
@@ -110,13 +83,13 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	sort.Strings(keys)
 
 	// Create a new map with sorted keys
-	sortedTickerMap := make(map[string]stocks.TickerInfo)
+	sortedTickerMap := make(map[string]api.TickerObj)
 	for _, key := range keys {
 		sortedTickerMap[key] = tickerMap[key]
 	}
 
 	// Save the sorted map to a CSV file
-	err = stocks.SaveToCSV(sortedTickerMap, filename)
+	err = api.SaveToCSV(sortedTickerMap, filename)
 	if err != nil {
 		return err
 	}
@@ -126,19 +99,15 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 
 func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	// Initialize the markets client
-	client.SetEnvironment("dev")
 
 	// Initialize the stocks client
-	tickers, err := stocks.New()
-	if err != nil {
-		log.Fatalf("Failed to create new tickers: %v", err)
-	}
+	tickers := api.StockTickers()
 
 	// Convert date to string in the format "YYYY-MM-DD"
 	dateStr := date.Format("2006-01-02")
 
 	// Get the TickersResponse for the date
-	response, err := tickers.Date(dateStr).GetTickers()
+	response, err := tickers.Date(dateStr).Get()
 	if err != nil {
 		return err
 	}
@@ -150,7 +119,7 @@ func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	}
 
 	// Save the map to a CSV file
-	err = stocks.SaveToCSV(responseMap, filename)
+	err = api.SaveToCSV(responseMap, filename)
 	if err != nil {
 		return err
 	}
