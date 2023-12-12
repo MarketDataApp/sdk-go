@@ -1,29 +1,33 @@
-package endpoints
+package client
 
 import (
 	"fmt"
 	"strings"
 	"time"
-
-	md "github.com/MarketDataApp/sdk-go/client"
 )
 
 // MarketStatusResponse represents the response from a market status request.
 type MarketStatusResponse struct {
-	*md.MarketDataResponse
 	Date   []int64   `json:"date"`
 	Status *[]string `json:"status,omitempty"`
 }
 
+// IsValid checks if there's at least 1 date in the response.
+func (msr *MarketStatusResponse) IsValid() bool {
+	return len(msr.Date) > 0
+}
+
 // String returns a string representation of the MarketStatusResponse.
-func (msr MarketStatusResponse) String() string {
+func (msr *MarketStatusResponse) String() string {
 	var parts []string
-	for i, date := range msr.Date {
-		t := time.Unix(date, 0)
-		dateStr := t.Format("2006-01-02")
-		status := (*msr.Status)[i]
-		part := fmt.Sprintf("Date: %s, Status: %s", dateStr, status)
-		parts = append(parts, part)
+	if msr.Status != nil && len(msr.Date) == len(*msr.Status) {
+		for i, date := range msr.Date {
+			t := time.Unix(date, 0)
+			dateStr := t.Format("2006-01-02")
+			status := (*msr.Status)[i]
+			part := fmt.Sprintf("Date: %s, Status: %s", dateStr, status)
+			parts = append(parts, part)
+		}
 	}
 	return "MarketStatusResponse{\n" + strings.Join(parts, ",\n") + "\n}"
 }
@@ -35,7 +39,7 @@ func (ms MarketStatusObj) String() string {
 
 // Unpack unpacks the MarketStatusResponse into a slice of MarketStatus.
 func (msr *MarketStatusResponse) Unpack() ([]MarketStatusObj, error) {
-	if len(msr.Date) != len(*msr.Status) {
+	if msr.Status == nil || len(msr.Date) != len(*msr.Status) {
 		return nil, fmt.Errorf("date and status slices are not of the same length")
 	}
 

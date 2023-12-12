@@ -1,4 +1,4 @@
-package endpoints
+package client
 
 import (
 	"encoding/csv"
@@ -9,13 +9,11 @@ import (
 	"strings"
 	"time"
 
-	md "github.com/MarketDataApp/sdk-go/client"
 	"github.com/iancoleman/orderedmap"
 )
 
 // TickersResponse represents the response from the /stocks/tickers endpoint.
 type TickersResponse struct {
-	*md.MarketDataResponse
 	Symbol        []string `json:"symbol"`
 	Name          []string `json:"name,omitempty"`
 	Type          []string `json:"type,omitempty"`
@@ -26,6 +24,10 @@ type TickersResponse struct {
 	Cik           []string `json:"cik,omitempty"`
 	Updated       *[]int64 `json:"updated,omitempty"`
 }
+// IsValid checks if the TickersResponse is valid.
+func (tr *TickersResponse) IsValid() bool {
+	return len(tr.Symbol) > 0
+}
 
 // String returns a string representation of TickersResponse.
 func (tr *TickersResponse) String() string {
@@ -33,7 +35,7 @@ func (tr *TickersResponse) String() string {
 	str.WriteString("TickersResponse{\n")
 	for i := range tr.Symbol {
 		str.WriteString(fmt.Sprintf("Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s\n", tr.Symbol[i], tr.Name[i], tr.Type[i], tr.Currency[i], tr.Exchange[i], tr.FigiShares[i], tr.FigiComposite[i], tr.Cik[i]))
-		if tr.Updated != nil && (*tr.Updated)[i] != 0 {
+		if tr.Updated != nil && i < len(*tr.Updated) && (*tr.Updated)[i] != 0 {
 			str.WriteString(fmt.Sprintf("Updated: %v\n", time.Unix((*tr.Updated)[i], 0)))
 		} else {
 			str.WriteString("Updated: \n")
@@ -45,8 +47,8 @@ func (tr *TickersResponse) String() string {
 
 // Unpack converts TickersResponse to a slice of TickerObj.
 func (tr *TickersResponse) Unpack() ([]TickerObj, error) {
-	if tr == nil {
-		return nil, fmt.Errorf("TickersResponse is nil")
+	if tr == nil || tr.Updated == nil {
+		return nil, fmt.Errorf("TickersResponse or its Updated field is nil")
 	}
 	var tickerInfos []TickerObj
 	for i := range tr.Symbol {
@@ -103,11 +105,10 @@ func (tr *TickersResponse) ToMap() (map[string]TickerObj, error) {
 }
 
 // MarshalJSON is a method on the TickersResponse struct.
-// It marshals the struct into a JSON object.
-// The JSON object is an ordered map with keys "s", "symbol", "name", "type", "currency", "exchange", "figiShares", "figiComposite", "cik", and "updated".
-// The "s" key is always set to "ok".
-// The other keys correspond to the slices in the struct.
 func (tr *TickersResponse) MarshalJSON() ([]byte, error) {
+	if tr == nil {
+		return nil, fmt.Errorf("TickersResponse is nil")
+	}
 	// Create a new ordered map
 	o := orderedmap.New()
 
@@ -182,6 +183,9 @@ func MapToTickersResponse(tickerMap map[string]TickerObj) *TickersResponse {
 
 // SaveToCSV saves the ticker map to a CSV file.
 func SaveToCSV(tickerMap map[string]TickerObj, filename string) error {
+	if tickerMap == nil {
+		return fmt.Errorf("tickerMap is nil")
+	}
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

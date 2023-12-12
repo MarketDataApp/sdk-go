@@ -56,7 +56,11 @@ func (mdr *MarketDataResponse) setLatency() {
 // GetRateLimitConsumed retrieves the number of requests consumed from the HTTP response.
 // It sets the number of requests consumed to the struct and returns an error if any.
 func (mdr *MarketDataResponse) setRateLimitConsumed() error {
-	rateLimitConsumed, err := strconv.Atoi(mdr.Response.Header().Get("X-Api-RateLimit-Consumed"))
+	rateLimitConsumedStr := mdr.Response.Header().Get("X-Api-RateLimit-Consumed")
+	if rateLimitConsumedStr == "" {
+		return errors.New("x-Api-RateLimit-Consumed header not found")
+	}
+	rateLimitConsumed, err := strconv.Atoi(rateLimitConsumedStr)
 	if err != nil {
 		return err
 	}
@@ -181,14 +185,17 @@ func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
 	c.RateLimitReset = time.Unix(resetVal, 0)
 }
 
-func (c *MarketDataClient) GetFromRequest(mdr MarketDataRequest, result interface{}) (*MarketDataResponse, error) {
+func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*MarketDataResponse, error) {
 	if c.RateLimitRemaining < 0 {
 		return nil, errors.New("rate limit exceeded")
 	}
-	req := mdr.GetResty().SetResult(result)
+	req := br.getResty().SetResult(result)
 
 	// Parse the parameters from the request
-	paramsSlice := mdr.GetParams()
+	paramsSlice, err := br.getParams()
+	if err != nil {
+		return nil, err
+	}
 	for _, param := range paramsSlice {
 		err := param.SetParams(req)
 		if err != nil {
@@ -196,9 +203,12 @@ func (c *MarketDataClient) GetFromRequest(mdr MarketDataRequest, result interfac
 		}
 	}
 
-	path := mdr.GetPath()
+	path, err := br.getPath()
+	if err != nil {
+		return nil, err
+	}
 
-	if err := mdr.GetError(); err != nil {
+	if err := br.getError(); err != nil {
 		return nil, err
 	}
 

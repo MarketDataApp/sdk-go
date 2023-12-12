@@ -1,9 +1,28 @@
-package endpoints
+package client
 
 import (
-	md "github.com/MarketDataApp/sdk-go/client"
+	"fmt"
+
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
 	"github.com/go-resty/resty/v2"
 )
+
+type CountryParams struct {
+	Country string `query:"country"`
+}
+
+func (cp *CountryParams) SetCountry(q string) error {
+	if len(q) != 2 || !IsAlpha(q) {
+		err := fmt.Errorf("invalid country code")
+		return err
+	}
+	cp.Country = q
+	return nil
+}
+
+func (cp *CountryParams) SetParams(request *resty.Request) error {
+	return ParseAndSetParams(cp, request)
+}
 
 type UniversalParams struct {
 	Limit      int    `query:"limit"`
@@ -16,6 +35,21 @@ type UniversalParams struct {
 	Error      error
 }
 
+type DateKeyParam struct {
+	DateKey string `path:"datekey" validate:"required"`
+}
+
+// Date sets the date parameter for the TickersRequest.
+func (dk *DateKeyParam) SetDateKey(q interface{}) error {
+	dateString, err := dates.ToDayString(q)
+	if err != nil {
+		return err
+	} else {
+		dk.DateKey = dateString
+	}
+	return nil
+}
+
 type DateParams struct {
 	Date      string `query:"date"`
 	From      string `query:"from"`
@@ -23,9 +57,12 @@ type DateParams struct {
 	Countback *int   `query:"countback"`
 }
 
+
+
+
 // Date sets the date parameter of the DateParams.
 func (dp *DateParams) SetDate(q interface{}) error {
-	date, err := md.DecodeDate(q)
+	date, err := DecodeDate(q)
 	if err != nil {
 		return err
 	}
@@ -42,7 +79,7 @@ func (dp *DateParams) SetDate(q interface{}) error {
 
 // From sets the from parameter of the DateParams.
 func (dp *DateParams) SetFrom(q interface{}) error {
-	date, err := md.DecodeDate(q)
+	date, err := DecodeDate(q)
 	if err != nil {
 		return err
 	}
@@ -60,7 +97,7 @@ func (dp *DateParams) SetFrom(q interface{}) error {
 
 // To sets the to parameter of the DateParams.
 func (dp *DateParams) SetTo(q interface{}) error {
-	date, err := md.DecodeDate(q)
+	date, err := DecodeDate(q)
 	if err != nil {
 		return err
 	}
@@ -91,9 +128,13 @@ func (dp *DateParams) SetCountback(q int) error {
 }
 
 func (dp *DateParams) SetParams(request *resty.Request) error {
-	return md.ParseAndSetParams(dp, request)
+	return ParseAndSetParams(dp, request)
 }
 
 func (up *UniversalParams) SetParams(request *resty.Request) error {
-	return md.ParseAndSetParams(up, request)
+	return ParseAndSetParams(up, request)
+}
+
+func (dk *DateKeyParam) SetParams(request *resty.Request) error {
+	return ParseAndSetParams(dk, request)
 }
