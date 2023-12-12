@@ -5,25 +5,12 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/go-resty/resty/v2"
 )
 
 // TickersRequest represents a request to the /stocks/tickers endpoint.
 type TickersRequest struct {
 	*baseRequest
 	dateKey *DateKeyParam
-}
-
-// String returns a string representation of TickersRequest.
-func (tr *TickersRequest) String() string {
-	if tr == nil {
-		return "TickersRequest is nil"
-	}
-	if tr.Error != nil {
-		return fmt.Sprintf("Path: %s, Date: %s, Error: %v", tr.path, tr.dateKey, tr.Error)
-	}
-	return fmt.Sprintf("Path: %s, Date: %s", tr.path, tr.dateKey)
 }
 
 // Date sets the date parameter for the TickersRequest.
@@ -36,15 +23,6 @@ func (tr *TickersRequest) Date(q interface{}) *TickersRequest {
 		tr.Error = err
 	}
 	return tr
-}
-
-// SetParams parses the TickersRequest and sets the parameters in the provided resty.Request.
-// It returns an error if the parsing or setting of parameters fails.
-func (tr *TickersRequest) SetParams(request *resty.Request) error {
-	if tr == nil {
-		return fmt.Errorf("TickersRequest is nil")
-	}
-	return ParseAndSetParams(tr, request)
 }
 
 // GetParams packs the TickersRequest struct into a slice of interface{} and returns it.

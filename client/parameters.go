@@ -21,7 +21,7 @@ func (cp *CountryParams) SetCountry(q string) error {
 }
 
 func (cp *CountryParams) SetParams(request *resty.Request) error {
-	return ParseAndSetParams(cp, request)
+	return parseAndSetParams(cp, request)
 }
 
 type UniversalParams struct {
@@ -128,13 +128,13 @@ func (dp *DateParams) SetCountback(q int) error {
 }
 
 func (dp *DateParams) SetParams(request *resty.Request) error {
-	return ParseAndSetParams(dp, request)
+	return parseAndSetParams(dp, request)
 }
 
 func (up *UniversalParams) SetParams(request *resty.Request) error {
-	return ParseAndSetParams(up, request)
+	return parseAndSetParams(up, request)
 }
 
 func (dk *DateKeyParam) SetParams(request *resty.Request) error {
-	return ParseAndSetParams(dk, request)
+	return parseAndSetParams(dk, request)
 }

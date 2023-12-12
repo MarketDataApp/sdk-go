@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
 )
 
 // MarketStatusResponse represents the response from a market status request.
@@ -89,6 +91,42 @@ func (msr *MarketStatusResponse) GetClosedDates() ([]time.Time, error) {
 	}
 
 	return closedDates, nil
+}
+
+// getMinMaxTimestamp is a method on the MarketStatusResponse struct.
+// It returns the minimum and maximum timestamps from the Date slice.
+// If the Date slice is empty, it returns both min and max as 0.
+func (msr *MarketStatusResponse) getMinMaxTimestamp() (min int64, max int64) {
+	if len(msr.Date) == 0 {
+		return 0, 0
+	}
+
+	min = msr.Date[0]
+	max = msr.Date[len(msr.Date)-1]
+
+	return min, max
+}
+
+// GetDateRange returns the date range of the MarketStatusResponse.
+func (msr *MarketStatusResponse) GetDateRange() (*dates.DateRange, error) {
+	// Use the Earliest and Latest functions to find the earliest and latest dates
+	earliest, err := dates.Earliest(msr.Date)
+	if err != nil {
+		return nil, err
+	}
+
+	latest, err := dates.Latest(msr.Date)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new DateRange using NewDateRange function
+	dr, err := dates.NewDateRange(earliest, latest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dr, nil
 }
 
 // MarketStatusObj represents the status of a market.

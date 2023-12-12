@@ -393,13 +393,20 @@ func CombineDateRanges(dates ...interface{}) (DateRange, error) {
 func Earliest(dates ...interface{}) (time.Time, error) {
 	var earliest time.Time
 
-	// Check if the first argument is a slice of DateRange
+	// Check if the first argument is a slice of DateRange or a slice of int64
 	if len(dates) == 1 {
-		if dateRanges, ok := dates[0].([]DateRange); ok {
+		switch v := dates[0].(type) {
+		case []DateRange:
 			// Convert the slice of DateRange to a slice of interface{}
-			dates = make([]interface{}, len(dateRanges))
-			for i, dr := range dateRanges {
+			dates = make([]interface{}, len(v))
+			for i, dr := range v {
 				dates[i] = dr
+			}
+		case []int64:
+			// Convert the slice of int64 to a slice of time.Time
+			dates = make([]interface{}, len(v))
+			for i, timestamp := range v {
+				dates[i] = time.Unix(timestamp, 0)
 			}
 		}
 	}
@@ -431,13 +438,20 @@ func Earliest(dates ...interface{}) (time.Time, error) {
 func Latest(dates ...interface{}) (time.Time, error) {
 	var latest time.Time
 
-	// Check if the first argument is a slice of DateRange
+	// Check if the first argument is a slice of DateRange or a slice of int64
 	if len(dates) == 1 {
-		if dateRanges, ok := dates[0].([]DateRange); ok {
+		switch v := dates[0].(type) {
+		case []DateRange:
 			// Convert the slice of DateRange to a slice of interface{}
-			dates = make([]interface{}, len(dateRanges))
-			for i, dr := range dateRanges {
+			dates = make([]interface{}, len(v))
+			for i, dr := range v {
 				dates[i] = dr
+			}
+		case []int64:
+			// Convert the slice of int64 to a slice of time.Time
+			dates = make([]interface{}, len(v))
+			for i, timestamp := range v {
+				dates[i] = time.Unix(timestamp, 0)
 			}
 		}
 	}
