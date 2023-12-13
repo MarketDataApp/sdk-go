@@ -58,14 +58,23 @@ func IsAlpha(s string) bool {
 // ParseAndSetParams takes a struct and a Resty request, parses the struct into path and query parameters, and sets them to the request.
 // It returns an error if a required parameter has a zero value.
 func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
-	if reflect.TypeOf(params).Kind() != reflect.Struct {
-		return errors.New("params must be a struct")
+	if params == nil {
+		return errors.New("params cannot be nil")
+	}
+	kind := reflect.TypeOf(params).Kind()
+	if kind != reflect.Struct && kind != reflect.Ptr {
+		return errors.New("params must be a struct or a pointer to a struct")
 	}
 	v := reflect.ValueOf(params)
 
 	// Check if the params is a pointer and dereference it
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
+	}
+
+	// Check if the dereferenced value is a struct
+	if v.Kind() != reflect.Struct {
+		return errors.New("params must be a struct or a pointer to a struct")
 	}
 
 	t := v.Type()

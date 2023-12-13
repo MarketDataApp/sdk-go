@@ -28,21 +28,26 @@ type StockCandlesResponse struct {
 	Low    []float64  `json:"l" human:"Low"`
 	Close  []float64  `json:"c" human:"Close"`
 	Volume []int64    `json:"v" human:"Volume"`
-	VWAP   *[]float64 `json:"vwap,omitempty" human:"VWAP,omitempty"`         // Optional, for V2 candles
+	VWAP   *[]float64 `json:"vwap,omitempty" human:"VWAP,omitempty"`       // Optional, for V2 candles
 	N      *[]int64   `json:"n,omitempty" human:"No. of Trades,omitempty"` // Optional, for V2 candles
 }
 
 type StockCandle struct {
-	Time time.Time
-	Open float64
-	High   float64 
-	Low    float64  
-	Close  float64  
-	Volume int64   
-	VWAP   float64 
-	N      int64 
-
+	Time   time.Time
+	Open   float64
+	High   float64
+	Low    float64
+	Close  float64
+	Volume int64
+	VWAP   float64
+	N      int64
 }
+
+func (sc StockCandle) String() string {
+	return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
+		sc.Time, sc.Open, sc.High, sc.Low, sc.Close, sc.Volume, sc.VWAP, sc.N)
+}
+
 
 func (scr *StockCandlesResponse) Unpack() ([]StockCandle, error) {
 	if err := scr.checkForEqualSlices(); err != nil {
@@ -70,14 +75,13 @@ func (scr *StockCandlesResponse) Unpack() ([]StockCandle, error) {
 	return stockCandles, nil
 }
 
-
 func (s *StockCandlesResponse) String() string {
 	// Determine the version of the struct
 	version, _ := s.getVersion()
 
 	if version == 1 {
 		return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v",
-			 s.Time, s.Open, s.High, s.Low, s.Close, s.Volume)
+			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume)
 	} else {
 		vwap := "nil"
 		n := "nil"
@@ -91,7 +95,6 @@ func (s *StockCandlesResponse) String() string {
 			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume, vwap, n)
 	}
 }
-
 
 func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
 	for i := 1; i < len(s.Time); i++ {
@@ -478,4 +481,3 @@ func CombineStockCandles(s1, s2 *StockCandlesResponse) (*StockCandlesResponse, e
 
 	return combined, nil
 }
-

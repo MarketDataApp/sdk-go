@@ -4,7 +4,6 @@ package client
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 // TickersRequest represents a request to the /stocks/tickers endpoint.
@@ -14,7 +13,7 @@ type TickersRequest struct {
 }
 
 // Date sets the date parameter for the TickersRequest.
-func (tr *TickersRequest) Date(q interface{}) *TickersRequest {
+func (tr *TickersRequest) DateKey(q string) *TickersRequest {
 	if tr == nil {
 		return nil
 	}
@@ -46,7 +45,6 @@ func StockTickers(client ...*MarketDataClient) *TickersRequest {
 	}
 
 	// Set the date to the current time
-	tr.Date(time.Now())
 	baseReq.child = tr
 
 	return tr

@@ -9,15 +9,33 @@ import (
 	api "github.com/MarketDataApp/sdk-go/client"
 )
 
+func stockCandlesExample() {
+
+	sce, _, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Get()
+	candles, _ := sce.Unpack()
+
+	for _, candle := range candles {
+		fmt.Println(candle)
+	}
+
+	if err != nil {
+		fmt.Print(err)
+	}
+}
+
 func marketstatusExample() {
 
-	msr, _, _ := api.MarketStatus().From("2022-01-01").To("2022-12-31").Get()
+	msr, _, err := api.MarketStatus().From("2022-01-01").To("2022-01-10").Get()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 	fmt.Println(msr)
 
 }
 
 func stocksTickersExample() {
-	tickers, _, _ := api.StockTickers().Date("2023-01-05").Get()
+	tickers, _, _ := api.StockTickers().DateKey("2023-01-05").Get()
 	fmt.Println(tickers)
 }
 
@@ -56,7 +74,7 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 		dateStr := date.Format("2006-01-02")
 
 		// Get the TickersResponse for the date
-		response, _, err := tickers.Date(dateStr).Get()
+		response, _, err := tickers.DateKey(dateStr).Get()
 		if err != nil {
 			return err
 		}
@@ -107,7 +125,7 @@ func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	dateStr := date.Format("2006-01-02")
 
 	// Get the TickersResponse for the date
-	response, _, err := tickers.Date(dateStr).Get()
+	response, _, err := tickers.DateKey(dateStr).Get()
 	if err != nil {
 		return err
 	}

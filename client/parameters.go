@@ -39,14 +39,34 @@ type DateKeyParam struct {
 	DateKey string `path:"datekey" validate:"required"`
 }
 
-// Date sets the date parameter for the TickersRequest.
-func (dk *DateKeyParam) SetDateKey(q interface{}) error {
-	dateString, err := dates.ToDayString(q)
-	if err != nil {
-		return err
-	} else {
-		dk.DateKey = dateString
+// SetDateKey sets the date key parameter for the TickersRequest.
+// It validates the date key using the IsValidDateKey function from the dates package.
+func (dk *DateKeyParam) SetDateKey(q string) error {
+	if !dates.IsValidDateKey(q) {
+		return fmt.Errorf("invalid date key format")
 	}
+	dk.DateKey = q
+	return nil
+}
+
+type CandleParams struct {
+	Symbol     string `path:"symbol" validate:"required"`
+	Resolution string `path:"resolution" validate:"required"`
+}
+
+func (cp *CandleParams) SetSymbol(symbol string) error {
+	if symbol == "" {
+		return fmt.Errorf("symbol is required")
+	}
+	cp.Symbol = symbol
+	return nil
+}
+
+func (cp *CandleParams) SetResolution(resolution string) error {
+	if resolution == "" {
+		return fmt.Errorf("resolution is required")
+	}
+	cp.Resolution = resolution
 	return nil
 }
 
@@ -56,9 +76,6 @@ type DateParams struct {
 	To        string `query:"to"`
 	Countback *int   `query:"countback"`
 }
-
-
-
 
 // Date sets the date parameter of the DateParams.
 func (dp *DateParams) SetDate(q interface{}) error {
@@ -137,4 +154,8 @@ func (up *UniversalParams) SetParams(request *resty.Request) error {
 
 func (dk *DateKeyParam) SetParams(request *resty.Request) error {
 	return parseAndSetParams(dk, request)
+}
+
+func (cp *CandleParams) SetParams(request *resty.Request) error {
+	return parseAndSetParams(cp, request)
 }

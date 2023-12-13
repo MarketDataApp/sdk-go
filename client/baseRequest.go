@@ -17,7 +17,7 @@ type baseRequest struct {
 	Error   error
 }
 
-// getParams calls the getParams method of the appopriate MarketDataRequest.
+// getParams calls the getParams method of the appropriate MarketDataRequest.
 func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 	if br == nil {
 		return []MarketDataParam{}, nil
@@ -33,6 +33,14 @@ func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 
 	if tr, ok := br.child.(*TickersRequest); ok {
 		params, err := tr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if scr, ok := br.child.(*StockCandlesRequestV2); ok {
+		params, err := scr.getParams()
 		if err != nil {
 			return nil, err
 		}

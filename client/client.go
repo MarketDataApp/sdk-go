@@ -6,15 +6,21 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/fatih/color"
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-const Version = "1.0.0"
+var debugModeLogger = log.New(os.Stdout, "", 0) // 0 turns off all flags, including the default timestamp flag
+
+const Version = "0.0.3"
 
 const (
 	ProdEnv = "prod"
@@ -37,6 +43,7 @@ type MarketDataClient struct {
 	RateLimitReset     time.Time
 	mu                 sync.Mutex
 	Error              error
+	debug              bool
 }
 
 // MarketDataResponse represents the response from the Market Data API.
@@ -45,7 +52,7 @@ type MarketDataResponse struct {
 	*resty.Response          // The response from the resty client
 	RayID             string // The Ray ID from the HTTP response
 	RateLimitConsumed int    // The number of requests consumed from the rate limit
-	Delay             int64  // The time (in miliseconds) between the request and the server's response.
+	Delay             int64  // The time (in miliseconds) between the request and the server's response
 }
 
 func (mdr *MarketDataResponse) setLatency() {
@@ -55,17 +62,18 @@ func (mdr *MarketDataResponse) setLatency() {
 
 // GetRateLimitConsumed retrieves the number of requests consumed from the HTTP response.
 // It sets the number of requests consumed to the struct and returns an error if any.
-func (mdr *MarketDataResponse) setRateLimitConsumed() error {
+func (mdr *MarketDataResponse) setRateLimitConsumed() {
 	rateLimitConsumedStr := mdr.Response.Header().Get("X-Api-RateLimit-Consumed")
 	if rateLimitConsumedStr == "" {
-		return errors.New("x-Api-RateLimit-Consumed header not found")
+		log.Println("Error: missing 'x-Api-RateLimit-Consumed' header")
+		return
 	}
 	rateLimitConsumed, err := strconv.Atoi(rateLimitConsumedStr)
 	if err != nil {
-		return err
+		log.Println(err)
+		return
 	}
 	mdr.RateLimitConsumed = rateLimitConsumed
-	return nil
 }
 
 // GetRayID retrieves the Cf-Ray ID from the HTTP response.
@@ -124,6 +132,7 @@ func (c *MarketDataClient) setDefaultResetTime() {
 func NewClient() *MarketDataClient {
 	client := &MarketDataClient{
 		Client: resty.New(),
+		debug:  false,
 	}
 
 	client.setDefaultResetTime()
@@ -137,14 +146,30 @@ func NewClient() *MarketDataClient {
 	// Enable client trace
 	client.Client.EnableTrace()
 
+	// Set the OnBeforeRequest hook
+	client.Client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		//log.Printf("Sending request to URL: %s", req.URL) // Debug print
+		return nil
+	})
+
 	// Set the OnAfterResponse hook
 	client.Client.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
-		log.Printf("Sent request URL: %s", resp.Request.URL) // Debug print
+		//log.Printf("Sent request URL: %s", resp.Request.URL) // Debug print
 		client.updateRateLimit(resp)
+		client.logRequestResponse(resp.Request, resp)
+
 		return nil
 	})
 
 	return client
+}
+
+// Debug is a method that enables or disables the debug mode of the client.
+// Debug mode will result in the request and response headers being printed to
+// the terminal with each request.
+func (c *MarketDataClient) Debug(enable bool) *MarketDataClient {
+	c.debug = enable
+	return c
 }
 
 func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
@@ -156,9 +181,16 @@ func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
 	remainingHeader := resp.Header().Get("X-Api-Ratelimit-Remaining")
 	resetHeader := resp.Header().Get("X-Api-Ratelimit-Reset")
 
-	if limitHeader == "" || remainingHeader == "" || resetHeader == "" {
-		log.Printf("URL of the request made: %v", resp.Request.URL)
-		log.Println("Error: missing rate limit headers")
+	if limitHeader == "" {
+		log.Println("Error: missing 'X-Api-Ratelimit-Limit' header")
+		return
+	}
+	if remainingHeader == "" {
+		log.Println("Error: missing 'X-Api-Ratelimit-Remaining' header")
+		return
+	}
+	if resetHeader == "" {
+		log.Println("Error: missing 'X-Api-Ratelimit-Reset' header")
 		return
 	}
 
@@ -238,10 +270,7 @@ func (c *MarketDataClient) WrapResponse(req *resty.Request, path string) (*Marke
 	}
 
 	mdr := &MarketDataResponse{Response: resp}
-	err = mdr.setRateLimitConsumed()
-	if err != nil {
-		return nil, err
-	}
+	mdr.setRateLimitConsumed()
 
 	err = mdr.setRayID()
 	if err != nil {
@@ -333,4 +362,53 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 	}
 
 	return c
+}
+
+func (c *MarketDataClient) logRequestResponse(req *resty.Request, resp *resty.Response) {
+	if !c.debug {
+		return
+	}
+
+	// Define color functions
+	blue := color.New(color.FgBlue).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	purple := color.New(color.FgMagenta).SprintFunc() // Define purple color function
+
+	// Log request
+	debugModeLogger.Printf("%s %s\n", blue("Request URL:"), req.URL)
+	debugModeLogger.Println(blue("Request Headers:"))
+
+	// Sort the headers
+	var keys []string
+	for k := range req.Header {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, name := range keys {
+		if name == "Authorization" {
+			token := req.Header.Get("Authorization")
+			redactedToken := "Bearer " + strings.Repeat("*", len(token)-8) + token[len(token)-4:]
+			debugModeLogger.Printf("%s: %s\n", yellow(name), redactedToken)
+		} else {
+			debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(req.Header[name], ", "))
+		}
+	}
+
+	// Log response
+	debugModeLogger.Println(blue("Response Headers:"))
+
+	// Sort the headers
+	keys = keys[:0]
+	for k := range resp.Header() {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, name := range keys {
+		// If header starts with "X-Api-", print it in purple
+		if strings.HasPrefix(name, "X-Api-") {
+			debugModeLogger.Printf("%s: %s\n", purple(name), strings.Join(resp.Header()[name], ", "))
+		} else {
+			debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(resp.Header()[name], ", "))
+		}
+	}
 }
