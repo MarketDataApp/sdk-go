@@ -62,7 +62,7 @@ type DateParams struct {
 
 // Date sets the date parameter of the DateParams.
 func (dp *DateParams) SetDate(q interface{}) error {
-	date, err := DecodeDate(q)
+	date, err := dates.ToDayString(q)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (dp *DateParams) SetDate(q interface{}) error {
 
 // From sets the from parameter of the DateParams.
 func (dp *DateParams) SetFrom(q interface{}) error {
-	date, err := DecodeDate(q)
+	date, err := dates.ToDayString(q)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (dp *DateParams) SetFrom(q interface{}) error {
 
 // To sets the to parameter of the DateParams.
 func (dp *DateParams) SetTo(q interface{}) error {
-	date, err := DecodeDate(q)
+	date, err := dates.ToDayString(q)
 	if err != nil {
 		return err
 	}

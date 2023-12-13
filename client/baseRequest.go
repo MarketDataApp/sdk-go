@@ -6,7 +6,9 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// BaseRequest is for internal use only by the Market Data Client package.
+// baseRequest is a struct that represents a basic request in the Market Data Client package.
+// It contains a request of type *resty.Request, a path of type string, a client of type *MarketDataClient,
+// a child of type any, and an Error of type error.
 type baseRequest struct {
 	request *resty.Request
 	path    string
@@ -15,6 +17,7 @@ type baseRequest struct {
 	Error   error
 }
 
+// getParams calls the getParams method of the appopriate MarketDataRequest.
 func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 	if br == nil {
 		return []MarketDataParam{}, nil
@@ -39,7 +42,7 @@ func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 	return []MarketDataParam{}, nil
 }
 
-// XtractPath returns the path of the BaseRequest.
+// getPath returns the path of the BaseRequest.
 // It returns an error if the BaseRequest is nil.
 func (br *baseRequest) getPath() (string, error) {
 	if br == nil {
@@ -48,7 +51,7 @@ func (br *baseRequest) getPath() (string, error) {
 	return br.path, nil
 }
 
-// XtractResty returns the resty.Request for the BaseRequest.
+// getResty returns the resty.Request for the BaseRequest.
 func (br *baseRequest) getResty() *resty.Request {
 	return br.request
 }
@@ -75,7 +78,7 @@ func newBaseRequest(clients ...*MarketDataClient) *baseRequest {
 	return baseReq
 }
 
-// XtractError returns the error of the BaseRequest.
+// getError returns the error of the BaseRequest.
 func (br *baseRequest) getError() error {
 	return br.Error
 }

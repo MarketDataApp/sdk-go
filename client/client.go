@@ -321,7 +321,7 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 	c.Client.SetAuthToken(bearerToken)
 
 	// Make an initial request to authorize the token and load the rate limit information
-	resp, err := c.Client.R().Get("https://api.marketdata.app/v1/stocks/candles/D/SPY/?from=2020-01-01&to=2020-01-31")
+	resp, err := c.Client.R().Get("https://api.marketdata.app/user/")
 	if err != nil {
 		c.Error = err
 		return c

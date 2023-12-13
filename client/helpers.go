@@ -55,23 +55,6 @@ func IsAlpha(s string) bool {
 	return true
 }
 
-// DecodeDate decodes a date from an interface{} type.
-// It supports time.Time and string types and returns the date in "YYYY-MM-DD" format and any error encountered.
-func DecodeDate(date interface{}) (string, error) {
-	switch v := date.(type) {
-	case time.Time:
-		return v.Format("2006-01-02"), nil
-	case string:
-		_, err := time.Parse("2006-01-02", v)
-		if err != nil {
-			return "", err
-		}
-		return v, nil
-	default:
-		return "", errors.New("date must be a time.Time object or a YYYY-MM-DD string")
-	}
-}
-
 // ParseAndSetParams takes a struct and a Resty request, parses the struct into path and query parameters, and sets them to the request.
 // It returns an error if a required parameter has a zero value.
 func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
