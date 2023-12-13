@@ -21,31 +21,22 @@ After installation, you can import it in your project like this:
 import md "github.com/MarketDataApp/sdk-go/client"
 ```
 
-
 # Endpoints Status:
 
-## Markets
-
-* ✅ Status
-
-## Stocks
-
-* ❌ Candles
-* ❌ Quotes
-
-## Options
-
-* ❌ Expirations
-* ❌ Lookup
-* ❌ Strikes
-* ❌ Option Chain
-* ❌ Quotes
-
-## Indices
-
-* ❌ Candles
-* ❌ Quotes
-
+ | Endpoint Category | Endpoint     | v1 Status | v2 Status |
+ |-------------------|--------------|-----------|-----------|
+ | Markets           | Status       | ✅        |           |
+ | Stocks            | Candles      | ❌        |           |
+ | Stocks            | Quotes       | ❌        |           |
+ | Stocks            | Earnings     | ❌        |           |
+ | Stocks            | Tickers      | ❌        |     ✅    |
+ | Options           | Expirations  | ❌        |           |
+ | Options           | Lookup       | ❌        |           |
+ | Options           | Strikes      | ❌        |           |
+ | Options           | Option Chain | ❌        |           |
+ | Options           | Quotes       | ❌        |           |
+ | Indices           | Candles      | ❌        |           |
+ | Indices           | Quotes       | ❌        |           |
 
 # Usage
 
