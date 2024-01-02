@@ -12,9 +12,9 @@ func main() {
 	client, _ := api.GetClient()
 	client.Debug(true)
 
-	//fmt.Println("Starting stocks candles request...")
-	//stockCandlesExample()
+	fmt.Println("Starting stocks candles request...")
+	stockCandlesExample()
 
-	fmt.Println("Starting market status request...")
-	marketstatusExample()
+	//fmt.Println("Starting market status request...")
+	//marketstatusExample()
 }
