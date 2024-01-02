@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -103,4 +104,21 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 	}
 
 	return nil
+}
+
+func redactAuthorizationHeader(headers http.Header) http.Header {
+	// Copy the headers so we don't modify the original
+	copiedHeaders := make(http.Header)
+	for k, v := range headers {
+		copiedHeaders[k] = v
+	}
+
+	// Redact the Authorization header if it exists
+	if _, ok := copiedHeaders["Authorization"]; ok {
+		token := copiedHeaders.Get("Authorization")
+		redactedToken := "Bearer " + strings.Repeat("*", len(token)-8) + token[len(token)-4:]
+		copiedHeaders.Set("Authorization", redactedToken)
+	}
+
+	return copiedHeaders
 }

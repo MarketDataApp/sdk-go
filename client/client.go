@@ -15,10 +15,19 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/go-resty/resty/v2"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var debugModeLogger = log.New(os.Stdout, "", 0) // 0 turns off all flags, including the default timestamp flag
+var (
+	debugModeLogger = log.New(os.Stdout, "", 0) // 0 turns off all flags, including the default timestamp flag
+	blue   = color.New(color.FgBlue).SprintFunc()
+	yellow = color.New(color.FgYellow).SprintFunc()
+	purple = color.New(color.FgMagenta).SprintFunc()
+	keys   = make([]string, 0)
+)
 
 const Version = "0.0.3"
 
@@ -44,6 +53,8 @@ type MarketDataClient struct {
 	mu                 sync.Mutex
 	Error              error
 	debug              bool
+	Logger             *zap.Logger
+
 }
 
 // MarketDataResponse represents the response from the Market Data API.
@@ -130,9 +141,28 @@ func (c *MarketDataClient) setDefaultResetTime() {
 }
 
 func NewClient() *MarketDataClient {
+	// Open the log file. If it does not exist, create it.
+	logFile, err := os.OpenFile("sdk-go.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+
+	// Create a zapcore.Core that writes to the log file
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(logFile),
+		zap.InfoLevel,
+	)
+
+	// Create a zap.Logger from the Core
+	logger := zap.New(core)
+
 	client := &MarketDataClient{
 		Client: resty.New(),
 		debug:  false,
+		Logger: logger,
 	}
 
 	client.setDefaultResetTime()
@@ -365,50 +395,58 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 }
 
 func (c *MarketDataClient) logRequestResponse(req *resty.Request, resp *resty.Response) {
-	if !c.debug {
-		return
+	// Log the request if the response was not successful or if debug mode is turned on.
+	if !resp.IsSuccess() || c.debug {
+		redactedHeaders := redactAuthorizationHeader(req.Header)
+		c.Logger.Info("Request",
+			zap.String("request_url", req.URL),
+			zap.Any("request_headers", redactedHeaders),
+			zap.Int("response_code", resp.StatusCode()),
+			zap.String("cf_ray", resp.Header().Get("Cf-Ray")),
+			zap.Any("response_headers", resp.Header()),
+			zap.String("response_body", resp.String()),
+		)
 	}
 
-	// Define color functions
-	blue := color.New(color.FgBlue).SprintFunc()
-	yellow := color.New(color.FgYellow).SprintFunc()
-	purple := color.New(color.FgMagenta).SprintFunc() // Define purple color function
+	if c.debug {
+		// Log request
+		debugModeLogger.Printf("%s %s\n", blue("Request URL:"), req.URL)
+		debugModeLogger.Println(blue("Request Headers:"))
 
-	// Log request
-	debugModeLogger.Printf("%s %s\n", blue("Request URL:"), req.URL)
-	debugModeLogger.Println(blue("Request Headers:"))
+		redactedHeaders := redactAuthorizationHeader(req.Header)
 
-	// Sort the headers
-	var keys []string
-	for k := range req.Header {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, name := range keys {
-		if name == "Authorization" {
-			token := req.Header.Get("Authorization")
-			redactedToken := "Bearer " + strings.Repeat("*", len(token)-8) + token[len(token)-4:]
-			debugModeLogger.Printf("%s: %s\n", yellow(name), redactedToken)
-		} else {
-			debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(req.Header[name], ", "))
+		// Sort the headers
+		for k := range redactedHeaders {
+			keys = append(keys, k)
 		}
-	}
 
-	// Log response
-	debugModeLogger.Println(blue("Response Headers:"))
+		sort.Strings(keys)
+		for _, name := range keys {
+			if name == "Authorization" {
+				token := req.Header.Get("Authorization")
+				redactedToken := "Bearer " + strings.Repeat("*", len(token)-8) + token[len(token)-4:]
+				debugModeLogger.Printf("%s: %s\n", yellow(name), redactedToken)
+			} else {
+				debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(req.Header[name], ", "))
+			}
+		}
 
-	// Sort the headers
-	keys = keys[:0]
-	for k := range resp.Header() {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, name := range keys {
-		// If header starts with "X-Api-", print it in purple
-		if strings.HasPrefix(name, "X-Api-") {
-			debugModeLogger.Printf("%s: %s\n", purple(name), strings.Join(resp.Header()[name], ", "))
-		} else {
-			debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(resp.Header()[name], ", "))
+		// Log response
+		debugModeLogger.Println(blue("Response Headers:"))
+
+		// Sort the headers
+		keys = keys[:0]
+		for k := range resp.Header() {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, name := range keys {
+			// If header starts with "X-Api-", print it in purple
+			if strings.HasPrefix(name, "X-Api-") {
+				debugModeLogger.Printf("%s: %s\n", purple(name), strings.Join(resp.Header()[name], ", "))
+			} else {
+				debugModeLogger.Printf("%s: %s\n", yellow(name), strings.Join(resp.Header()[name], ", "))
+			}
 		}
 	}
 }
