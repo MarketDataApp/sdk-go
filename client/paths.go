@@ -7,6 +7,7 @@ var Paths = map[int]map[string]map[string]string{
 		},
 		"stocks": {
 			"candles": "/v1/stocks/candles/{resolution}/{symbol}/",
+			"quotes": "/v1/stocks/quotes/{symbol}/",
 		},
 		"indices": {
 			"candles": "/v1/indices/candles/{resolution}/{symbol}/",

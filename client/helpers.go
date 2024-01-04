@@ -64,7 +64,7 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 	}
 	kind := reflect.TypeOf(params).Kind()
 	if kind != reflect.Struct && kind != reflect.Ptr {
-		return errors.New("params must be a struct or a pointer to a struct")
+		return fmt.Errorf("params must be a struct or a pointer to a struct, got %v", kind)
 	}
 	v := reflect.ValueOf(params)
 
@@ -75,9 +75,9 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 
 	// Check if the dereferenced value is a struct
 	if v.Kind() != reflect.Struct {
-		return errors.New("params must be a struct or a pointer to a struct")
+		return fmt.Errorf("dereferenced value of params must be a struct, got %v", v.Kind())
 	}
-
+	
 	t := v.Type()
 
 	// Iterate over the fields of the struct.

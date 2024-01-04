@@ -7,6 +7,25 @@ import (
 	api "github.com/MarketDataApp/sdk-go/client"
 )
 
+func stockQuoteExample() {
+	sqe, _, err := api.StockQuotes().Symbol("AAPL").FiftyTwoWeek(true).Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	quotes, err := sqe.Unpack()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	
+	for _, quote := range quotes {
+		fmt.Println(quote)
+	}
+
+}
+
 func indicesCandlesExample() {
 
 	oneWeekAgo := time.Now().AddDate(0, 0, -7)
@@ -15,7 +34,7 @@ func indicesCandlesExample() {
 		fmt.Print(err)
 		return
 	}
-	
+
 	candles, err := ice.Unpack()
 	if err != nil {
 		fmt.Print(err)
@@ -25,7 +44,7 @@ func indicesCandlesExample() {
 	for _, candle := range candles {
 		fmt.Println(candle)
 	}
-	
+
 }
 
 func stockCandlesExample() {

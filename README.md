@@ -27,7 +27,7 @@ import md "github.com/MarketDataApp/sdk-go/client"
  |-------------------|--------------|-----------|-----------|
  | Markets           | Status       | ✅        |           |
  | Stocks            | Candles      | ✅        |     ✅    |
- | Stocks            | Quotes       | ❌        |           |
+ | Stocks            | Quotes       | ✅        |           |
  | Stocks            | Earnings     | ❌        |           |
  | Stocks            | Tickers      | ❌        |     ✅    |
  | Stocks            | News         | ❌        |     ❌    |

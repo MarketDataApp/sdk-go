@@ -8,7 +8,8 @@ import (
 type StockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *StockCandleParams
-	candleParams      *CandleParams
+	resolutionParams  *ResolutionParams
+	symbolParams      *SymbolParams
 	dateParams        *DateParams
 }
 
@@ -17,7 +18,7 @@ func (cr *StockCandlesRequest) Resolution(q string) *StockCandlesRequest {
 	if cr == nil {
 		return nil
 	}
-	err := cr.candleParams.SetResolution(q)
+	err := cr.resolutionParams.SetResolution(q)
 	if err != nil {
 		cr.Error = err
 	}
@@ -29,7 +30,7 @@ func (cr *StockCandlesRequest) Symbol(q string) *StockCandlesRequest {
 	if cr == nil {
 		return nil
 	}
-	err := cr.candleParams.SetSymbol(q)
+	err := cr.symbolParams.SetSymbol(q)
 	if err != nil {
 		cr.Error = err
 	}
@@ -116,7 +117,7 @@ func (scr *StockCandlesRequest) getParams() ([]MarketDataParam, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
-	params := []MarketDataParam{scr.dateParams, scr.candleParams, scr.stockCandleParams}
+	params := []MarketDataParam{scr.dateParams, scr.symbolParams, scr.resolutionParams, scr.stockCandleParams}
 	return params, nil
 }
 
@@ -142,9 +143,10 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 	baseReq.path = Paths[1]["stocks"]["candles"]
 
 	scr := &StockCandlesRequest{
-		baseRequest:  baseReq,
-		dateParams:   &DateParams{},
-		candleParams: &CandleParams{},
+		baseRequest:       baseReq,
+		dateParams:        &DateParams{},
+		resolutionParams:  &ResolutionParams{},
+		symbolParams:      &SymbolParams{},
 		stockCandleParams: &StockCandleParams{},
 	}
 
@@ -157,8 +159,9 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 // StockCandlesRequestV2 represents a request to the /v2/stocks/candles endpoint.
 type StockCandlesRequestV2 struct {
 	*baseRequest
-	dateKey      *DateKeyParam
-	candleParams *CandleParams
+	dateKey          *DateKeyParam
+	resolutionParams *ResolutionParams
+	symbolParams     *SymbolParams
 }
 
 // Resolution sets the resolution parameter for the CandlesRequest.
@@ -166,7 +169,7 @@ func (cr *StockCandlesRequestV2) Resolution(q string) *StockCandlesRequestV2 {
 	if cr == nil {
 		return nil
 	}
-	err := cr.candleParams.SetResolution(q)
+	err := cr.resolutionParams.SetResolution(q)
 	if err != nil {
 		cr.Error = err
 	}
@@ -178,7 +181,7 @@ func (cr *StockCandlesRequestV2) Symbol(q string) *StockCandlesRequestV2 {
 	if cr == nil {
 		return nil
 	}
-	err := cr.candleParams.SetSymbol(q)
+	err := cr.symbolParams.SetSymbol(q)
 	if err != nil {
 		cr.Error = err
 	}
@@ -202,7 +205,7 @@ func (cr *StockCandlesRequestV2) getParams() ([]MarketDataParam, error) {
 	if cr == nil {
 		return nil, fmt.Errorf("CandlesRequest is nil")
 	}
-	params := []MarketDataParam{cr.dateKey, cr.candleParams}
+	params := []MarketDataParam{cr.dateKey, cr.resolutionParams, cr.symbolParams}
 	return params, nil
 }
 
@@ -228,9 +231,10 @@ func StockCandlesV2(client ...*MarketDataClient) *StockCandlesRequestV2 {
 	baseReq.path = Paths[2]["stocks"]["candles"]
 
 	cr := &StockCandlesRequestV2{
-		baseRequest:  baseReq,
-		dateKey:      &DateKeyParam{},
-		candleParams: &CandleParams{},
+		baseRequest:      baseReq,
+		dateKey:          &DateKeyParam{},
+		resolutionParams: &ResolutionParams{},
+		symbolParams:     &SymbolParams{},
 	}
 
 	// Set the date to the current time

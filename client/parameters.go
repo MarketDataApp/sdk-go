@@ -7,6 +7,16 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// StockQuoteParams represents the unique parameters for a StockQuoteRequest
+type StockQuoteParams struct {
+	FiftyTwoWeek bool `query:"52week"`
+}
+
+// SetFiftyTwoWeek sets the FiftyTwoWeek parameter for the StockQuoteParams.
+func (sqp *StockQuoteParams) SetFiftyTwoWeek(q bool) {
+	sqp.FiftyTwoWeek = q
+}
+
 // CountryParams represents the parameters for a country.
 // It includes a country code that is used in various requests.
 type CountryParams struct {
@@ -94,32 +104,33 @@ func (scp *StockCandleParams) SetParams(request *resty.Request) error {
 	return parseAndSetParams(scp, request)
 }
 
-// CandleParams represents the parameters for a candle request.
-// It includes a symbol and a resolution, both of which are required.
-type CandleParams struct {
-	Symbol     string `path:"symbol" validate:"required"`
+type ResolutionParams struct {
 	Resolution string `path:"resolution" validate:"required"`
 }
 
-// SetSymbol sets the symbol parameter for the CandleParams.
-// It validates that the symbol is not an empty string.
-// If the validation fails, it returns an error.
-func (cp *CandleParams) SetSymbol(symbol string) error {
-	if symbol == "" {
-		return fmt.Errorf("symbol is required")
-	}
-	cp.Symbol = symbol
-	return nil
-}
-
-// SetResolution sets the resolution parameter for the CandleParams.
+// SetResolution sets the resolution parameter for the ResolutionParams.
 // It validates that the resolution is not an empty string.
 // If the validation fails, it returns an error.
-func (cp *CandleParams) SetResolution(resolution string) error {
+func (rp *ResolutionParams) SetResolution(resolution string) error {
 	if resolution == "" {
 		return fmt.Errorf("resolution is required")
 	}
-	cp.Resolution = resolution
+	rp.Resolution = resolution
+	return nil
+}
+
+type SymbolParams struct {
+	Symbol string `path:"symbol" validate:"required"`
+}
+
+// SetSymbol sets the symbol parameter for the SymbolParams.
+// It validates that the symbol is not an empty string.
+// If the validation fails, it returns an error.
+func (sp *SymbolParams) SetSymbol(symbol string) error {
+	if symbol == "" {
+		return fmt.Errorf("symbol is required")
+	}
+	sp.Symbol = symbol
 	return nil
 }
 
@@ -226,12 +237,24 @@ func (dk *DateKeyParam) SetParams(request *resty.Request) error {
 
 // SetParams sets the parameters for the CandleParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
-func (cp *CandleParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(cp, request)
+func (rp *ResolutionParams) SetParams(request *resty.Request) error {
+	return parseAndSetParams(rp, request)
+}
+
+// SetParams sets the parameters for the CandleParams.
+// It uses the parseAndSetParams function to parse and set the parameters.
+func (sp *SymbolParams) SetParams(request *resty.Request) error {
+	return parseAndSetParams(sp, request)
 }
 
 // SetParams sets the parameters for the CountryParams in the request.
 // If the parsing and setting of parameters fail, it returns an error.
 func (cp *CountryParams) SetParams(request *resty.Request) error {
 	return parseAndSetParams(cp, request)
+}
+
+// SetParams sets the FiftyTwoWeek parameter for the StockQuoteParams.
+// If the parsing and setting of parameters fail, it returns an error.
+func (sqp *StockQuoteParams) SetParams(request *resty.Request) error {
+	return parseAndSetParams(sqp, request)
 }

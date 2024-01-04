@@ -9,8 +9,6 @@ import (
 
 func main() {
 
-	//fmt.Println("Starting stocks tickers request...")
-	//stocksTickersExample()
 	client, err := api.GetClient()
 	if err != nil {
 		log.Fatalf("Failed to get client: %v", err)
@@ -18,9 +16,19 @@ func main() {
 
 	client.Debug(true)
 
+	fmt.Println("Starting stock quote request...")
+	stockQuoteExample()
+
+	/*
+
 	fmt.Println("Starting index candles request...")
 	indicesCandlesExample()
 
+	fmt.Println("Starting stock candles request...")
+	stockCandlesExample()
+
 	//fmt.Println("Starting market status request...")
 	//marketstatusExample()
+
+	*/
 }

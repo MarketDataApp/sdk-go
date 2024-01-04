@@ -5,8 +5,9 @@ import "fmt"
 // IndicesCandlesRequest represents a request to the /v1/indices/candles endpoint.
 type IndicesCandlesRequest struct {
 	*baseRequest
-	candleParams *CandleParams
-	dateParams   *DateParams
+	resolutionParams *ResolutionParams
+	symbolParams     *SymbolParams
+	dateParams       *DateParams
 }
 
 // Resolution sets the resolution parameter for the IndicesCandlesRequest.
@@ -14,7 +15,7 @@ func (icr *IndicesCandlesRequest) Resolution(q string) *IndicesCandlesRequest {
 	if icr == nil {
 		return nil
 	}
-	err := icr.candleParams.SetResolution(q)
+	err := icr.resolutionParams.SetResolution(q)
 	if err != nil {
 		icr.Error = err
 	}
@@ -26,7 +27,7 @@ func (icr *IndicesCandlesRequest) Symbol(q string) *IndicesCandlesRequest {
 	if icr == nil {
 		return nil
 	}
-	err := icr.candleParams.SetSymbol(q)
+	err := icr.symbolParams.SetSymbol(q)
 	if err != nil {
 		icr.Error = err
 	}
@@ -74,7 +75,7 @@ func (icr *IndicesCandlesRequest) getParams() ([]MarketDataParam, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
-	params := []MarketDataParam{icr.dateParams, icr.candleParams}
+	params := []MarketDataParam{icr.dateParams, icr.symbolParams, icr.resolutionParams}
 	return params, nil
 }
 
@@ -100,9 +101,10 @@ func IndexCandles(client ...*MarketDataClient) *IndicesCandlesRequest {
 	baseReq.path = Paths[1]["indices"]["candles"]
 
 	icr := &IndicesCandlesRequest{
-		baseRequest:  baseReq,
-		dateParams:   &DateParams{},
-		candleParams: &CandleParams{},
+		baseRequest:      baseReq,
+		dateParams:       &DateParams{},
+		resolutionParams: &ResolutionParams{},
+		symbolParams:     &SymbolParams{},
 	}
 
 	baseReq.child = icr
