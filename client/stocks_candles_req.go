@@ -7,8 +7,9 @@ import (
 // StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
 type StockCandlesRequest struct {
 	*baseRequest
-	candleParams *CandleParams
-	dateParams   *DateParams
+	stockCandleParams *StockCandleParams
+	candleParams      *CandleParams
+	dateParams        *DateParams
 }
 
 // Resolution sets the resolution parameter for the CandlesRequest.
@@ -71,12 +72,51 @@ func (scr *StockCandlesRequest) Countback(q int) *StockCandlesRequest {
 	return scr
 }
 
+// AdjustSplits sets the AdjustSplits parameter for the StockCandlesRequest.
+func (scr *StockCandlesRequest) AdjustSplits(q bool) *StockCandlesRequest {
+	if scr == nil {
+		return nil
+	}
+	scr.stockCandleParams.SetAdjustSplits(q)
+	return scr
+}
+
+// AdjustDividends sets the AdjustDividends parameter for the StockCandlesRequest.
+func (scr *StockCandlesRequest) AdjustDividends(q bool) *StockCandlesRequest {
+	if scr == nil {
+		return nil
+	}
+	scr.stockCandleParams.SetAdjustDividends(q)
+	return scr
+}
+
+// Extended sets the Extended parameter for the StockCandlesRequest.
+func (scr *StockCandlesRequest) Extended(q bool) *StockCandlesRequest {
+	if scr == nil {
+		return nil
+	}
+	scr.stockCandleParams.SetExtended(q)
+	return scr
+}
+
+// Exchange sets the Exchange parameter for the StockCandlesRequest.
+func (scr *StockCandlesRequest) Exchange(q string) *StockCandlesRequest {
+	if scr == nil {
+		return nil
+	}
+	err := scr.stockCandleParams.SetExchange(q)
+	if err != nil {
+		scr.baseRequest.Error = err
+	}
+	return scr
+}
+
 // GetParams packs the CandlesRequest struct into a slice of interface{} and returns it.
 func (scr *StockCandlesRequest) getParams() ([]MarketDataParam, error) {
 	if scr == nil {
-		return nil, fmt.Errorf("CandlesRequest is nil")
+		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
-	params := []MarketDataParam{scr.dateParams, scr.candleParams}
+	params := []MarketDataParam{scr.dateParams, scr.candleParams, scr.stockCandleParams}
 	return params, nil
 }
 
@@ -105,6 +145,7 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 		baseRequest:  baseReq,
 		dateParams:   &DateParams{},
 		candleParams: &CandleParams{},
+		stockCandleParams: &StockCandleParams{},
 	}
 
 	// Set the date to the current time

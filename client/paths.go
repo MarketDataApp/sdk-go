@@ -2,11 +2,14 @@ package client
 
 var Paths = map[int]map[string]map[string]string{
 	1: {
+		"markets": {
+			"status": "/v1/markets/status/",
+		},
 		"stocks": {
 			"candles": "/v1/stocks/candles/{resolution}/{symbol}/",
 		},
-		"markets": {
-			"status": "/v1/markets/status/",
+		"indices": {
+			"candles": "/v1/indices/candles/{resolution}/{symbol}/",
 		},
 	},
 	2: {

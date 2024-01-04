@@ -100,6 +100,13 @@ func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
 	return nil
 }
 
+func (s *StockCandlesResponse) IsValid() bool {
+	if err := s.Validate(); err != nil {
+		return false
+	}
+	return true
+}
+
 func (s *StockCandlesResponse) Validate() error {
 	// Check if the time is in ascending order
 	if err := s.checkTimeInAscendingOrder(); err != nil {

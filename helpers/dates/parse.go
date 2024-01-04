@@ -3,6 +3,7 @@ package dates
 import (
 	"errors"
 	"time"
+	"reflect"
 )
 
 // ToDayString takes an interface and returns the date in YYYY-MM-DD format and an error
@@ -106,7 +107,18 @@ func parsePrimitives(dateInput interface{}, tz *time.Location) (time.Time, strin
 			return time.Time{}, "", errors.New("nil pointer passed for DateRange")
 		}
 		return dateRangeParser(*v, tz)
+	case func() time.Time:
+		return parsePrimitives(v(), tz)
+	case *func() time.Time:
+		if v == nil {
+			return time.Time{}, "", errors.New("nil pointer passed for func() time.Time")
+		}
+		return parsePrimitives((*v)(), tz)
 	default:
+		rv := reflect.ValueOf(dateInput)
+		if rv.Kind() == reflect.Func && rv.Type().NumIn() == 0 && rv.Type().NumOut() == 1 && rv.Type().Out(0) == reflect.TypeOf(time.Time{}) {
+			return parsePrimitives(rv.Call(nil)[0].Interface(), tz)
+		}
 		return time.Time{}, "", errors.New("value cannot be parsed as a date")
 	}
 }

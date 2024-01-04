@@ -15,11 +15,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get client: %v", err)
 	}
-	
+
 	client.Debug(true)
 
-	fmt.Println("Starting stocks candles request...")
-	stockCandlesExample()
+	fmt.Println("Starting index candles request...")
+	indicesCandlesExample()
 
 	//fmt.Println("Starting market status request...")
 	//marketstatusExample()

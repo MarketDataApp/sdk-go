@@ -6,6 +6,15 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+type MarketDataPacked interface {
+	IsValid() bool
+	Unpack() any
+}
+
+type MarketDataParam interface {
+	SetParams(*resty.Request) error
+}
+
 // baseRequest is a struct that represents a basic request in the Market Data Client package.
 // It contains a request of type *resty.Request, a path of type string, a client of type *MarketDataClient,
 // a child of type any, and an Error of type error.
@@ -19,8 +28,13 @@ type baseRequest struct {
 
 // getParams calls the getParams method of the appropriate MarketDataRequest.
 func (br *baseRequest) getParams() ([]MarketDataParam, error) {
-	if br == nil {
+	if br == nil || br.child == nil {
 		return []MarketDataParam{}, nil
+	}
+
+	// Check if child is of type *baseRequest
+	if _, ok := br.child.(*baseRequest); ok {
+		return nil, fmt.Errorf("child is of type *baseRequest, stopping recursion")
 	}
 
 	if msr, ok := br.child.(*MarketStatusRequest); ok {
@@ -49,6 +63,14 @@ func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 
 	if scr, ok := br.child.(*StockCandlesRequestV2); ok {
 		params, err := scr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if icr, ok := br.child.(*IndicesCandlesRequest); ok {
+		params, err := icr.getParams()
 		if err != nil {
 			return nil, err
 		}
