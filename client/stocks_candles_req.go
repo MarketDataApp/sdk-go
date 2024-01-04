@@ -4,12 +4,120 @@ import (
 	"fmt"
 )
 
-// CandlesRequest represents a request to the /stocks/candles endpoint.
+// StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
+type StockCandlesRequest struct {
+	*baseRequest
+	candleParams *CandleParams
+	dateParams   *DateParams
+}
+
+// Resolution sets the resolution parameter for the CandlesRequest.
+func (cr *StockCandlesRequest) Resolution(q string) *StockCandlesRequest {
+	if cr == nil {
+		return nil
+	}
+	err := cr.candleParams.SetResolution(q)
+	if err != nil {
+		cr.Error = err
+	}
+	return cr
+}
+
+// Symbol sets the symbol parameter for the CandlesRequest.
+func (cr *StockCandlesRequest) Symbol(q string) *StockCandlesRequest {
+	if cr == nil {
+		return nil
+	}
+	err := cr.candleParams.SetSymbol(q)
+	if err != nil {
+		cr.Error = err
+	}
+	return cr
+}
+
+// Date sets the date parameter of the StockCandlesRequest.
+func (scr *StockCandlesRequest) Date(q interface{}) *StockCandlesRequest {
+	err := scr.dateParams.SetDate(q)
+	if err != nil {
+		scr.baseRequest.Error = err
+	}
+	return scr
+}
+
+// From sets the from parameter of the StockCandlesRequest.
+func (scr *StockCandlesRequest) From(q interface{}) *StockCandlesRequest {
+	err := scr.dateParams.SetFrom(q)
+	if err != nil {
+		scr.baseRequest.Error = err
+	}
+	return scr
+}
+
+// To sets the to parameter of the StockCandlesRequest.
+func (scr *StockCandlesRequest) To(q interface{}) *StockCandlesRequest {
+	err := scr.dateParams.SetTo(q)
+	if err != nil {
+		scr.baseRequest.Error = err
+	}
+	return scr
+}
+
+// Countback sets the countback parameter of the StockCandlesRequest.
+func (scr *StockCandlesRequest) Countback(q int) *StockCandlesRequest {
+	err := scr.dateParams.SetCountback(q)
+	if err != nil {
+		scr.baseRequest.Error = err
+	}
+	return scr
+}
+
+// GetParams packs the CandlesRequest struct into a slice of interface{} and returns it.
+func (scr *StockCandlesRequest) getParams() ([]MarketDataParam, error) {
+	if scr == nil {
+		return nil, fmt.Errorf("CandlesRequest is nil")
+	}
+	params := []MarketDataParam{scr.dateParams, scr.candleParams}
+	return params, nil
+}
+
+// Get sends the StockCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
+// It returns an error if the request fails.
+func (scr *StockCandlesRequest) Get() (*StockCandlesResponse, *MarketDataResponse, error) {
+	if scr == nil {
+		return nil, nil, fmt.Errorf("StockCandlesRequest is nil")
+	}
+	var scrResp StockCandlesResponse
+	mdr, err := scr.baseRequest.client.GetFromRequest(scr.baseRequest, &scrResp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &scrResp, mdr, nil
+}
+
+// StockCandles creates a new CandlesRequest and associates it with the provided client.
+// If no client is provided, it uses the default client.
+func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
+	baseReq := newBaseRequest(client...)
+	baseReq.path = Paths[1]["stocks"]["candles"]
+
+	scr := &StockCandlesRequest{
+		baseRequest:  baseReq,
+		dateParams:   &DateParams{},
+		candleParams: &CandleParams{},
+	}
+
+	// Set the date to the current time
+	baseReq.child = scr
+
+	return scr
+}
+
+// StockCandlesRequestV2 represents a request to the /v2/stocks/candles endpoint.
 type StockCandlesRequestV2 struct {
 	*baseRequest
 	dateKey      *DateKeyParam
 	candleParams *CandleParams
-
 }
 
 // Resolution sets the resolution parameter for the CandlesRequest.
@@ -72,7 +180,6 @@ func (cr *StockCandlesRequestV2) Get() (*StockCandlesResponse, *MarketDataRespon
 	return &crResp, mdr, nil
 }
 
-
 // StockCandles creates a new CandlesRequest and associates it with the provided client.
 // If no client is provided, it uses the default client.
 func StockCandlesV2(client ...*MarketDataClient) *StockCandlesRequestV2 {
@@ -80,8 +187,8 @@ func StockCandlesV2(client ...*MarketDataClient) *StockCandlesRequestV2 {
 	baseReq.path = Paths[2]["stocks"]["candles"]
 
 	cr := &StockCandlesRequestV2{
-		baseRequest: baseReq,
-		dateKey:     &DateKeyParam{},
+		baseRequest:  baseReq,
+		dateKey:      &DateKeyParam{},
 		candleParams: &CandleParams{},
 	}
 

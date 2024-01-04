@@ -26,7 +26,7 @@ import md "github.com/MarketDataApp/sdk-go/client"
  | Endpoint Category | Endpoint     | v1 Status | v2 Status |
  |-------------------|--------------|-----------|-----------|
  | Markets           | Status       | ✅        |           |
- | Stocks            | Candles      | ❌        |     ✅    |
+ | Stocks            | Candles      | ✅        |     ✅    |
  | Stocks            | Quotes       | ❌        |           |
  | Stocks            | Earnings     | ❌        |           |
  | Stocks            | Tickers      | ❌        |     ✅    |

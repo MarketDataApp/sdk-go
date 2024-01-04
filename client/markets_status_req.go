@@ -6,16 +6,9 @@ import (
 
 // MarketStatusRequest represents a request for market status.
 type MarketStatusRequest struct {
-	// BaseRequest is the base request that this struct extends.
 	*baseRequest
-
-	// CountryParams represents the parameters related to the country.
 	countryParams *CountryParams
-
-	// UniversalParams represents the universal parameters applicable to the request.
 	universalParams *UniversalParams
-
-	// DateParams represents the parameters related to the date.
 	dateParams *DateParams
 }
 

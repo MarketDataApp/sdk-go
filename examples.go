@@ -11,6 +11,24 @@ import (
 
 func stockCandlesExample() {
 
+	sce, _, err := api.StockCandles().Resolution("1").Symbol("AAPL").Date("today").Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}	
+	candles, _ := sce.Unpack()
+
+	for _, candle := range candles {
+		fmt.Println(candle)
+	}
+
+	if err != nil {
+		fmt.Print(err)
+	}
+}
+
+func stockCandlesV2Example() {
+
 	sce, _, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Get()
 	candles, _ := sce.Unpack()
 

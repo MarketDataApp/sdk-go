@@ -10,17 +10,6 @@ import (
 	"github.com/iancoleman/orderedmap"
 )
 
-// Example JSON:
-//
-//	{
-//	  "s": "ok",
-//	  "t": [1699462680,1699462740,1699462800,1699462860,1699462920,1699462980,1699463040,1699463100,1699463160,1699463220],
-//	  "o": [182.09,182.04,182.02,181.94,181.9698,181.95,181.9197,181.94,181.9499,181.9703],
-//	  "h": [182.095,182.07,182.07,181.9799,182.04,181.97,182.02,182.0,182.07,181.9999],
-//	  "l": [182.01,182.0,181.89,181.855,181.915,181.87,181.91,181.9101,181.89,181.68],
-//	  "c": [182.03,182.01,181.947,181.9699,181.9592,181.9203,181.93,181.94,181.98,181.695],
-//	  "v": [81954,96569,236174,133964,103286,62645,71547,48792,109215,195926]}
-
 type StockCandlesResponse struct {
 	Time   []int64    `json:"t" human:"Date"`
 	Open   []float64  `json:"o" human:"Open"`
@@ -44,8 +33,14 @@ type StockCandle struct {
 }
 
 func (sc StockCandle) String() string {
-	return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
-		sc.Time, sc.Open, sc.High, sc.Low, sc.Close, sc.Volume, sc.VWAP, sc.N)
+	loc, _ := time.LoadLocation("America/New_York")
+	if sc.VWAP == 0 && sc.N == 0 {
+		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v",
+			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume)
+		} else {
+		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
+			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume, sc.VWAP, sc.N)
+	}
 }
 
 

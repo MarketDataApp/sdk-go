@@ -31,13 +31,15 @@ func stringDateParser(dateStr string, tz *time.Location) (time.Time, string, err
 // tryParseSpecialCases tries to parse special date strings like "today", "yesterday", and "now".
 // It returns the parsed time, the precision, and a boolean indicating if the parsing was successful.
 func tryParseSpecialCases(dateStr string) (time.Time, string, bool) {
+    now := time.Now()
     switch strings.ToLower(dateStr) {
     case "today":
-        return time.Now().Truncate(24 * time.Hour), "day", true
+        return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()), "day", true
     case "yesterday":
-        return time.Now().Truncate(24 * time.Hour).AddDate(0, 0, -1), "day", true
+        yesterday := now.AddDate(0, 0, -1)
+        return time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, now.Location()), "day", true
     case "now":
-        return time.Now(), "second", true
+        return now, "second", true
     default:
         return time.Time{}, "", false
     }

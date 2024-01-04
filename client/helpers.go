@@ -95,10 +95,16 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 
 		// Set the field to the appropriate part of the request if it is not a zero value.
 		if !value.IsZero() {
+			var valueInterface interface{}
+			if value.Kind() == reflect.Ptr && !value.IsNil() {
+				valueInterface = reflect.Indirect(value).Interface()
+			} else {
+				valueInterface = value.Interface()
+			}
 			if pathTag := tag.Get("path"); pathTag != "" {
-				request.SetPathParam(pathTag, fmt.Sprint(value.Interface()))
+				request.SetPathParam(pathTag, fmt.Sprint(valueInterface))
 			} else if queryTag := tag.Get("query"); queryTag != "" {
-				request.SetQueryParam(queryTag, fmt.Sprint(value.Interface()))
+				request.SetQueryParam(queryTag, fmt.Sprint(valueInterface))
 			}
 		}
 	}
