@@ -1,4 +1,4 @@
-package client
+package models
 
 import (
 	"encoding/csv"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/iancoleman/orderedmap"
@@ -24,6 +25,7 @@ type TickersResponse struct {
 	Cik           []string `json:"cik,omitempty"`
 	Updated       *[]int64 `json:"updated,omitempty"`
 }
+
 // IsValid checks if the TickersResponse is valid.
 func (tr *TickersResponse) IsValid() bool {
 	return len(tr.Symbol) > 0
@@ -214,4 +216,43 @@ func SaveToCSV(tickerMap map[string]TickerObj, filename string) error {
 	}
 
 	return nil
+}
+
+// CombineTickerResponses combines multiple TickersResponses into a single map.
+func CombineTickerResponses(responses []*TickersResponse) (map[string]TickerObj, error) {
+	tickerMap := make(map[string]TickerObj)
+	var mutex sync.Mutex
+
+	var wg sync.WaitGroup
+	errors := make(chan error)
+
+	for _, response := range responses {
+		wg.Add(1)
+		go func(response *TickersResponse) {
+			defer wg.Done()
+			responseMap, err := response.ToMap()
+			if err != nil {
+				errors <- err
+				return
+			}
+			mutex.Lock()
+			for key, value := range responseMap {
+				tickerMap[key] = value
+			}
+			mutex.Unlock()
+		}(response)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errors)
+	}()
+
+	for err := range errors {
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return tickerMap, nil
 }

@@ -29,5 +29,6 @@ sdk-go
 # CSV files
 *.csv
 
-# Log files
+# Log files & Log Directory
 *.log
+logs/

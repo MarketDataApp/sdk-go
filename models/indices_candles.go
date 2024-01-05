@@ -1,4 +1,4 @@
-package client
+package models
 
 import (
 	"encoding/json"
@@ -147,21 +147,22 @@ func (icr *IndicesCandlesResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (icr *IndicesCandlesResponse) Validate() error {
-	// Check if the time is in ascending order
-	if err := icr.checkTimeInAscendingOrder(); err != nil {
-		return err
+	// Create a channel to handle errors
+	errChan := make(chan error, 3)
+
+	// Run each validation function concurrently
+	go func() { errChan <- icr.checkTimeInAscendingOrder() }()
+	go func() { errChan <- icr.checkForEqualSlices() }()
+	go func() { errChan <- icr.checkForEmptySlices() }()
+
+	// Wait for all validation functions to finish
+	for i := 0; i < 3; i++ {
+		if err := <-errChan; err != nil {
+			return err
+		}
 	}
 
-	// Validate the JSON after unmarshaling
-	if err := icr.checkForEqualSlices(); err != nil {
-		return err
-	}
-
-	// Check for empty slices
-	if err := icr.checkForEmptySlices(); err != nil {
-		return err
-	}
-
+	// Return nil if there were no errors
 	return nil
 }
 

@@ -2,19 +2,22 @@ package client
 
 import (
 	"fmt"
+
+	"github.com/MarketDataApp/sdk-go/helpers/parameters"
+	"github.com/MarketDataApp/sdk-go/models"
 )
 
 // MarketStatusRequest represents a request for market status.
 type MarketStatusRequest struct {
 	*baseRequest
-	countryParams *CountryParams
-	universalParams *UniversalParams
-	dateParams *DateParams
+	countryParams   *parameters.CountryParams
+	universalParams *parameters.UniversalParams
+	dateParams      *parameters.DateParams
 }
 
 // GetParams returns a slice of interface containing the MarketStatusRequest, UniversalParams and DateParams structs.
 // It returns an error if one of these 3 structs don't exist.
-func (msr *MarketStatusRequest) getParams() ([]MarketDataParam, error) {
+func (msr *MarketStatusRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if msr.countryParams == nil {
 		return nil, fmt.Errorf("required struct CountryParams doesn't exist")
 	}
@@ -24,7 +27,7 @@ func (msr *MarketStatusRequest) getParams() ([]MarketDataParam, error) {
 	if msr.dateParams == nil {
 		return nil, fmt.Errorf("required struct DateParams doesn't exist")
 	}
-	params := []MarketDataParam{msr.countryParams, msr.universalParams, msr.dateParams}
+	params := []parameters.MarketDataParam{msr.countryParams, msr.universalParams, msr.dateParams}
 	return params, nil
 }
 
@@ -74,8 +77,8 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 }
 
 // GetMarketStatus sends the MarketStatusRequest and returns the response.
-func (msr *MarketStatusRequest) Get() (*MarketStatusResponse, *MarketDataResponse, error) {
-	var msrResp MarketStatusResponse
+func (msr *MarketStatusRequest) Get() (*models.MarketStatusResponse, *MarketDataResponse, error) {
+	var msrResp models.MarketStatusResponse
 	mdr, err := msr.baseRequest.client.GetFromRequest(msr.baseRequest, &msrResp)
 	if err != nil {
 		return nil, nil, err
@@ -90,16 +93,16 @@ func MarketStatus(clients ...*MarketDataClient) *MarketStatusRequest {
 
 	msr := &MarketStatusRequest{
 		baseRequest:     baseReq,
-		countryParams:   &CountryParams{},
-		universalParams: &UniversalParams{},
-		dateParams:      &DateParams{},
+		countryParams:   &parameters.CountryParams{},
+		universalParams: &parameters.UniversalParams{},
+		dateParams:      &parameters.DateParams{},
 	}
 
 	baseReq.child = msr
 
 	msr.Country("US") // Set default country value to "US"
-	
-	path, ok := Paths[1]["markets"]["status"]
+
+	path, ok := endpoints[1]["markets"]["status"]
 	if !ok {
 		msr.baseRequest.Error = fmt.Errorf("path not found for market status")
 		return msr

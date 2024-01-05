@@ -7,6 +7,7 @@ import (
 	"time"
 
 	api "github.com/MarketDataApp/sdk-go/client"
+	md "github.com/MarketDataApp/sdk-go/models"
 )
 
 func stockCandlesV2Example() {
@@ -67,7 +68,7 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	tickers := api.StockTickers()
 
 	// Get TickersResponse for each date and combine them into a map
-	tickerMap := make(map[string]api.TickerObj)
+	tickerMap := make(map[string]md.TickerObj)
 	for _, date := range openDates {
 		// Convert date to string in the format "YYYY-MM-DD"
 		dateStr := date.Format("2006-01-02")
@@ -100,13 +101,13 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	sort.Strings(keys)
 
 	// Create a new map with sorted keys
-	sortedTickerMap := make(map[string]api.TickerObj)
+	sortedTickerMap := make(map[string]md.TickerObj)
 	for _, key := range keys {
 		sortedTickerMap[key] = tickerMap[key]
 	}
 
 	// Save the sorted map to a CSV file
-	err = api.SaveToCSV(sortedTickerMap, filename)
+	err = md.SaveToCSV(sortedTickerMap, filename)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	}
 
 	// Save the map to a CSV file
-	err = api.SaveToCSV(responseMap, filename)
+	err = md.SaveToCSV(responseMap, filename)
 	if err != nil {
 		return err
 	}

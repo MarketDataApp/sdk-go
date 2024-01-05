@@ -4,15 +4,12 @@ import (
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 )
 
 type MarketDataPacked interface {
 	IsValid() bool
 	Unpack() any
-}
-
-type MarketDataParam interface {
-	SetParams(*resty.Request) error
 }
 
 // baseRequest is a struct that represents a basic request in the Market Data Client package.
@@ -27,9 +24,9 @@ type baseRequest struct {
 }
 
 // getParams calls the getParams method of the appropriate MarketDataRequest.
-func (br *baseRequest) getParams() ([]MarketDataParam, error) {
+func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if br == nil || br.child == nil {
-		return []MarketDataParam{}, nil
+		return []parameters.MarketDataParam{}, nil
 	}
 
 	// Check if child is of type *baseRequest
@@ -101,7 +98,15 @@ func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 		return params, nil
 	}
 
-	return []MarketDataParam{}, nil
+	if oer, ok := br.child.(*OptionsExpirationsRequest); ok {
+		params, err := oer.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	return []parameters.MarketDataParam{}, nil
 }
 
 // getPath returns the path of the BaseRequest.

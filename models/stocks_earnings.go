@@ -1,4 +1,4 @@
-package client
+package models
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ type StockEarningsResponse struct {
 	Symbol         []string   `json:"symbol"`
 	FiscalYear     []int64    `json:"fiscalYear"`
 	FiscalQuarter  []int64    `json:"fiscalQuarter"`
-	Date           []int64   `json:"date"`
-	ReportDate     []int64   `json:"reportDate"`
+	Date           []int64    `json:"date"`
+	ReportDate     []int64    `json:"reportDate"`
 	ReportTime     []string   `json:"reportTime"`
 	Currency       []string   `json:"currency"`
 	ReportedEPS    []*float64 `json:"reportedEPS"`

@@ -1,13 +1,18 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/MarketDataApp/sdk-go/helpers/parameters"
+	"github.com/MarketDataApp/sdk-go/models"
+)
 
 // IndicesCandlesRequest represents a request to the /v1/indices/candles endpoint.
 type IndicesCandlesRequest struct {
 	*baseRequest
-	resolutionParams *ResolutionParams
-	symbolParams     *SymbolParams
-	dateParams       *DateParams
+	resolutionParams *parameters.ResolutionParams
+	symbolParams     *parameters.SymbolParams
+	dateParams       *parameters.DateParams
 }
 
 // Resolution sets the resolution parameter for the IndicesCandlesRequest.
@@ -71,21 +76,21 @@ func (icr *IndicesCandlesRequest) Countback(q int) *IndicesCandlesRequest {
 }
 
 // GetParams packs the IndicesCandlesRequest struct into a slice of interface{} and returns it.
-func (icr *IndicesCandlesRequest) getParams() ([]MarketDataParam, error) {
+func (icr *IndicesCandlesRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
-	params := []MarketDataParam{icr.dateParams, icr.symbolParams, icr.resolutionParams}
+	params := []parameters.MarketDataParam{icr.dateParams, icr.symbolParams, icr.resolutionParams}
 	return params, nil
 }
 
 // Get sends the IndicesCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (icr *IndicesCandlesRequest) Get() (*IndicesCandlesResponse, *MarketDataResponse, error) {
+func (icr *IndicesCandlesRequest) Get() (*models.IndicesCandlesResponse, *MarketDataResponse, error) {
 	if icr == nil {
 		return nil, nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
-	var icrResp IndicesCandlesResponse
+	var icrResp models.IndicesCandlesResponse
 	mdr, err := icr.baseRequest.client.GetFromRequest(icr.baseRequest, &icrResp)
 	if err != nil {
 		return nil, nil, err
@@ -98,13 +103,13 @@ func (icr *IndicesCandlesRequest) Get() (*IndicesCandlesResponse, *MarketDataRes
 // If no client is provided, it uses the default client.
 func IndexCandles(client ...*MarketDataClient) *IndicesCandlesRequest {
 	baseReq := newBaseRequest(client...)
-	baseReq.path = Paths[1]["indices"]["candles"]
+	baseReq.path = endpoints[1]["indices"]["candles"]
 
 	icr := &IndicesCandlesRequest{
 		baseRequest:      baseReq,
-		dateParams:       &DateParams{},
-		resolutionParams: &ResolutionParams{},
-		symbolParams:     &SymbolParams{},
+		dateParams:       &parameters.DateParams{},
+		resolutionParams: &parameters.ResolutionParams{},
+		symbolParams:     &parameters.SymbolParams{},
 	}
 
 	baseReq.child = icr

@@ -1,64 +1,21 @@
-package client
+package parameters
 
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/go-resty/resty/v2"
 )
 
-func IsZeroValue(i interface{}) bool {
-	if i == nil {
-		return true
-	}
-	v := reflect.ValueOf(i)
-	switch v.Kind() {
-	case reflect.String:
-		return v.Len() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Interface, reflect.Chan:
-		return v.IsNil()
-	case reflect.Struct:
-		if _, ok := v.Interface().(time.Time); ok {
-			return v.Interface() == time.Time{}
-		}
-		zero := true
-		for i := 0; i < v.NumField(); i++ {
-			if !IsZeroValue(v.Field(i).Interface()) {
-				zero = false
-				break
-			}
-		}
-		return zero
-	default:
-		// Add more types if needed
-		return false
-	}
-}
-
-func IsAlpha(s string) bool {
-	for _, r := range s {
-		if !('a' <= r && r <= 'z' || 'A' <= r && r <= 'Z') {
-			return false
-		}
-	}
-	return true
+type MarketDataParam interface {
+	SetParams(*resty.Request) error
 }
 
 // ParseAndSetParams takes a struct and a Resty request, parses the struct into path and query parameters, and sets them to the request.
 // It returns an error if a required parameter has a zero value.
-func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
+func ParseAndSetParams(params MarketDataParam, request *resty.Request) error {
 	if params == nil {
 		return errors.New("params cannot be nil")
 	}
@@ -77,7 +34,7 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 	if v.Kind() != reflect.Struct {
 		return fmt.Errorf("dereferenced value of params must be a struct, got %v", v.Kind())
 	}
-	
+
 	t := v.Type()
 
 	// Iterate over the fields of the struct.
@@ -110,21 +67,4 @@ func parseAndSetParams(params MarketDataParam, request *resty.Request) error {
 	}
 
 	return nil
-}
-
-func redactAuthorizationHeader(headers http.Header) http.Header {
-	// Copy the headers so we don't modify the original
-	copiedHeaders := make(http.Header)
-	for k, v := range headers {
-		copiedHeaders[k] = v
-	}
-
-	// Redact the Authorization header if it exists
-	if _, ok := copiedHeaders["Authorization"]; ok {
-		token := copiedHeaders.Get("Authorization")
-		redactedToken := "Bearer " + strings.Repeat("*", len(token)-8) + token[len(token)-4:]
-		copiedHeaders.Set("Authorization", redactedToken)
-	}
-
-	return copiedHeaders
 }

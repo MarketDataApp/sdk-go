@@ -1,9 +1,11 @@
-package client
+package parameters
 
 import (
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/dates"
+	"github.com/MarketDataApp/sdk-go/helpers"
+
 	"github.com/go-resty/resty/v2"
 )
 
@@ -42,7 +44,7 @@ type CountryParams struct {
 // It validates the country code to be of length 2 and only contain alphabets.
 // If the validation fails, it returns an error.
 func (cp *CountryParams) SetCountry(q string) error {
-	if len(q) != 2 || !IsAlpha(q) {
+	if len(q) != 2 || !helpers.IsAlpha(q) {
 		err := fmt.Errorf("invalid country code")
 		return err
 	}
@@ -111,12 +113,6 @@ func (scp *StockCandleParams) SetExchange(exchange string) error {
 	}
 	scp.Exchange = exchange
 	return nil
-}
-
-// SetParams sets the parameters for the StockCandleParams.
-// It uses the parseAndSetParams function to parse and set the parameters.
-func (scp *StockCandleParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(scp, request)
 }
 
 type ResolutionParams struct {
@@ -232,50 +228,56 @@ func (dp *DateParams) SetCountback(q int) error {
 	return nil
 }
 
+// SetParams sets the parameters for the StockCandleParams.
+// It uses the parseAndSetParams function to parse and set the parameters.
+func (scp *StockCandleParams) SetParams(request *resty.Request) error {
+	return ParseAndSetParams(scp, request)
+}
+
 // SetParams sets the parameters for the DateParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (dp *DateParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(dp, request)
+	return ParseAndSetParams(dp, request)
 }
 
 // SetParams sets the parameters for the UniversalParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (up *UniversalParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(up, request)
+	return ParseAndSetParams(up, request)
 }
 
 // SetParams sets the parameters for the DateKeyParam.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (dk *DateKeyParam) SetParams(request *resty.Request) error {
-	return parseAndSetParams(dk, request)
+	return ParseAndSetParams(dk, request)
 }
 
 // SetParams sets the parameters for the CandleParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (rp *ResolutionParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(rp, request)
+	return ParseAndSetParams(rp, request)
 }
 
 // SetParams sets the parameters for the CandleParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (sp *SymbolParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(sp, request)
+	return ParseAndSetParams(sp, request)
 }
 
 // SetParams sets the parameters for the CountryParams in the request.
 // If the parsing and setting of parameters fail, it returns an error.
 func (cp *CountryParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(cp, request)
+	return ParseAndSetParams(cp, request)
 }
 
 // SetParams sets the FiftyTwoWeek parameter for the FiftyTwoWeekParams.
 // If the parsing and setting of parameters fail, it returns an error.
 func (sqp *FiftyTwoWeekParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(sqp, request)
+	return ParseAndSetParams(sqp, request)
 }
 
 // SetParams sets the parameters for the StockEarningsParams.
 // If the parsing and setting of parameters fail, it returns an error.
 func (sep *StockEarningsParams) SetParams(request *resty.Request) error {
-	return parseAndSetParams(sep, request)
+	return ParseAndSetParams(sep, request)
 }

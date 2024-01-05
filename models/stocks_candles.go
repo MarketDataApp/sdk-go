@@ -1,4 +1,4 @@
-package client
+package models
 
 import (
 	"encoding/json"
@@ -108,29 +108,23 @@ func (s *StockCandlesResponse) IsValid() bool {
 }
 
 func (s *StockCandlesResponse) Validate() error {
-	// Check if the time is in ascending order
-	if err := s.checkTimeInAscendingOrder(); err != nil {
-		return err
-	}
+	// Create a channel to handle errors
+	errChan := make(chan error, 4)
 
-	// Validate the JSON after unmarshaling
-	if err := s.checkForEqualSlices(); err != nil {
-		return err
-	}
+	// Run each validation function concurrently
+	go func() { errChan <- s.checkTimeInAscendingOrder() }()
+	go func() { errChan <- s.checkForEqualSlices() }()
+	go func() { errChan <- s.checkForEmptySlices() }()
+	go func() { _, err := s.getVersion(); errChan <- err }()
 
-	// Check for empty slices
-	if err := s.checkForEmptySlices(); err != nil {
-		return err
-	}
-
-	// Check the version for errors:
-	_, err := s.getVersion()
-	if err != nil {
-		return err
+	// Check for errors from the validation functions
+	for i := 0; i < 4; i++ {
+		if err := <-errChan; err != nil {
+			return err
+		}
 	}
 
 	return nil
-
 }
 
 // checkForEqualSlices checks if all slices in the StockCandles struct have the same length.

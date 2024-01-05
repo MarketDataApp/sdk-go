@@ -1,4 +1,4 @@
-package client
+package models
 
 import (
 	"fmt"
@@ -74,23 +74,50 @@ func (iqr *IndexQuotesResponse) Unpack() ([]IndexQuote, error) {
 func (iqr *IndexQuotesResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "Symbol: %v, Last: %v", 
-		iqr.Symbol, iqr.Last)
+	fmt.Fprintf(&result, "Symbol: [%v], Last: [%v]", strings.Join(iqr.Symbol, ", "), joinFloat64Slice(iqr.Last))
 
-	if iqr.Change != nil && len(iqr.Change) > 0 {
-		fmt.Fprintf(&result, ", Change: %v", iqr.Change[0])
+	if iqr.Change != nil {
+		fmt.Fprintf(&result, ", Change: [%v]", joinFloat64PointerSlice(iqr.Change))
 	}
-	if iqr.ChangePct != nil && len(iqr.ChangePct) > 0 {
-		fmt.Fprintf(&result, ", ChangePct: %v", iqr.ChangePct[0])
+	if iqr.ChangePct != nil {
+		fmt.Fprintf(&result, ", ChangePct: [%v]", joinFloat64PointerSlice(iqr.ChangePct))
 	}
-	if iqr.High52 != nil && len(*iqr.High52) > 0 {
-		fmt.Fprintf(&result, ", High52: %v", *iqr.High52)
+	if iqr.High52 != nil {
+		fmt.Fprintf(&result, ", High52: [%v]", joinFloat64Slice(*iqr.High52))
 	}
-	if iqr.Low52 != nil && len(*iqr.Low52) > 0 {
-		fmt.Fprintf(&result, ", Low52: %v", *iqr.Low52)
+	if iqr.Low52 != nil {
+		fmt.Fprintf(&result, ", Low52: [%v]", joinFloat64Slice(*iqr.Low52))
 	}
 
-	fmt.Fprintf(&result, ", Updated: %v", iqr.Updated)
+	fmt.Fprintf(&result, ", Updated: [%v]", joinInt64Slice(iqr.Updated))
 
 	return result.String()
+}
+
+func joinFloat64Slice(slice []float64) string {
+	strs := make([]string, len(slice))
+	for i, v := range slice {
+		strs[i] = fmt.Sprintf("%v", v)
+	}
+	return strings.Join(strs, ", ")
+}
+
+func joinFloat64PointerSlice(slice []*float64) string {
+	strs := make([]string, len(slice))
+	for i, v := range slice {
+		if v != nil {
+			strs[i] = fmt.Sprintf("%v", *v)
+		} else {
+			strs[i] = "nil"
+		}
+	}
+	return strings.Join(strs, ", ")
+}
+
+func joinInt64Slice(slice []int64) string {
+	strs := make([]string, len(slice))
+	for i, v := range slice {
+		strs[i] = fmt.Sprintf("%v", v)
+	}
+	return strings.Join(strs, ", ")
 }

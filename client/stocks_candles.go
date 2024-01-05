@@ -2,15 +2,18 @@ package client
 
 import (
 	"fmt"
+
+	"github.com/MarketDataApp/sdk-go/helpers/parameters"
+	"github.com/MarketDataApp/sdk-go/models"
 )
 
 // StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
 type StockCandlesRequest struct {
 	*baseRequest
-	stockCandleParams *StockCandleParams
-	resolutionParams  *ResolutionParams
-	symbolParams      *SymbolParams
-	dateParams        *DateParams
+	stockCandleParams *parameters.StockCandleParams
+	resolutionParams  *parameters.ResolutionParams
+	symbolParams      *parameters.SymbolParams
+	dateParams        *parameters.DateParams
 }
 
 // Resolution sets the resolution parameter for the CandlesRequest.
@@ -113,21 +116,21 @@ func (scr *StockCandlesRequest) Exchange(q string) *StockCandlesRequest {
 }
 
 // GetParams packs the CandlesRequest struct into a slice of interface{} and returns it.
-func (scr *StockCandlesRequest) getParams() ([]MarketDataParam, error) {
+func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
-	params := []MarketDataParam{scr.dateParams, scr.symbolParams, scr.resolutionParams, scr.stockCandleParams}
+	params := []parameters.MarketDataParam{scr.dateParams, scr.symbolParams, scr.resolutionParams, scr.stockCandleParams}
 	return params, nil
 }
 
 // Get sends the StockCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (scr *StockCandlesRequest) Get() (*StockCandlesResponse, *MarketDataResponse, error) {
+func (scr *StockCandlesRequest) Get() (*models.StockCandlesResponse, *MarketDataResponse, error) {
 	if scr == nil {
 		return nil, nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
-	var scrResp StockCandlesResponse
+	var scrResp models.StockCandlesResponse
 	mdr, err := scr.baseRequest.client.GetFromRequest(scr.baseRequest, &scrResp)
 	if err != nil {
 		return nil, nil, err
@@ -140,14 +143,14 @@ func (scr *StockCandlesRequest) Get() (*StockCandlesResponse, *MarketDataRespons
 // If no client is provided, it uses the default client.
 func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 	baseReq := newBaseRequest(client...)
-	baseReq.path = Paths[1]["stocks"]["candles"]
+	baseReq.path = endpoints[1]["stocks"]["candles"]
 
 	scr := &StockCandlesRequest{
 		baseRequest:       baseReq,
-		dateParams:        &DateParams{},
-		resolutionParams:  &ResolutionParams{},
-		symbolParams:      &SymbolParams{},
-		stockCandleParams: &StockCandleParams{},
+		dateParams:        &parameters.DateParams{},
+		resolutionParams:  &parameters.ResolutionParams{},
+		symbolParams:      &parameters.SymbolParams{},
+		stockCandleParams: &parameters.StockCandleParams{},
 	}
 
 	// Set the date to the current time
@@ -159,9 +162,9 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 // StockCandlesRequestV2 represents a request to the /v2/stocks/candles endpoint.
 type StockCandlesRequestV2 struct {
 	*baseRequest
-	dateKey          *DateKeyParam
-	resolutionParams *ResolutionParams
-	symbolParams     *SymbolParams
+	dateKey          *parameters.DateKeyParam
+	resolutionParams *parameters.ResolutionParams
+	symbolParams     *parameters.SymbolParams
 }
 
 // Resolution sets the resolution parameter for the CandlesRequest.
@@ -201,21 +204,21 @@ func (cr *StockCandlesRequestV2) DateKey(q string) *StockCandlesRequestV2 {
 }
 
 // GetParams packs the CandlesRequest struct into a slice of interface{} and returns it.
-func (cr *StockCandlesRequestV2) getParams() ([]MarketDataParam, error) {
+func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, error) {
 	if cr == nil {
 		return nil, fmt.Errorf("CandlesRequest is nil")
 	}
-	params := []MarketDataParam{cr.dateKey, cr.resolutionParams, cr.symbolParams}
+	params := []parameters.MarketDataParam{cr.dateKey, cr.resolutionParams, cr.symbolParams}
 	return params, nil
 }
 
 // GetCandles sends the CandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (cr *StockCandlesRequestV2) Get() (*StockCandlesResponse, *MarketDataResponse, error) {
+func (cr *StockCandlesRequestV2) Get() (*models.StockCandlesResponse, *MarketDataResponse, error) {
 	if cr == nil {
 		return nil, nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
-	var crResp StockCandlesResponse
+	var crResp models.StockCandlesResponse
 	mdr, err := cr.baseRequest.client.GetFromRequest(cr.baseRequest, &crResp)
 	if err != nil {
 		return nil, nil, err
@@ -228,13 +231,13 @@ func (cr *StockCandlesRequestV2) Get() (*StockCandlesResponse, *MarketDataRespon
 // If no client is provided, it uses the default client.
 func StockCandlesV2(client ...*MarketDataClient) *StockCandlesRequestV2 {
 	baseReq := newBaseRequest(client...)
-	baseReq.path = Paths[2]["stocks"]["candles"]
+	baseReq.path = endpoints[2]["stocks"]["candles"]
 
 	cr := &StockCandlesRequestV2{
 		baseRequest:      baseReq,
-		dateKey:          &DateKeyParam{},
-		resolutionParams: &ResolutionParams{},
-		symbolParams:     &SymbolParams{},
+		dateKey:          &parameters.DateKeyParam{},
+		resolutionParams: &parameters.ResolutionParams{},
+		symbolParams:     &parameters.SymbolParams{},
 	}
 
 	// Set the date to the current time

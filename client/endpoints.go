@@ -1,6 +1,6 @@
 package client
 
-var Paths = map[int]map[string]map[string]string{
+var endpoints = map[int]map[string]map[string]string{
 	1: {
 		"markets": {
 			"status": "/v1/markets/status/",
