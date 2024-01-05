@@ -22,13 +22,13 @@ func (ep *StockEarningsParams) SetReport(q string) error {
 	return nil
 }
 
-// StockQuoteParams represents the unique parameters for a StockQuoteRequest
-type StockQuoteParams struct {
+// FiftyTwoWeekParams represents the unique parameters for a StockQuoteRequest
+type FiftyTwoWeekParams struct {
 	FiftyTwoWeek bool `query:"52week"`
 }
 
-// SetFiftyTwoWeek sets the FiftyTwoWeek parameter for the StockQuoteParams.
-func (sqp *StockQuoteParams) SetFiftyTwoWeek(q bool) {
+// SetFiftyTwoWeek sets the FiftyTwoWeek parameter for the FiftyTwoWeekParams.
+func (sqp *FiftyTwoWeekParams) SetFiftyTwoWeek(q bool) {
 	sqp.FiftyTwoWeek = q
 }
 
@@ -268,9 +268,9 @@ func (cp *CountryParams) SetParams(request *resty.Request) error {
 	return parseAndSetParams(cp, request)
 }
 
-// SetParams sets the FiftyTwoWeek parameter for the StockQuoteParams.
+// SetParams sets the FiftyTwoWeek parameter for the FiftyTwoWeekParams.
 // If the parsing and setting of parameters fail, it returns an error.
-func (sqp *StockQuoteParams) SetParams(request *resty.Request) error {
+func (sqp *FiftyTwoWeekParams) SetParams(request *resty.Request) error {
 	return parseAndSetParams(sqp, request)
 }
 

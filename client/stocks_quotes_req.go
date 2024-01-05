@@ -6,7 +6,7 @@ import "fmt"
 type StockQuoteRequest struct {
 	*baseRequest
 	symbolParams     *SymbolParams
-	stockQuoteParams *StockQuoteParams
+	fiftyTwoWeekParams *FiftyTwoWeekParams
 }
 
 // Symbol sets the symbol parameter for the IndicesCandlesRequest.
@@ -26,7 +26,7 @@ func (sqr *StockQuoteRequest) FiftyTwoWeek(q bool) *StockQuoteRequest {
 	if sqr == nil {
 		return nil
 	}
-	sqr.stockQuoteParams.SetFiftyTwoWeek(q)
+	sqr.fiftyTwoWeekParams.SetFiftyTwoWeek(q)
 	return sqr
 }
 
@@ -35,7 +35,7 @@ func (sqr *StockQuoteRequest) getParams() ([]MarketDataParam, error) {
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
-	params := []MarketDataParam{sqr.symbolParams, sqr.stockQuoteParams}
+	params := []MarketDataParam{sqr.symbolParams, sqr.fiftyTwoWeekParams}
 	return params, nil
 }
 
@@ -63,7 +63,7 @@ func StockQuotes(client ...*MarketDataClient) *StockQuoteRequest {
 	sqr := &StockQuoteRequest{
 		baseRequest:      baseReq,
 		symbolParams:     &SymbolParams{},
-		stockQuoteParams: &StockQuoteParams{},
+		fiftyTwoWeekParams: &FiftyTwoWeekParams{},
 	}
 
 	baseReq.child = sqr

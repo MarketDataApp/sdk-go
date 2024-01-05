@@ -37,11 +37,11 @@ import md "github.com/MarketDataApp/sdk-go/client"
  | Options           | Option Chain | ❌        |           |
  | Options           | Quotes       | ❌        |           |
  | Indices           | Candles      | ✅        |           |
- | Indices           | Quotes       | ❌        |           |
+ | Indices           | Quotes       | ✅        |           |
 
-# Usage
+# Example Usage
 
-Usage examples coming soon.
+See the examples.go file for examples of how to use each endpoint.
 
 ## Authentication
 

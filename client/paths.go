@@ -11,6 +11,7 @@ var Paths = map[int]map[string]map[string]string{
 			"earnings": "/v1/stocks/earnings/{symbol}/",
 		},
 		"indices": {
+			"quotes": "/v1/indices/quotes/{symbol}/",
 			"candles": "/v1/indices/candles/{resolution}/{symbol}/",
 		},
 	},

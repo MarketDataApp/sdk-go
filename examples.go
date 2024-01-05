@@ -8,6 +8,30 @@ import (
 )
 
 
+func indexQuoteExample() {
+	iqe, raw, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	fmt.Println("Printing Index Quote Response...")
+	fmt.Println(iqe)
+	fmt.Println("Printing Raw JSON Response...")
+	fmt.Println(raw)
+
+	unpacked, err := iqe.Unpack()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	fmt.Println("Printing Unpacked Index Quotes...")
+	for _, quote := range unpacked {
+		fmt.Println(quote)
+	}
+}
+
 func stockEarningsExample() {
 	see, raw, err := api.StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-12-31").Get()
 	if err != nil {
