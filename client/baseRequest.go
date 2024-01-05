@@ -77,6 +77,14 @@ func (br *baseRequest) getParams() ([]MarketDataParam, error) {
 		return params, nil
 	}
 
+	if ser, ok := br.child.(*StockEarningsRequest); ok {
+		params, err := ser.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
 	if icr, ok := br.child.(*IndicesCandlesRequest); ok {
 		params, err := icr.getParams()
 		if err != nil {

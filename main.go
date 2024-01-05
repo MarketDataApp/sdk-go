@@ -16,13 +16,15 @@ func main() {
 
 	client.Debug(true)
 
+	fmt.Println("Starting stock earnings request...")
+	stockEarningsExample()
+	/*
+
 	fmt.Println("Starting stock quote request...")
 	stockQuoteExample()
 
-	/*
-
 	fmt.Println("Starting index candles request...")
-	indicesCandlesExample()
+	indexCandlesExample()
 
 	fmt.Println("Starting stock candles request...")
 	stockCandlesExample()

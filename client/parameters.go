@@ -7,6 +7,21 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+type StockEarningsParams struct {
+	Report string `query:"report"`
+}
+
+// SetReport sets the report parameter for the EarningsParams.
+// It validates the report parameter using the IsValidDateKey function from the dates package.
+func (ep *StockEarningsParams) SetReport(q string) error {
+	if !dates.IsValidDateKey(q) {
+		err := fmt.Errorf("invalid report parameter")
+		return err
+	}
+	ep.Report = q
+	return nil
+}
+
 // StockQuoteParams represents the unique parameters for a StockQuoteRequest
 type StockQuoteParams struct {
 	FiftyTwoWeek bool `query:"52week"`
@@ -257,4 +272,10 @@ func (cp *CountryParams) SetParams(request *resty.Request) error {
 // If the parsing and setting of parameters fail, it returns an error.
 func (sqp *StockQuoteParams) SetParams(request *resty.Request) error {
 	return parseAndSetParams(sqp, request)
+}
+
+// SetParams sets the parameters for the StockEarningsParams.
+// If the parsing and setting of parameters fail, it returns an error.
+func (sep *StockEarningsParams) SetParams(request *resty.Request) error {
+	return parseAndSetParams(sep, request)
 }

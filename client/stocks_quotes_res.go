@@ -91,7 +91,7 @@ func (sqr *StockQuotesResponse) Unpack() ([]StockQuote, error) {
 func (sqr *StockQuotesResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "s: ok, Symbol: %v, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v", 
+	fmt.Fprintf(&result, "Symbol: %v, Ask: %v, Ask Size: %v, Bid: %v, Bid Size: %v, Mid: %v, Last: %v", 
 		sqr.Symbol, sqr.Ask, sqr.AskSize, sqr.Bid, sqr.BidSize, sqr.Mid, sqr.Last)
 
 	if sqr.Change != nil && len(sqr.Change) > 0 {
