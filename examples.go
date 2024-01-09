@@ -7,6 +7,16 @@ import (
 	api "github.com/MarketDataApp/sdk-go/client"
 )
 
+func logExample() {
+	_, _, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	fmt.Println(api.GetLogs())
+
+}
 
 func indexQuoteExample() {
 	iqe, raw, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Get()
@@ -30,6 +40,7 @@ func indexQuoteExample() {
 	for _, quote := range unpacked {
 		fmt.Println(quote)
 	}
+
 }
 
 func stockEarningsExample() {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
@@ -126,7 +127,7 @@ func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error
 
 // Get sends the StockCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (scr *StockCandlesRequest) Get() (*models.StockCandlesResponse, *MarketDataResponse, error) {
+func (scr *StockCandlesRequest) Get() (*models.StockCandlesResponse, *resty.Response, error) {
 	if scr == nil {
 		return nil, nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
@@ -214,7 +215,7 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 
 // GetCandles sends the CandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (cr *StockCandlesRequestV2) Get() (*models.StockCandlesResponse, *MarketDataResponse, error) {
+func (cr *StockCandlesRequestV2) Get() (*models.StockCandlesResponse, *resty.Response, error) {
 	if cr == nil {
 		return nil, nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}

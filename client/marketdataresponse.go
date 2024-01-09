@@ -49,17 +49,17 @@ func (mdr *MarketDataResponse) setRayID() error {
 	return nil
 }
 
-func (c *MarketDataClient) Get(path string) (*MarketDataResponse, error) {
+func (c *MarketDataClient) Get(path string) (*resty.Response, error) {
 	req := c.Client.R()
 	return c.wrapResponse(req, path)
 }
 
-func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*MarketDataResponse, error) {
+func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*resty.Response, error) {
 	resp, err := req.Get(path) // Must run GET after setting all params.
 	if err != nil {
 		return nil, err
 	}
-
+	/*
 	mdr := &MarketDataResponse{Response: resp}
 	mdr.setRateLimitConsumed()
 
@@ -69,6 +69,6 @@ func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*Marke
 	}
 
 	mdr.setLatency()
-
-	return mdr, nil
+	*/
+	return resp, nil
 }

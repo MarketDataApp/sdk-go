@@ -5,6 +5,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // StockQuoteRequest represents a request to the /stocks/quote endpoint.
@@ -86,7 +87,7 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 
 // Get sends the StockEarningsRequest and returns the StockEarningsResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (ser *StockEarningsRequest) Get() (*models.StockEarningsResponse, *MarketDataResponse, error) {
+func (ser *StockEarningsRequest) Get() (*models.StockEarningsResponse, *resty.Response, error) {
 	if ser == nil {
 		return nil, nil, fmt.Errorf("StockEarningsRequest is nil")
 	}

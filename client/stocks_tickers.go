@@ -6,6 +6,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // TickersRequest represents a request to the /stocks/tickers endpoint.
@@ -54,7 +55,7 @@ func StockTickers(client ...*MarketDataClient) *TickersRequest {
 
 // GetTickers sends the TickersRequest and returns the TickersResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (tr *TickersRequest) Get() (*models.TickersResponse, *MarketDataResponse, error) {
+func (tr *TickersRequest) Get() (*models.TickersResponse, *resty.Response, error) {
 	if tr == nil {
 		return nil, nil, fmt.Errorf("TickersRequest is nil")
 	}

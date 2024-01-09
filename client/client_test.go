@@ -55,7 +55,7 @@ func TestRateLimit(t *testing.T) {
 	fmt.Println("Status code after AAPL request:", resp.StatusCode())
 	fmt.Println("Body after AAPL request:", string(body))
 	initialRemaining := client.RateLimitRemaining
-	fmt.Println("Rate limit consumed after AAPL request:", resp.RateLimitConsumed)
+	//fmt.Println("Rate limit consumed after AAPL request:", resp.RateLimitConsumed)
 
 	// Request to https://api.marketdata.app/stocks/quotes/SPY/
 	resp, err = client.Get("https://api.marketdata.app/v1/stocks/quotes/SPY/")
@@ -67,7 +67,7 @@ func TestRateLimit(t *testing.T) {
 	fmt.Println("Status code after SPY request:", resp.StatusCode())
 	fmt.Println("Body after SPY request:", string(body))
 	afterRequestRemaining := client.RateLimitRemaining
-	fmt.Println("Rate limit consumed after SPY request:", resp.RateLimitConsumed)
+	//fmt.Println("Rate limit consumed after SPY request:", resp.RateLimitConsumed)
 
 	if afterRequestRemaining != initialRemaining-1 {
 		t.Errorf("Expected remaining rate limit to decrease by 1, but got %d", initialRemaining-afterRequestRemaining)

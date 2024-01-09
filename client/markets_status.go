@@ -5,6 +5,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // MarketStatusRequest represents a request for market status.
@@ -77,7 +78,7 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 }
 
 // GetMarketStatus sends the MarketStatusRequest and returns the response.
-func (msr *MarketStatusRequest) Get() (*models.MarketStatusResponse, *MarketDataResponse, error) {
+func (msr *MarketStatusRequest) Get() (*models.MarketStatusResponse, *resty.Response, error) {
 	var msrResp models.MarketStatusResponse
 	mdr, err := msr.baseRequest.client.GetFromRequest(msr.baseRequest, &msrResp)
 	if err != nil {

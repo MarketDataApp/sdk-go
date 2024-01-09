@@ -16,10 +16,13 @@ func main() {
 
 	client.Debug(true)
 
+	fmt.Println("Staring log example...")
+	logExample()
+	/*
+
 	fmt.Println("Starting index quote request...")
 	indexQuoteExample()
 
-	/*
 
 	fmt.Println("Starting stock earnings request...")
 	stockEarningsExample()

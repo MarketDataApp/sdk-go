@@ -5,6 +5,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // IndicesCandlesRequest represents a request to the /v1/indices/candles endpoint.
@@ -86,7 +87,7 @@ func (icr *IndicesCandlesRequest) getParams() ([]parameters.MarketDataParam, err
 
 // Get sends the IndicesCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (icr *IndicesCandlesRequest) Get() (*models.IndicesCandlesResponse, *MarketDataResponse, error) {
+func (icr *IndicesCandlesRequest) Get() (*models.IndicesCandlesResponse, *resty.Response, error) {
 	if icr == nil {
 		return nil, nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}

@@ -47,7 +47,7 @@ func (o *OptionsExpirationsRequest) SetParams(request *resty.Request) error {
 
 // Get sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (o *OptionsExpirationsRequest) Get() (*models.OptionsExpirationsResponse, *MarketDataResponse, error) {
+func (o *OptionsExpirationsRequest) Get() (*models.OptionsExpirationsResponse, *resty.Response, error) {
 	if o == nil {
 		return nil, nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}

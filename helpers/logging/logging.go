@@ -14,8 +14,8 @@ import (
 
 var (
 	//debugModeLogger = log.New(os.Stdout, "", 0) // 0 turns off all flags, including the default timestamp flag
-	blue            = color.New(color.FgBlue).SprintFunc()
-	yellow          = color.New(color.FgYellow).SprintFunc()
+	blue   = color.New(color.FgBlue).SprintFunc()
+	yellow = color.New(color.FgYellow).SprintFunc()
 	//purple          = color.New(color.FgMagenta).SprintFunc()
 )
 
@@ -61,20 +61,27 @@ func (h *HttpRequestLogs) PrintLatest() {
 	} else {
 		fmt.Println(blue("Latest Log Entry:"))
 		fmt.Println(yellow("Timestamp:"), h.Logs[len(h.Logs)-1].Timestamp.Format("2006-01-02 15:04:05"))
-		fmt.Println(yellow("RayID:"), h.Logs[len(h.Logs)-1].RayID)
-		fmt.Println(yellow("RateLimitConsumed:"), h.Logs[len(h.Logs)-1].RateLimitConsumed)
+		fmt.Println(yellow("Ray ID:"), h.Logs[len(h.Logs)-1].RayID)
+		fmt.Println(yellow("Rate Limit Consumed:"), h.Logs[len(h.Logs)-1].RateLimitConsumed)
 		fmt.Println(yellow("Delay:"), fmt.Sprintf("%dms", h.Logs[len(h.Logs)-1].Delay))
-		fmt.Println(yellow("RequestURL:"), h.Logs[len(h.Logs)-1].URL)
+		fmt.Println(yellow("Request URL:"), h.Logs[len(h.Logs)-1].URL)
 	}
 }
 
-func (h *HttpRequestLogs) AddToLog(timestamp time.Time, rayID string, url string, rateLimitConsumed int, delay int64) {
+func AddToLog(h *HttpRequestLogs, timestamp time.Time, rayID string, url string, rateLimitConsumed int, delay int64, status int) {
+	if url == "https://api.marketdata.app/user/" {
+		// If the URL starts with https://api.marketdata.app/user/ do not add it to the log.
+		// Just return without doing anything in this case.
+		return
+	}
+
 	log := HttpRequestLog{
 		Timestamp:         timestamp,
 		RayID:             rayID,
 		URL:               url,
 		RateLimitConsumed: rateLimitConsumed,
 		Delay:             delay,
+		Status:            status,
 	}
 
 	if MaxLogEntries != 0 && len(h.Logs) >= MaxLogEntries {

@@ -72,8 +72,9 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 		return
 	}
 	delay := getLatencyFromRequest(req)
+	status := resp.StatusCode()
 
-	logging.Logs.AddToLog(time.Now(), rayID, req.URL, rateLimitConsumed, delay)
+	logging.AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status)
 }
 
 func (c *MarketDataClient) getEnvironment() string {
@@ -209,7 +210,7 @@ func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
 	c.RateLimitReset = time.Unix(resetVal, 0)
 }
 
-func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*MarketDataResponse, error) {
+func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
 	if c.RateLimitRemaining < 0 {
 		return nil, errors.New("rate limit exceeded")
 	}
@@ -374,27 +375,43 @@ func (c *MarketDataClient) logToConsole(req *resty.Request, resp *resty.Response
 func (c *MarketDataClient) logRequestResponse(req *resty.Request, resp *resty.Response) {
 	redactedHeaders := redactAuthorizationHeader(req.Header)
 	statusCode := resp.StatusCode()
+	delay := getLatencyFromRequest(req)
+	body := resp.String()
+	responseHeaders := resp.Header()
+	rateLimitConsumed, _ := getRateLimitConsumed(resp)
+	rayID, _ := getRayIDFromResponse(resp)
 
 	var logger *zap.Logger
+	var logMessage string
+
 	if statusCode >= 200 && statusCode < 300 {
 		if c.debug {
 			logger = logging.SuccessLogger
+			logMessage = "Successful Request"
 		}
 	} else if statusCode >= 400 && statusCode < 500 {
 		logger = logging.ClientErrorLogger
+		logMessage = "Client Error"
 	} else if statusCode >= 500 {
 		logger = logging.ServerErrorLogger
+		logMessage = "Server Error"
 	}
 
 	if logger != nil {
-		logger.Info("Request",
-			zap.String("cf_ray", resp.Header().Get("Cf-Ray")),
+		logger.Info(logMessage,
+			zap.String("cf_ray", rayID),
 			zap.String("request_url", req.URL),
-			zap.String("ratelimit_consumed", resp.Header().Get("X-Api-Ratelimit-Consumed")),
+			zap.Int("ratelimit_consumed", rateLimitConsumed),
 			zap.Int("response_code", statusCode),
-			zap.String("response_body", resp.String()),
+			zap.Int64("delay_ms", delay),
+			zap.String("response_body", body),
 			zap.Any("request_headers", redactedHeaders),
-			zap.Any("response_headers", resp.Header()),
+			zap.Any("response_headers", responseHeaders),
 		)
 	}
+}
+
+// GetLogs method returns the Logs variable.
+func GetLogs() *logging.HttpRequestLogs {
+	return logging.Logs
 }

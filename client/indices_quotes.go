@@ -5,6 +5,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // IndexQuoteRequest represents a request to the /indices/quote endpoint.
@@ -46,7 +47,7 @@ func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 
 // Get sends the IndexQuoteRequest and returns the IndexQuoteResponse along with the MarketDataResponse.
 // It returns an error if the request fails.
-func (iqr *IndexQuoteRequest) Get() (*models.IndexQuotesResponse, *MarketDataResponse, error) {
+func (iqr *IndexQuoteRequest) Get() (*models.IndexQuotesResponse, *resty.Response, error) {
 	if iqr == nil {
 		return nil, nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
