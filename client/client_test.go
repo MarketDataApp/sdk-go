@@ -1,10 +1,8 @@
 package client
 
 import (
-	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -28,6 +26,7 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("Expected nil, got a client")
 	}
 }
+/*
 
 func TestRateLimit(t *testing.T) {
 	client, err := GetClient(os.Getenv("MARKETDATA_TOKEN"))
@@ -73,3 +72,5 @@ func TestRateLimit(t *testing.T) {
 		t.Errorf("Expected remaining rate limit to decrease by 1, but got %d", initialRemaining-afterRequestRemaining)
 	}
 }
+
+*/

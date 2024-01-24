@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(true)
+	client.Debug(false)
 
 	fmt.Println("Staring log example...")
 	logExample()

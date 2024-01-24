@@ -14,6 +14,13 @@ func logExample() {
 		return
 	}
 
+	_, _, err = api.IndexQuotes().Symbol("SPX").FiftyTwoWeek(true).Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+
 	fmt.Println(api.GetLogs())
 
 }

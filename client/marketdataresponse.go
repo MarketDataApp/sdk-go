@@ -1,5 +1,7 @@
 package client
 
+/*
+
 import (
 	"errors"
 	"log"
@@ -51,7 +53,12 @@ func (mdr *MarketDataResponse) setRayID() error {
 
 func (c *MarketDataClient) Get(path string) (*resty.Response, error) {
 	req := c.Client.R()
-	return c.wrapResponse(req, path)
+	resp, err := req.Get(path) // Must run GET after setting all params.
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+
 }
 
 func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*resty.Response, error) {
@@ -59,7 +66,7 @@ func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*resty
 	if err != nil {
 		return nil, err
 	}
-	/*
+	
 	mdr := &MarketDataResponse{Response: resp}
 	mdr.setRateLimitConsumed()
 
@@ -69,6 +76,8 @@ func (c *MarketDataClient) wrapResponse(req *resty.Request, path string) (*resty
 	}
 
 	mdr.setLatency()
-	*/
+	
 	return resp, nil
 }
+
+*/
