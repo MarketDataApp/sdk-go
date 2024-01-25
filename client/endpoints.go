@@ -6,12 +6,13 @@ var endpoints = map[int]map[string]map[string]string{
 			"status": "/v1/markets/status/",
 		},
 		"stocks": {
-			"candles": "/v1/stocks/candles/{resolution}/{symbol}/",
-			"quotes": "/v1/stocks/quotes/{symbol}/",
+			"candles":  "/v1/stocks/candles/{resolution}/{symbol}/",
+			"quotes":   "/v1/stocks/quotes/{symbol}/",
 			"earnings": "/v1/stocks/earnings/{symbol}/",
+			"news":     "/v1/stocks/news/{symbol}/",
 		},
 		"indices": {
-			"quotes": "/v1/indices/quotes/{symbol}/",
+			"quotes":  "/v1/indices/quotes/{symbol}/",
 			"candles": "/v1/indices/candles/{resolution}/{symbol}/",
 		},
 	},

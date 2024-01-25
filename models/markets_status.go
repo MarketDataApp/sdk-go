@@ -35,20 +35,20 @@ func (msr *MarketStatusResponse) String() string {
 }
 
 // String returns a string representation of the MarketStatus.
-func (ms MarketStatusObj) String() string {
+func (ms MarketStatusReport) String() string {
 	return fmt.Sprintf("MarketStatus{Date: %v, Open: %v, Closed: %v}", ms.Date, ms.Open, ms.Closed)
 }
 
 // Unpack unpacks the MarketStatusResponse into a slice of MarketStatus.
-func (msr *MarketStatusResponse) Unpack() ([]MarketStatusObj, error) {
+func (msr *MarketStatusResponse) Unpack() ([]MarketStatusReport, error) {
 	if msr.Status == nil || len(msr.Date) != len(*msr.Status) {
 		return nil, fmt.Errorf("date and status slices are not of the same length")
 	}
 
-	var marketStatuses []MarketStatusObj
+	var marketStatuses []MarketStatusReport
 	for i, date := range msr.Date {
 		status := strings.ToLower((*msr.Status)[i])
-		marketStatus := MarketStatusObj{
+		marketStatus := MarketStatusReport{
 			Date:   time.Unix(date, 0),
 			Open:   status == "open",
 			Closed: status == "closed",
@@ -115,8 +115,8 @@ func (msr *MarketStatusResponse) GetDateRange() (*dates.DateRange, error) {
 	return dr, nil
 }
 
-// MarketStatusObj represents the status of a market.
-type MarketStatusObj struct {
+// MarketStatusReport represents the status of a market.
+type MarketStatusReport struct {
 	Date   time.Time
 	Open   bool
 	Closed bool

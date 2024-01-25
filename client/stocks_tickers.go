@@ -6,7 +6,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // TickersRequest represents a request to the /stocks/tickers endpoint.
@@ -53,17 +52,39 @@ func StockTickers(client ...*MarketDataClient) *TickersRequest {
 	return tr
 }
 
-// GetTickers sends the TickersRequest and returns the TickersResponse along with the MarketDataResponse.
+// Packed sends the TickersRequest and returns the TickersResponse.
 // It returns an error if the request fails.
-func (tr *TickersRequest) Get() (*models.TickersResponse, *resty.Response, error) {
+func (tr *TickersRequest) Packed() (*models.TickersResponse, error) {
 	if tr == nil {
-		return nil, nil, fmt.Errorf("TickersRequest is nil")
+		return nil, fmt.Errorf("TickersRequest is nil")
 	}
 	var trResp models.TickersResponse
-	mdr, err := tr.baseRequest.client.GetFromRequest(tr.baseRequest, &trResp)
+	_, err := tr.baseRequest.client.GetFromRequest(tr.baseRequest, &trResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &trResp, mdr, nil
+	return &trResp, nil
+}
+
+// Get sends the TickersRequest, unpacks the TickersResponse and returns the data.
+// It returns an error if the request or unpacking fails.
+func (tr *TickersRequest) Get() ([]models.Ticker, error) {
+	if tr == nil {
+		return nil, fmt.Errorf("TickersRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	trResp, err := tr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := trResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

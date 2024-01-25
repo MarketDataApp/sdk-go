@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
@@ -45,19 +46,41 @@ func (o *OptionsExpirationsRequest) SetParams(request *resty.Request) error {
 	return parameters.ParseAndSetParams(o, request)
 }
 
-// Get sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse along with the MarketDataResponse.
+// Packed sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse.
 // It returns an error if the request fails.
-func (o *OptionsExpirationsRequest) Get() (*models.OptionsExpirationsResponse, *resty.Response, error) {
+func (o *OptionsExpirationsRequest) Packed() (*models.OptionsExpirationsResponse, error) {
 	if o == nil {
-		return nil, nil, fmt.Errorf("OptionsExpirationsRequest is nil")
+		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
 	var oResp models.OptionsExpirationsResponse
-	mdr, err := o.baseRequest.client.GetFromRequest(o.baseRequest, &oResp)
+	_, err := o.baseRequest.client.GetFromRequest(o.baseRequest, &oResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &oResp, mdr, nil
+	return &oResp, nil
+}
+
+// Get sends the OptionsExpirationsRequest, unpacks the OptionsExpirationsResponse and returns a slice of time.Time.
+// It returns an error if the request or unpacking fails.
+func (o *OptionsExpirationsRequest) Get() ([]time.Time, error) {
+	if o == nil {
+		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
+	}
+
+	// Use the Packed method to make the request
+	oResp, err := o.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := oResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // OptionsExpirations creates a new OptionsExpirationsRequest and associates it with the provided client.

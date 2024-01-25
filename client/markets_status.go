@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // MarketStatusRequest represents a request for market status.
@@ -77,16 +76,39 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 	return msr
 }
 
-// GetMarketStatus sends the MarketStatusRequest and returns the response.
-func (msr *MarketStatusRequest) Get() (*models.MarketStatusResponse, *resty.Response, error) {
+// Packed sends the MarketStatusRequest and returns the response.
+func (msr *MarketStatusRequest) Packed() (*models.MarketStatusResponse, error) {
 	var msrResp models.MarketStatusResponse
-	mdr, err := msr.baseRequest.client.GetFromRequest(msr.baseRequest, &msrResp)
+	_, err := msr.baseRequest.client.GetFromRequest(msr.baseRequest, &msrResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &msrResp, mdr, nil
+	return &msrResp, nil
 }
+
+// Get sends the MarketStatusRequest, unpacks the MarketStatusResponse and returns a MarketStatus.
+// It returns an error if the request or unpacking fails.
+func (msr *MarketStatusRequest) Get() ([]models.MarketStatusReport, error) {
+	if msr == nil {
+		return nil, fmt.Errorf("MarketStatusRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	msrResp, err := msr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := msrResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 
 // New creates a new MarketStatusRequest.
 func MarketStatus(clients ...*MarketDataClient) *MarketStatusRequest {

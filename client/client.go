@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -15,6 +16,8 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 )
+
+var marketDataClient *MarketDataClient
 
 const (
 	Version = "0.0.4"
@@ -42,6 +45,19 @@ type MarketDataClient struct {
 	debug              bool
 }
 
+func (c *MarketDataClient) RateLimitExceeded() bool {
+	if c.RateLimitRemaining > 0 {
+		return false
+	}
+	if c.RateLimitRemaining <= 0 && time.Now().After(c.RateLimitReset) {
+		return false
+	}
+	if c.RateLimitRemaining <= 0 && time.Now().Before(c.RateLimitReset) {
+		return true
+	}
+	return false
+}
+
 func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *resty.Response) {
 	redactedHeaders := redactAuthorizationHeader(req.Header)
 	resHeaders := resp.Header()
@@ -64,7 +80,7 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 		logEntry.PrettyPrint()
 	}
 	if logEntry != nil {
-		go logEntry.WriteToLog(c.debug)
+		logEntry.WriteToLog(c.debug)
 	}
 }
 
@@ -90,8 +106,6 @@ func (c *MarketDataClient) String() string {
 	clientType := c.getEnvironment()
 	return fmt.Sprintf("Client Type: %s, RateLimitLimit: %d, RateLimitRemaining: %d, RateLimitReset: %v", clientType, c.RateLimitLimit, c.RateLimitRemaining, c.RateLimitReset)
 }
-
-var marketDataClient *MarketDataClient
 
 func (c *MarketDataClient) setDefaultResetTime() {
 	// Get current time in Eastern Time Zone
@@ -201,11 +215,20 @@ func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
 	c.RateLimitReset = time.Unix(resetVal, 0)
 }
 
-func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
-	if c.RateLimitRemaining < 0 {
+func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
+
+	if err := br.getError(); err != nil {
+		return nil, err
+	}
+
+	if c.RateLimitExceeded() {
 		return nil, errors.New("rate limit exceeded")
 	}
-	req := br.getResty().SetResult(result)
+
+	req := br.getResty()
+	if result != nil {
+		req = req.SetResult(result)
+	}
 
 	// Parse the parameters from the request
 	paramsSlice, err := br.getParams()
@@ -224,20 +247,39 @@ func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (
 		return nil, err
 	}
 
-	if err := br.getError(); err != nil {
-		return nil, err
-	}
-
 	resp, err := req.Get(path)
 	if err != nil {
 		return resp, err
 	}
 
 	if !resp.IsSuccess() {
+		var result map[string]interface{}
+		_ = json.Unmarshal(resp.Body(), &result)
+		if errMsg, ok := result["errmsg"]; ok {
+			return resp, fmt.Errorf("received non-OK status: %s, error message: %v", resp.Status(), errMsg)
+		}
 		return resp, fmt.Errorf("received non-OK status: %s", resp.Status())
 	}
 
 	return resp, nil
+}
+
+func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
+	resp, err := c.prepareAndExecuteRequest(br, result)
+	if err != nil {
+		return resp, err
+	}
+
+	if resp.Error() != nil {
+		// Handle unmarshalling error
+		return resp, resp.Error().(error)
+	}
+
+	return resp, nil
+}
+
+func (c *MarketDataClient) GetRawResponse(br *baseRequest) (*resty.Response, error) {
+	return c.prepareAndExecuteRequest(br, nil)
 }
 
 func GetClient(token ...string) (*MarketDataClient, error) {

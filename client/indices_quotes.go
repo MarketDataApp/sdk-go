@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // IndexQuoteRequest represents a request to the /indices/quote endpoint.
@@ -45,19 +44,41 @@ func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Get sends the IndexQuoteRequest and returns the IndexQuoteResponse along with the MarketDataResponse.
+// Get sends the IndexQuoteRequest and returns the IndexQuoteResponse.
 // It returns an error if the request fails.
-func (iqr *IndexQuoteRequest) Get() (*models.IndexQuotesResponse, *resty.Response, error) {
+func (iqr *IndexQuoteRequest) Packed() (*models.IndexQuotesResponse, error) {
 	if iqr == nil {
-		return nil, nil, fmt.Errorf("IndexQuoteRequest is nil")
+		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
 	var iqrResp models.IndexQuotesResponse
-	mdr, err := iqr.baseRequest.client.GetFromRequest(iqr.baseRequest, &iqrResp)
+	_, err := iqr.baseRequest.client.GetFromRequest(iqr.baseRequest, &iqrResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &iqrResp, mdr, nil
+	return &iqrResp, nil
+}
+
+// Get sends the IndexQuoteRequest, unpacks the IndexQuotesResponse and returns a slice of IndexQuote.
+// It returns an error if the request or unpacking fails.
+func (iqr *IndexQuoteRequest) Get() ([]models.IndexQuote, error) {
+	if iqr == nil {
+		return nil, fmt.Errorf("IndexQuoteRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	iqrResp, err := iqr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := iqrResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // IndexQuote creates a new IndexQuoteRequest and associates it with the provided client.

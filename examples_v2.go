@@ -12,7 +12,7 @@ import (
 
 func stockCandlesV2Example() {
 
-	sce, _, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Get()
+	sce, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Packed()
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -30,7 +30,7 @@ func stockCandlesV2Example() {
 }
 
 func stocksTickersV2Example() {
-	tickers, _, err := api.StockTickers().DateKey("2023-01-05").Get()
+	tickers, err := api.StockTickers().DateKey("2023-01-05").Packed()
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -42,7 +42,7 @@ func stocksTickersV2Example() {
 func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	// Initialize the markets client
 
-	marketStatusResp, _, err := api.MarketStatus().From(startDate).To(endDate).Get()
+	marketStatusResp, err := api.MarketStatus().From(startDate).To(endDate).Packed()
 	if err != nil {
 		log.Fatalf("Failed to get market status: %v", err)
 	}
@@ -68,13 +68,13 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	tickers := api.StockTickers()
 
 	// Get TickersResponse for each date and combine them into a map
-	tickerMap := make(map[string]md.TickerObj)
+	tickerMap := make(map[string]md.Ticker)
 	for _, date := range openDates {
 		// Convert date to string in the format "YYYY-MM-DD"
 		dateStr := date.Format("2006-01-02")
 
 		// Get the TickersResponse for the date
-		response, _, err := tickers.DateKey(dateStr).Get()
+		response, err := tickers.DateKey(dateStr).Packed()
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	sort.Strings(keys)
 
 	// Create a new map with sorted keys
-	sortedTickerMap := make(map[string]md.TickerObj)
+	sortedTickerMap := make(map[string]md.Ticker)
 	for _, key := range keys {
 		sortedTickerMap[key] = tickerMap[key]
 	}
@@ -125,7 +125,7 @@ func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	dateStr := date.Format("2006-01-02")
 
 	// Get the TickersResponse for the date
-	response, _, err := tickers.DateKey(dateStr).Get()
+	response, err := tickers.DateKey(dateStr).Packed()
 	if err != nil {
 		return err
 	}

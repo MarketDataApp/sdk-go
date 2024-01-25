@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // StockQuoteRequest represents a request to the /stocks/quote endpoint.
@@ -45,19 +44,41 @@ func (sqr *StockQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Get sends the StockQuoteRequest and returns the StockQuoteResponse along with the MarketDataResponse.
+// Packed sends the StockQuoteRequest and returns the StockQuotesResponse.
 // It returns an error if the request fails.
-func (sqr *StockQuoteRequest) Get() (*models.StockQuotesResponse, *resty.Response, error) {
+func (sqr *StockQuoteRequest) Packed() (*models.StockQuotesResponse, error) {
 	if sqr == nil {
-		return nil, nil, fmt.Errorf("StockQuoteRequest is nil")
+		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
 	var sqrResp models.StockQuotesResponse
-	mdr, err := sqr.baseRequest.client.GetFromRequest(sqr.baseRequest, &sqrResp)
+	_, err := sqr.baseRequest.client.GetFromRequest(sqr.baseRequest, &sqrResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &sqrResp, mdr, nil
+	return &sqrResp, nil
+}
+
+// Get sends the StockQuoteRequest, unpacks the StockQuotesResponse and returns the data.
+// It returns an error if the request or unpacking fails.
+func (sqr *StockQuoteRequest) Get() ([]models.StockQuote, error) {
+	if sqr == nil {
+		return nil, fmt.Errorf("StockQuoteRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	sqrResp, err := sqr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := sqrResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // StockQuote creates a new StockQuoteRequest and associates it with the provided client.

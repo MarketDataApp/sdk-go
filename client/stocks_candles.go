@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
@@ -125,19 +124,19 @@ func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error
 	return params, nil
 }
 
-// Get sends the StockCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
+// Packed sends the StockCandlesRequest and returns the CandlesResponse.
 // It returns an error if the request fails.
-func (scr *StockCandlesRequest) Get() (*models.StockCandlesResponse, *resty.Response, error) {
+func (scr *StockCandlesRequest) Packed() (*models.StockCandlesResponse, error) {
 	if scr == nil {
-		return nil, nil, fmt.Errorf("StockCandlesRequest is nil")
+		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
 	var scrResp models.StockCandlesResponse
-	mdr, err := scr.baseRequest.client.GetFromRequest(scr.baseRequest, &scrResp)
+	_, err := scr.baseRequest.client.GetFromRequest(scr.baseRequest, &scrResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &scrResp, mdr, nil
+	return &scrResp, nil
 }
 
 // StockCandles creates a new CandlesRequest and associates it with the provided client.
@@ -158,6 +157,28 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 	baseReq.child = scr
 
 	return scr
+}
+
+// Get sends the StockCandlesRequest, unpacks the StockCandlesResponse and returns a slice of StockCandle.
+// It returns an error if the request or unpacking fails.
+func (scr *StockCandlesRequest) Get() ([]models.StockCandle, error) {
+	if scr == nil {
+		return nil, fmt.Errorf("StockCandlesRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	scrResp, err := scr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := scrResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // StockCandlesRequestV2 represents a request to the /v2/stocks/candles endpoint.
@@ -213,19 +234,19 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 	return params, nil
 }
 
-// GetCandles sends the CandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
+// Packed sends the CandlesRequest and returns the CandlesResponse.
 // It returns an error if the request fails.
-func (cr *StockCandlesRequestV2) Get() (*models.StockCandlesResponse, *resty.Response, error) {
+func (cr *StockCandlesRequestV2) Packed() (*models.StockCandlesResponse, error) {
 	if cr == nil {
-		return nil, nil, fmt.Errorf("StockCandlesRequestV2 is nil")
+		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
 	var crResp models.StockCandlesResponse
-	mdr, err := cr.baseRequest.client.GetFromRequest(cr.baseRequest, &crResp)
+	_, err := cr.baseRequest.client.GetFromRequest(cr.baseRequest, &crResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &crResp, mdr, nil
+	return &crResp, nil
 }
 
 // StockCandles creates a new CandlesRequest and associates it with the provided client.

@@ -47,17 +47,17 @@ func (tr *TickersResponse) String() string {
 	return str.String()
 }
 
-// Unpack converts TickersResponse to a slice of TickerObj.
-func (tr *TickersResponse) Unpack() ([]TickerObj, error) {
+// Unpack converts TickersResponse to a slice of Ticker.
+func (tr *TickersResponse) Unpack() ([]Ticker, error) {
 	if tr == nil || tr.Updated == nil {
 		return nil, fmt.Errorf("TickersResponse or its Updated field is nil")
 	}
-	var tickerInfos []TickerObj
+	var tickerInfos []Ticker
 	for i := range tr.Symbol {
 		if i >= len(tr.Name) || i >= len(tr.Type) || i >= len(tr.Currency) || i >= len(tr.Exchange) || i >= len(tr.FigiShares) || i >= len(tr.FigiComposite) || i >= len(tr.Cik) || (tr.Updated != nil && i >= len(*tr.Updated)) {
 			return nil, fmt.Errorf("index out of range")
 		}
-		tickerInfo := TickerObj{
+		tickerInfo := Ticker{
 			Symbol:        tr.Symbol[i],
 			Name:          tr.Name[i],
 			Type:          tr.Type[i],
@@ -93,13 +93,13 @@ func (tr *TickersResponse) UniqueSymbols() ([]string, error) {
 }
 
 // ToMap converts TickersResponse to a map with the symbol as the key.
-func (tr *TickersResponse) ToMap() (map[string]TickerObj, error) {
+func (tr *TickersResponse) ToMap() (map[string]Ticker, error) {
 	tickerInfos, err := tr.Unpack()
 	if err != nil {
 		return nil, err
 	}
 
-	tickerMap := make(map[string]TickerObj)
+	tickerMap := make(map[string]Ticker)
 	for _, tickerInfo := range tickerInfos {
 		tickerMap[tickerInfo.Symbol] = tickerInfo
 	}
@@ -132,8 +132,8 @@ func (tr *TickersResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o)
 }
 
-// TickerObj represents the information of a ticker.
-type TickerObj struct {
+// Ticker represents the information of a ticker.
+type Ticker struct {
 	Symbol        string
 	Name          string
 	Type          string
@@ -145,17 +145,17 @@ type TickerObj struct {
 	Updated       *time.Time
 }
 
-// String returns a string representation of TickerObj.
-func (ti *TickerObj) String() string {
+// String returns a string representation of Ticker.
+func (ti *Ticker) String() string {
 	updated := ""
 	if ti.Updated != nil {
 		updated = ti.Updated.String()
 	}
-	return fmt.Sprintf("TickerObj{Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s, Updated: %s}", ti.Symbol, ti.Name, ti.Type, ti.Currency, ti.Exchange, ti.FigiShares, ti.FigiComposite, ti.Cik, updated)
+	return fmt.Sprintf("Ticker{Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s, Updated: %s}", ti.Symbol, ti.Name, ti.Type, ti.Currency, ti.Exchange, ti.FigiShares, ti.FigiComposite, ti.Cik, updated)
 }
 
-// MapToTickersResponse converts a map of TickerObj to a TickersResponse.
-func MapToTickersResponse(tickerMap map[string]TickerObj) *TickersResponse {
+// MapToTickersResponse converts a map of Ticker to a TickersResponse.
+func MapToTickersResponse(tickerMap map[string]Ticker) *TickersResponse {
 	var tr TickersResponse
 	tr.Updated = new([]int64) // Initialize tr.Updated
 	keys := make([]string, 0, len(tickerMap))
@@ -184,7 +184,7 @@ func MapToTickersResponse(tickerMap map[string]TickerObj) *TickersResponse {
 }
 
 // SaveToCSV saves the ticker map to a CSV file.
-func SaveToCSV(tickerMap map[string]TickerObj, filename string) error {
+func SaveToCSV(tickerMap map[string]Ticker, filename string) error {
 	if tickerMap == nil {
 		return fmt.Errorf("tickerMap is nil")
 	}
@@ -219,8 +219,8 @@ func SaveToCSV(tickerMap map[string]TickerObj, filename string) error {
 }
 
 // CombineTickerResponses combines multiple TickersResponses into a single map.
-func CombineTickerResponses(responses []*TickersResponse) (map[string]TickerObj, error) {
-	tickerMap := make(map[string]TickerObj)
+func CombineTickerResponses(responses []*TickersResponse) (map[string]Ticker, error) {
+	tickerMap := make(map[string]Ticker)
 	var mutex sync.Mutex
 
 	var wg sync.WaitGroup

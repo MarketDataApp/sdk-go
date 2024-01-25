@@ -16,9 +16,15 @@ func main() {
 
 	client.Debug(false)
 
+	fmt.Println("Staring StockNews example...")
+	stockNewsExample()
+
+
+	/*
+
+
 	fmt.Println("Staring log example...")
 	logExample()
-	/*
 
 	fmt.Println("Starting index quote request...")
 	indexQuoteExample()
@@ -38,6 +44,9 @@ func main() {
 
 	//fmt.Println("Starting market status request...")
 	//marketstatusExample()
+
+	fmt.Println("Staring rawResponse example...")
+	rawHttpResponseExample()
 
 	*/
 }

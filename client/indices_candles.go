@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // IndicesCandlesRequest represents a request to the /v1/indices/candles endpoint.
@@ -85,19 +84,41 @@ func (icr *IndicesCandlesRequest) getParams() ([]parameters.MarketDataParam, err
 	return params, nil
 }
 
-// Get sends the IndicesCandlesRequest and returns the CandlesResponse along with the MarketDataResponse.
+// Get sends the IndicesCandlesRequest and returns the CandlesResponse.
 // It returns an error if the request fails.
-func (icr *IndicesCandlesRequest) Get() (*models.IndicesCandlesResponse, *resty.Response, error) {
+func (icr *IndicesCandlesRequest) Packed() (*models.IndicesCandlesResponse, error) {
 	if icr == nil {
-		return nil, nil, fmt.Errorf("IndicesCandlesRequest is nil")
+		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
 	var icrResp models.IndicesCandlesResponse
-	mdr, err := icr.baseRequest.client.GetFromRequest(icr.baseRequest, &icrResp)
+	_, err := icr.baseRequest.client.GetFromRequest(icr.baseRequest, &icrResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &icrResp, mdr, nil
+	return &icrResp, nil
+}
+
+// Get sends the IndicesCandlesRequest, unpacks the IndicesCandlesResponse and returns a slice of IndexCandle.
+// It returns an error if the request or unpacking fails.
+func (icr *IndicesCandlesRequest) Get() ([]models.IndexCandle, error) {
+	if icr == nil {
+		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	icrResp, err := icr.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := icrResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // IndexCandles creates a new CandlesRequest and associates it with the provided client.

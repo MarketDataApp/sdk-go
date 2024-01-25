@@ -3,8 +3,8 @@ package client
 import (
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
+	"github.com/go-resty/resty/v2"
 )
 
 type MarketDataPacked interface {
@@ -68,6 +68,14 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 
 	if sqr, ok := br.child.(*StockQuoteRequest); ok {
 		params, err := sqr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if snr, ok := br.child.(*StockNewsRequest); ok {
+		params, err := snr.getParams()
 		if err != nil {
 			return nil, err
 		}
@@ -148,4 +156,13 @@ func newBaseRequest(clients ...*MarketDataClient) *baseRequest {
 // getError returns the error of the BaseRequest.
 func (br *baseRequest) getError() error {
 	return br.Error
+}
+
+// Raw executes the request and returns the raw resty.Response.
+func (br *baseRequest) Raw() (*resty.Response, error) {
+	if br == nil || br.client == nil {
+		return nil, fmt.Errorf("baseRequest or MarketDataClient is nil")
+	}
+	response, err := br.client.GetRawResponse(br)
+	return response, err
 }

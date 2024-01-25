@@ -5,7 +5,6 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
-	"github.com/go-resty/resty/v2"
 )
 
 // StockQuoteRequest represents a request to the /stocks/quote endpoint.
@@ -85,19 +84,41 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 	return params, nil
 }
 
-// Get sends the StockEarningsRequest and returns the StockEarningsResponse along with the MarketDataResponse.
+// Packed sends the StockEarningsRequest and returns the StockEarningsResponse.
 // It returns an error if the request fails.
-func (ser *StockEarningsRequest) Get() (*models.StockEarningsResponse, *resty.Response, error) {
+func (ser *StockEarningsRequest) Packed() (*models.StockEarningsResponse, error) {
 	if ser == nil {
-		return nil, nil, fmt.Errorf("StockEarningsRequest is nil")
+		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
 	var serResp models.StockEarningsResponse
-	mdr, err := ser.baseRequest.client.GetFromRequest(ser.baseRequest, &serResp)
+	_, err := ser.baseRequest.client.GetFromRequest(ser.baseRequest, &serResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &serResp, mdr, nil
+	return &serResp, nil
+}
+
+// Get sends the StockEarningsRequest, unpacks the StockEarningsResponse and returns the data.
+// It returns an error if the request or unpacking fails.
+func (ser *StockEarningsRequest) Get() ([]models.StockEarningsReport, error) {
+	if ser == nil {
+		return nil, fmt.Errorf("StockEarningsRequest is nil")
+	}
+	
+	// Use the Packed method to make the request
+	serResp, err := ser.Packed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Unpack the data using the Unpack method in the response
+	data, err := serResp.Unpack()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // StockEarnings creates a new StockEarningsRequest and associates it with the provided client.
