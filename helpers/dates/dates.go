@@ -1,3 +1,7 @@
+// Package dates provides utilities for parsing, formatting, and manipulating dates and times.
+// It includes functions to parse dates with or without time zones, handle date ranges,
+// and convert dates to various formats. It also defines constants for different time precisions
+// and initializes default time zones and date formats.
 package dates
 
 import (

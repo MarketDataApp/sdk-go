@@ -1,3 +1,8 @@
+// Package logging provides a structured logging solution for the application.
+// It supports logging at different levels (success, client error, server error) and formats logs in JSON.
+// The package includes functionality to manage log files, colorize output for better readability,
+// and maintain an in-memory log of HTTP requests with utilities for adding, trimming, and printing log entries.
+// It utilizes the zap logging library for efficient, structured logging and the fatih/color library for colored output.
 package logging
 
 import (
@@ -32,10 +37,23 @@ var (
 
 )
 
+// HttpRequestLogs represents a collection of HTTP request logs.
+// It provides methods to manipulate and retrieve log entries.
+//
+// Public Methods:
+// - String() string: Returns a string representation of all HTTP request logs.
+// - PrintLatest(): Prints the latest HTTP request log entry.
 type HttpRequestLogs struct {
 	Logs []HttpRequestLog
 }
 
+// HttpRequestLog represents a single HTTP request log entry.
+// It includes detailed information about the request and response, such as headers, status code, and response body.
+//
+// Public Methods:
+// - WriteToLog(debug bool): Writes the log entry to the appropriate logger based on the HTTP response status.
+// - String() string: Returns a string representation of the HTTP request log entry.
+// - PrettyPrint(): Prints a formatted representation of the HTTP request log entry.
 type HttpRequestLog struct {
 	Timestamp         time.Time
 	ReqHeaders        http.Header // The Request Headers
@@ -49,6 +67,9 @@ type HttpRequestLog struct {
 	memory            int64       // The amount of memory (in bytes) used by the log entry
 }
 
+// WriteToLog writes the log entry to the appropriate logger based on the HTTP response status.
+// Parameters:
+// - debug: A boolean indicating whether to log as a debug message.
 func (h HttpRequestLog) WriteToLog(debug bool) {
 	var logger *zap.Logger
 	var logMessage string
@@ -93,11 +114,15 @@ func (h HttpRequestLog) WriteToLog(debug bool) {
 	}
 }
 
+// String returns a string representation of the HTTP request log entry.
+// Returns:
+// - A string representing the log entry.
 func (h HttpRequestLog) String() string {
 	return fmt.Sprintf("Timestamp: %v, Status: %d, Request: %s, Request Headers: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s",
 		h.Timestamp.Format("2006-01-02 15:04:05"), h.Status, h.Request, h.ReqHeaders, h.RayID, h.RateLimitConsumed, h.Delay, h.ResHeaders, h.Response)
 }
 
+// PrettyPrint prints a formatted representation of the HTTP request log entry.
 func (h HttpRequestLog) PrettyPrint() {
 	fmt.Println(blue("Timestamp:"), h.Timestamp.Format("2006-01-02 15:04:05"))
 	fmt.Println(blue("Request:"), h.Request)
@@ -112,6 +137,9 @@ func (h HttpRequestLog) PrettyPrint() {
 	fmt.Println(blue("Response:"), h.Response)
 }
 
+// printHeaders prints the HTTP headers in a formatted manner. Headers starting with "X-Api-Ratelimit" are highlighted.
+// Parameters:
+// - headers: The HTTP headers to be printed.
 func (h HttpRequestLog) printHeaders(headers http.Header) {
 	keys := make([]string, 0, len(headers))
 	for name := range headers {
@@ -129,6 +157,9 @@ func (h HttpRequestLog) printHeaders(headers http.Header) {
 	}
 }
 
+// memoryUsage calculates the memory usage of the log entry.
+// Returns:
+// - An integer representing the memory usage of the log entry in bytes.
 func (h HttpRequestLog) memoryUsage() int {
 	// Size of time.Time (24 bytes)
 	timestampSize := 24
@@ -155,6 +186,11 @@ func (h HttpRequestLog) memoryUsage() int {
 	return totalSize
 }
 
+// headerSize calculates the memory usage of HTTP headers.
+// Parameters:
+// - header: The HTTP headers for which the memory usage is calculated.
+// Returns:
+// - An integer representing the memory usage of the headers in bytes.
 func (h HttpRequestLog) headerSize(header http.Header) int {
 	size := 0
 	for key, values := range header {
@@ -186,6 +222,9 @@ func NewHttpRequestLog(timestamp time.Time, rayID string, request string, rateLi
 	return log
 }
 
+// totalMemoryUsage calculates the total memory usage of all log entries.
+// Returns:
+// - An int64 representing the total memory usage of all log entries in bytes.
 func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 	total := int64(0)
 	for _, log := range h.Logs {
@@ -194,6 +233,9 @@ func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 	return total
 }
 
+// String returns a string representation of all HTTP request logs.
+// Returns:
+// - A string representing all log entries.
 func (h *HttpRequestLogs) String() string {
 	var sb strings.Builder
 	for _, log := range h.Logs {
@@ -203,6 +245,7 @@ func (h *HttpRequestLogs) String() string {
 	return sb.String()
 }
 
+// PrintLatest prints the latest HTTP request log entry.
 func (h *HttpRequestLogs) PrintLatest() {
 	if len(h.Logs) == 0 {
 		fmt.Println("No logs available")
@@ -212,6 +255,26 @@ func (h *HttpRequestLogs) PrintLatest() {
 	}
 }
 
+// AddToLog adds a new HTTP request log entry to the HttpRequestLogs.
+//
+// This method creates a new HttpRequestLog entry based on the provided parameters and appends it to the HttpRequestLogs.
+// If the request URL starts with "https://api.marketdata.app/user/", the log entry is not added, and the method returns nil.
+// After adding a new log entry, it trims the log to ensure the total memory usage and the number of log entries are below their limits.
+//
+// Parameters:
+// - h *HttpRequestLogs: A pointer to the HttpRequestLogs to which the new log entry will be added.
+// - timestamp time.Time: The timestamp of the HTTP request.
+// - rayID string: The unique identifier for the request.
+// - request string: The URL of the HTTP request.
+// - rateLimitConsumed int: The amount of rate limit consumed by the request.
+// - delay int64: The delay experienced during the request, in milliseconds.
+// - status int: The HTTP status code of the response.
+// - body string: The body of the HTTP response.
+// - reqHeaders http.Header: The HTTP headers of the request.
+// - resHeaders http.Header: The HTTP headers of the response.
+//
+// Returns:
+// - *HttpRequestLog: A pointer to the newly added HttpRequestLog entry. Returns nil if the log entry is not added.
 func AddToLog(h *HttpRequestLogs, timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) *HttpRequestLog {
 	if request == "https://api.marketdata.app/user/" {
 		// If the URL starts with https://api.marketdata.app/user/ do not add it to the log.
@@ -230,13 +293,26 @@ func AddToLog(h *HttpRequestLogs, timestamp time.Time, rayID string, request str
 	return &h.Logs[len(h.Logs)-1]
 }
 
+// trimLog trims the HttpRequestLogs to ensure that the total memory usage and the number of log entries do not exceed their respective limits.
+// It iteratively removes the oldest log entry until the memory usage is below the MemoryLimit and the number of entries is less than or equal to MaxLogEntries.
 func (h *HttpRequestLogs) trimLog() {
 	// While the total memory usage is above the limit or there are too many log entries, remove the oldest log entry
 	for (h.totalMemoryUsage() > MemoryLimit || len(h.Logs) > MaxLogEntries) && len(h.Logs) > 0 {
 		h.Logs = h.Logs[1:]
 	}
 }
-
+// init initializes the logging system for the application.
+//
+// This function performs the following operations:
+// - Initializes the Logs variable with an empty HttpRequestLogs.
+// - Checks if the logs directory exists, and creates it if it does not.
+// - Opens or creates the success, client error, and server error log files.
+// - Sets up a zapcore.Core for each log file to enable structured logging.
+//
+// The log files are named success.log, client_error.log, and server_error.log respectively.
+// Each log file is opened with append mode, so new log entries are added to the end of the file.
+// The logging level for all log files is set to InfoLevel, and the logs are encoded in JSON format.
+// The time encoding for log entries is set to ISO8601 format.
 func init() {
 	// Initialize the Logs variable
 	Logs = &HttpRequestLogs{

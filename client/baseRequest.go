@@ -114,6 +114,38 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 		return params, nil
 	}
 
+	if olr, ok := br.child.(*OptionLookupRequest); ok {
+		params, err := olr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if osr, ok := br.child.(*OptionsStrikesRequest); ok {
+		params, err := osr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if oqr, ok := br.child.(*OptionQuoteRequest); ok {
+		params, err := oqr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if ocr, ok := br.child.(*OptionChainRequest); ok {
+		params, err := ocr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
 	return []parameters.MarketDataParam{}, nil
 }
 

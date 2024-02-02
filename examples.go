@@ -7,7 +7,7 @@ import (
 )
 
 func rawHttpResponseExample() {
-	resp, err := api.StockQuotes().Symbol("AAPL").Raw()
+	resp, err := api.StockQuote().Symbol("AAPL").Raw()
 	if err != nil {
 		fmt.Print(err)
 		return

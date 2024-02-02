@@ -31,11 +31,11 @@ import md "github.com/MarketDataApp/sdk-go/client"
  | Stocks            | Earnings     | ✅        |           |
  | Stocks            | Tickers      | ❌        |     ✅    |
  | Stocks            | News         | ✅        |     ❌    |
- | Options           | Expirations  | ❌        |           |
- | Options           | Lookup       | ❌        |           |
- | Options           | Strikes      | ❌        |           |
- | Options           | Option Chain | ❌        |           |
- | Options           | Quotes       | ❌        |           |
+ | Options           | Expirations  | ✅        |           |
+ | Options           | Lookup       | ✅        |           |
+ | Options           | Strikes      | ✅        |           |
+ | Options           | Option Chain | ✅        |           |
+ | Options           | Quotes       | ✅        |           |
  | Indices           | Candles      | ✅        |           |
  | Indices           | Quotes       | ✅        |           |
 

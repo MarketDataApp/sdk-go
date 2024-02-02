@@ -33,13 +33,16 @@ func (oer *OptionsExpirationsResponse) String() string {
 
 func (oer *OptionsExpirationsResponse) Unpack() ([]time.Time, error) {
 	expirations := make([]time.Time, len(oer.Expirations))
-	loc, _ := time.LoadLocation("America/New_York")
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return nil, err
+	}
 	for i, exp := range oer.Expirations {
 		t, err := dates.ToTime(exp, loc)
 		if err != nil {
 			return nil, err
 		}
-		t = t.Add(time.Duration(16) * time.Hour) // Adding 16 hours to the time after parsing
+		t = t.Add(time.Duration(16) * time.Hour) // Adding 16 hours to the time after parsing. Options expire 4:00 PM Eastern Time.
 		expirations[i] = t
 	}
 	return expirations, nil

@@ -14,33 +14,11 @@ func main() {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(false)
-
-	fmt.Println("Staring StockNews example...")
-	stockNewsExample()
-
-
-	/*
-
+	client.Debug(true)
+/*
 
 	fmt.Println("Staring log example...")
 	logExample()
-
-	fmt.Println("Starting index quote request...")
-	indexQuoteExample()
-
-
-	fmt.Println("Starting stock earnings request...")
-	stockEarningsExample()
-
-	fmt.Println("Starting stock quote request...")
-	stockQuoteExample()
-
-	fmt.Println("Starting index candles request...")
-	indexCandlesExample()
-
-	fmt.Println("Starting stock candles request...")
-	stockCandlesExample()
 
 	//fmt.Println("Starting market status request...")
 	//marketstatusExample()
@@ -49,4 +27,46 @@ func main() {
 	rawHttpResponseExample()
 
 	*/
+}
+
+func optionsExamples() {
+	fmt.Println("Staring Options/Chain example...")
+	optionsChainExample()
+	
+	fmt.Println("Staring Options/Strikes example...")
+	optionsStrikesExample()
+
+	fmt.Println("Staring Options/Quotes example...")
+	optionsQuotesExample()
+
+	fmt.Println("Staring Options/Lookup example...")
+	optionsLookupExample()
+
+	fmt.Println("Staring Options/Expirations example...")
+	optionsExpirationsExample()
+
+}
+
+func stocksExamples() {
+	fmt.Println("Staring Stocks/News example...")
+	stockNewsExample()
+
+	fmt.Println("Starting stock earnings request...")
+	stockEarningsExample()
+
+	fmt.Println("Starting stock quote request...")
+	stockQuoteExample()
+
+	fmt.Println("Starting stock candles request...")
+	stockCandlesExample()
+
+}
+
+func indexExamples() {
+	fmt.Println("Starting index quote request...")
+	indexQuoteExample()
+
+	fmt.Println("Starting index candles request...")
+	indexCandlesExample()
+
 }

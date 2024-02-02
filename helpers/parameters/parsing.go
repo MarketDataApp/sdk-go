@@ -1,3 +1,7 @@
+// Package parameters defines structures and functions for handling request parameters across various API endpoints.
+// It includes types for universal parameters, specific request types like stock quotes, options, and user inputs,
+// and utilities for parsing and setting these parameters in API requests. The package leverages reflection
+// for dynamic parameter parsing and validation, ensuring that API requests are constructed correctly.
 package parameters
 
 import (
@@ -7,64 +11,66 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/MarketDataApp/sdk-go/helpers/types" // Ensure you import the package where IsZeroValue is defined
 )
 
 type MarketDataParam interface {
 	SetParams(*resty.Request) error
 }
 
-// ParseAndSetParams takes a struct and a Resty request, parses the struct into path and query parameters, and sets them to the request.
-// It returns an error if a required parameter has a zero value.
 func ParseAndSetParams(params MarketDataParam, request *resty.Request) error {
-	if params == nil {
-		return errors.New("params cannot be nil")
-	}
-	kind := reflect.TypeOf(params).Kind()
-	if kind != reflect.Struct && kind != reflect.Ptr {
-		return fmt.Errorf("params must be a struct or a pointer to a struct, got %v", kind)
-	}
-	v := reflect.ValueOf(params)
+    if params == nil {
+        return errors.New("params cannot be nil")
+    }
+    kind := reflect.TypeOf(params).Kind()
+    if kind != reflect.Struct && kind != reflect.Ptr {
+        return fmt.Errorf("params must be a struct or a pointer to a struct, got %v", kind)
+    }
+    v := reflect.ValueOf(params)
 
-	// Check if the params is a pointer and dereference it
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
+    if v.Kind() == reflect.Ptr {
+        v = v.Elem()
+    }
 
-	// Check if the dereferenced value is a struct
-	if v.Kind() != reflect.Struct {
-		return fmt.Errorf("dereferenced value of params must be a struct, got %v", v.Kind())
-	}
+    if v.Kind() != reflect.Struct {
+        return fmt.Errorf("dereferenced value of params must be a struct, got %v", v.Kind())
+    }
 
-	t := v.Type()
+    t := v.Type()
 
-	// Iterate over the fields of the struct.
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i)
+    for i := 0; i < t.NumField(); i++ {
+        field := t.Field(i)
+        value := v.Field(i)
+        tag := field.Tag
 
-		// Get the field tag value.
-		tag := field.Tag
+        // Skip setting the parameter if it's not required and has a zero value.
+        if !strings.Contains(tag.Get("path"), "required") && !strings.Contains(tag.Get("query"), "required") && types.IsZeroValue(value.Interface()) {
+            continue
+        }
 
-		// Check if the field is required and has a zero value.
-		if (strings.Contains(tag.Get("path"), "required") || strings.Contains(tag.Get("query"), "required")) && value.IsZero() {
-			return fmt.Errorf("required parameter %s has a zero value", field.Name)
-		}
+        // Prepare the value for setting, handling pointers correctly.
+        var valueInterface interface{}
+        if value.Kind() == reflect.Ptr {
+            if value.IsNil() {
+                // Skip nil pointers unless they are required.
+                continue
+            }
+            valueInterface = reflect.Indirect(value).Interface()
+        } else {
+            if types.IsZeroValue(value.Interface()) {
+                // Skip zero values unless they are required.
+                continue
+            }
+            valueInterface = value.Interface()
+        }
 
-		// Set the field to the appropriate part of the request if it is not a zero value.
-		if !value.IsZero() {
-			var valueInterface interface{}
-			if value.Kind() == reflect.Ptr && !value.IsNil() {
-				valueInterface = reflect.Indirect(value).Interface()
-			} else {
-				valueInterface = value.Interface()
-			}
-			if pathTag := tag.Get("path"); pathTag != "" {
-				request.SetPathParam(pathTag, fmt.Sprint(valueInterface))
-			} else if queryTag := tag.Get("query"); queryTag != "" {
-				request.SetQueryParam(queryTag, fmt.Sprint(valueInterface))
-			}
-		}
-	}
+        // Set the field to the appropriate part of the request.
+        if pathTag := tag.Get("path"); pathTag != "" {
+            request.SetPathParam(pathTag, fmt.Sprint(valueInterface))
+        } else if queryTag := tag.Get("query"); queryTag != "" {
+            request.SetQueryParam(queryTag, fmt.Sprint(valueInterface))
+        }
+    }
 
-	return nil
+    return nil
 }

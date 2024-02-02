@@ -7,7 +7,7 @@ import (
 )
 
 func stockQuoteExample() {
-	sqe, err := api.StockQuotes().Symbol("AAPL").FiftyTwoWeek(true).Packed()
+	sqe, err := api.StockQuote().Symbol("AAPL").FiftyTwoWeek(true).Packed()
 	if err != nil {
 		fmt.Print(err)
 		return
