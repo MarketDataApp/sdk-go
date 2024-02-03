@@ -1,9 +1,4 @@
-// Package logging provides a structured logging solution for the application.
-// It supports logging at different levels (success, client error, server error) and formats logs in JSON.
-// The package includes functionality to manage log files, colorize output for better readability,
-// and maintain an in-memory log of HTTP requests with utilities for adding, trimming, and printing log entries.
-// It utilizes the zap logging library for efficient, structured logging and the fatih/color library for colored output.
-package logging
+package client
 
 import (
 	"encoding/json"
@@ -243,6 +238,28 @@ func (h *HttpRequestLogs) String() string {
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+// GetLastLogResponse returns the response of the last log entry in the HttpRequestLogs.
+//
+// This method checks if there are any logs present. If there are no logs, it returns a message indicating that no logs are available.
+// If logs are present, it calculates the index of the last log entry, accesses it, and returns its response.
+//
+// Returns:
+// - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
+func (h *HttpRequestLogs) GetLastLogResponse() string {
+    // Step 2: Check if there are no logs
+    if len(h.Logs) == 0 {
+        // Return an appropriate response for no logs
+        return "No logs available"
+    }
+
+    // Step 3: Calculate the index of the last log entry and access it
+    lastLogIndex := len(h.Logs) - 1
+    lastLog := h.Logs[lastLogIndex]
+
+    // Step 4: Return the Response of the last log entry
+    return lastLog.Response
 }
 
 // PrintLatest prints the latest HTTP request log entry.

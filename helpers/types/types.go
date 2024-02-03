@@ -66,7 +66,11 @@ func IsZeroValue(i interface{}) bool {
 		return IsZeroValue(elem.Interface())
 	case reflect.Slice, reflect.Map, reflect.Interface, reflect.Chan:
 		// For slices, maps, interfaces, and channels, check if they are nil.
-		return v.IsNil()
+		if v.IsNil() {
+			return true
+		}
+		// Additionally, for slices and maps, check if they are non-nil but empty.
+		return v.Len() == 0
 	case reflect.Struct:
 		// Check if the struct has an IsZero method.
         if method := v.MethodByName("IsZero"); method.IsValid() {

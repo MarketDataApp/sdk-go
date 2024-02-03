@@ -49,9 +49,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MarketDataApp/sdk-go/helpers/logging"
 	"github.com/go-resty/resty/v2"
-
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -150,7 +148,7 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 	body := string(resp.Body())
 
 	// Create a new log entry with the gathered information.
-	logEntry := logging.AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
+	logEntry := AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
 	// If debug mode is enabled and the log entry is not nil, pretty print the log entry.
 	if c.debug && logEntry != nil {
 		logEntry.PrettyPrint()
@@ -366,11 +364,10 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 		_ = json.Unmarshal(resp.Body(), &result) // Attempt to unmarshal the response body into a map.
 		if errMsg, ok := result["errmsg"]; ok {
 			// Return an error with the non-OK status and the error message from the response.
-			return resp, fmt.Errorf("received non-OK status: %s, error message: %v", resp.Status(), errMsg)
+			return resp, fmt.Errorf("received non-OK status: %s, error message: %v, URL: %s", resp.Status(), errMsg, resp.Request.URL)
 		}
 		// Return an error with the non-OK status if no specific error message is found in the response.
-		return resp, fmt.Errorf("received non-OK status: %s", resp.Status())
-	}
+		return resp, fmt.Errorf("received non-OK status: %s for URL: %s", resp.Status(), resp.Request.URL)	}
 
 	return resp, nil
 }
@@ -527,6 +524,6 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 
 // GetLogs returns a pointer to the HttpRequestLogs instance.
 // This function is useful for accessing the logs that have been collected during HTTP requests.
-func GetLogs() *logging.HttpRequestLogs {
-	return logging.Logs
+func GetLogs() *HttpRequestLogs {
+	return Logs
 }
