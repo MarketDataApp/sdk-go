@@ -191,10 +191,22 @@ func (br *baseRequest) getError() error {
 }
 
 // Raw executes the request and returns the raw resty.Response.
-func (br *baseRequest) Raw() (*resty.Response, error) {
-	if br == nil || br.client == nil {
-		return nil, fmt.Errorf("baseRequest or MarketDataClient is nil")
+// An optional MarketDataClient can be passed to replace the client used in the request.
+func (br *baseRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	if br == nil {
+		return nil, fmt.Errorf("baseRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		br.client = optionalClients[0]
+	}
+
+	// Check if the client is nil after potentially replacing it
+	if br.client == nil {
+		return nil, fmt.Errorf("MarketDataClient is nil")
+	}
+
 	response, err := br.client.GetRawResponse(br)
 	return response, err
 }

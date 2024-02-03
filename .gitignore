@@ -32,3 +32,5 @@ sdk-go
 # Log files & Log Directory
 *.log
 logs/
+
+.DS_Store
