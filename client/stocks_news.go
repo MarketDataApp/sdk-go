@@ -129,16 +129,23 @@ func (snr *StockNewsRequest) getParams() ([]parameters.MarketDataParam, error) {
 }
 
 // Packed sends the StockNewsRequest and returns the StockNewsResponse.
-// This method checks if the StockNewsRequest receiver is nil, returning an error if true.
-// Otherwise, it proceeds to send the request and returns the StockNewsResponse along with any error encountered during the request.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (snr *StockNewsRequest) Packed() (*models.StockNewsResponse, error) {
+func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockNewsResponse, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		snr.baseRequest.client = optionalClients[0]
+	}
+
 	var snrResp models.StockNewsResponse
 	_, err := snr.baseRequest.client.GetFromRequest(snr.baseRequest, &snrResp)
 	if err != nil {
@@ -149,21 +156,21 @@ func (snr *StockNewsRequest) Packed() (*models.StockNewsResponse, error) {
 }
 
 // Get sends the StockNewsRequest, unpacks the StockNewsResponse, and returns a slice of StockNews.
-// It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual stock news data
-// from the stock news request. The method first checks if the StockNewsRequest receiver is nil, which would
-// result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
-// Upon receiving the response, it unpacks the data into a slice of StockNews using the Unpack method from the response.
-//
+// It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (snr *StockNewsRequest) Get() ([]models.StockNews, error) {
+func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockNews, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
-
-	// Use the Packed method to make the request
-	snrResp, err := snr.Packed()
+	
+	// Use the Packed method to make the request, passing along any optional client
+	snrResp, err := snr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

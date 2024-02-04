@@ -46,15 +46,24 @@ func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Packed sends the OptionsLookupRequest and returns the OptionsLookupResponse.
-// It returns an error if the request fails.
+// Packed sends the OptionLookupRequest and returns the OptionsLookupResponse.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.OptionsLookupResponse: A pointer to the OptionsLookupResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (o *OptionLookupRequest) Packed() (*models.OptionLookupResponse, error) {
+func (o *OptionLookupRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionLookupResponse, error) {
 	if o == nil {
-		return nil, fmt.Errorf("OptionLookupRequest is nil")
+		return nil, fmt.Errorf("OptionsLookupRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		o.baseRequest.client = optionalClients[0]
+	}
+
 	var oResp models.OptionLookupResponse
 	_, err := o.baseRequest.client.GetFromRequest(o.baseRequest, &oResp)
 	if err != nil {
@@ -64,17 +73,22 @@ func (o *OptionLookupRequest) Packed() (*models.OptionLookupResponse, error) {
 	return &oResp, nil
 }
 
-// Get sends the OptionsLookupRequest, unpacks the OptionsLookupResponse, and returns the unpacked data as a string.
+// Get sends the OptionLookupRequest, unpacks the OptionsLookupResponse, and returns the unpacked data as a string.
 // It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - string: A string containing the unpacked options data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (o *OptionLookupRequest) Get() (string, error) {
+func (o *OptionLookupRequest) Get(optionalClients ...*MarketDataClient) (string, error) {
 	if o == nil {
-		return "", fmt.Errorf("OptionLookupRequest is nil")
+		return "", fmt.Errorf("OptionsLookupRequest is nil")
 	}
-
-	oResp, err := o.Packed()
+	
+	// Use the Packed method to make the request, passing along any optional client
+	oResp, err := o.Packed(optionalClients...)
 	if err != nil {
 		return "", err
 	}

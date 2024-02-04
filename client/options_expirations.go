@@ -64,14 +64,23 @@ func (o *OptionsExpirationsRequest) getParams() ([]parameters.MarketDataParam, e
 }
 
 // Packed sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse.
-// It returns an error if the request fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.OptionsExpirationsResponse: A pointer to the OptionsExpirationsResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (o *OptionsExpirationsRequest) Packed() (*models.OptionsExpirationsResponse, error) {
+func (o *OptionsExpirationsRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionsExpirationsResponse, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		o.baseRequest.client = optionalClients[0]
+	}
+
 	var oResp models.OptionsExpirationsResponse
 	_, err := o.baseRequest.client.GetFromRequest(o.baseRequest, &oResp)
 	if err != nil {
@@ -83,16 +92,20 @@ func (o *OptionsExpirationsRequest) Packed() (*models.OptionsExpirationsResponse
 
 // Get sends the OptionsExpirationsRequest, unpacks the OptionsExpirationsResponse, and returns a slice of time.Time.
 // It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []time.Time: A slice of time.Time containing the unpacked options expirations data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (o *OptionsExpirationsRequest) Get() ([]time.Time, error) {
+func (o *OptionsExpirationsRequest) Get(optionalClients ...*MarketDataClient) ([]time.Time, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
-
-	// Use the Packed method to make the request
-	oResp, err := o.Packed()
+	
+	// Use the Packed method to make the request, passing along any optional client
+	oResp, err := o.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

@@ -105,15 +105,24 @@ func (oqr *OptionQuoteRequest) getParams() ([]parameters.MarketDataParam, error)
 	return params, nil
 }
 
-// Packed sends the OptionQuotesRequest and returns the OptionQuotesResponse.
-// It returns an error if the request fails.
+// Packed sends the OptionQuoteRequest and returns the OptionQuotesResponse.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (oqr *OptionQuoteRequest) Packed() (*models.OptionQuotesResponse, error) {
+func (oqr *OptionQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionQuotesResponse, error) {
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		oqr.baseRequest.client = optionalClients[0]
+	}
+
 	var oqrResp models.OptionQuotesResponse
 	_, err := oqr.baseRequest.client.GetFromRequest(oqr.baseRequest, &oqrResp)
 	if err != nil {
@@ -123,18 +132,22 @@ func (oqr *OptionQuoteRequest) Packed() (*models.OptionQuotesResponse, error) {
 	return &oqrResp, nil
 }
 
-// Get sends the OptionQuotesRequest, unpacks the OptionQuotesResponse, and returns a slice of OptionQuote.
+// Get sends the OptionQuoteRequest, unpacks the OptionQuotesResponse, and returns a slice of OptionQuote.
 // It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.OptionQuote: A slice of OptionQuote containing the unpacked options quotes data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (oqr *OptionQuoteRequest) Get() ([]models.OptionQuote, error) {
+func (oqr *OptionQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]models.OptionQuote, error) {
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
-
-	// Use the Packed method to make the request
-	oqrResp, err := oqr.Packed()
+	
+	// Use the Packed method to make the request, passing along any optional client
+	oqrResp, err := oqr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

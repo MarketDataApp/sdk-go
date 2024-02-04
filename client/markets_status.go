@@ -128,12 +128,24 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 
 // Packed sends the MarketStatusRequest and returns the MarketStatusResponse.
 // This method checks if the MarketStatusRequest receiver is nil, returning an error if true.
+// An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the MarketStatusResponse along with any error encountered during the request.
-//
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.MarketStatusResponse: A pointer to the MarketStatusResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (msr *MarketStatusRequest) Packed() (*models.MarketStatusResponse, error) {
+func (msr *MarketStatusRequest) Packed(optionalClients ...*MarketDataClient) (*models.MarketStatusResponse, error) {
+	if msr == nil {
+		return nil, fmt.Errorf("MarketStatusRequest is nil")
+	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		msr.baseRequest.client = optionalClients[0]
+	}
+
 	var msrResp models.MarketStatusResponse
 	_, err := msr.baseRequest.client.GetFromRequest(msr.baseRequest, &msrResp)
 	if err != nil {
@@ -148,17 +160,20 @@ func (msr *MarketStatusRequest) Packed() (*models.MarketStatusResponse, error) {
 // from the market status request. The method first checks if the MarketStatusRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of MarketStatusReport using the Unpack method from the response.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.MarketStatusReport: A slice of MarketStatusReport containing the unpacked market status data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (msr *MarketStatusRequest) Get() ([]models.MarketStatusReport, error) {
+func (msr *MarketStatusRequest) Get(optionalClients ...*MarketDataClient) ([]models.MarketStatusReport, error) {
 	if msr == nil {
 		return nil, fmt.Errorf("MarketStatusRequest is nil")
 	}
 	
-	// Use the Packed method to make the request
-	msrResp, err := msr.Packed()
+	// Use the Packed method to make the request, passing along any optional client
+	msrResp, err := msr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +186,6 @@ func (msr *MarketStatusRequest) Get() ([]models.MarketStatusReport, error) {
 
 	return data, nil
 }
-
 
 // MarketStatus creates a new MarketStatusRequest and associates it with the provided client.
 // If no client is provided, it uses the default client. This function initializes the request

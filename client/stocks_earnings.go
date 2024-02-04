@@ -139,16 +139,23 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 }
 
 // Packed sends the StockEarningsRequest and returns the StockEarningsResponse.
-// This method checks if the StockEarningsRequest receiver is nil, returning an error if true.
-// Otherwise, it proceeds to send the request and returns the StockEarningsResponse along with any error encountered during the request.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.StockEarningsResponse: A pointer to the StockEarningsResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (ser *StockEarningsRequest) Packed() (*models.StockEarningsResponse, error) {
+func (ser *StockEarningsRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockEarningsResponse, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		ser.baseRequest.client = optionalClients[0]
+	}
+
 	var serResp models.StockEarningsResponse
 	_, err := ser.baseRequest.client.GetFromRequest(ser.baseRequest, &serResp)
 	if err != nil {
@@ -159,21 +166,21 @@ func (ser *StockEarningsRequest) Packed() (*models.StockEarningsResponse, error)
 }
 
 // Get sends the StockEarningsRequest, unpacks the StockEarningsResponse, and returns a slice of StockEarningsReport.
-// It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual stock earnings data
-// from the stock earnings request. The method first checks if the StockEarningsRequest receiver is nil, which would
-// result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
-// Upon receiving the response, it unpacks the data into a slice of StockEarningsReport using the Unpack method from the response.
-//
+// It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.StockEarningsReport: A slice of StockEarningsReport containing the unpacked earnings data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (ser *StockEarningsRequest) Get() ([]models.StockEarningsReport, error) {
+func (ser *StockEarningsRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockEarningsReport, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
 	
-	// Use the Packed method to make the request
-	serResp, err := ser.Packed()
+	// Use the Packed method to make the request, passing along any optional client
+	serResp, err := ser.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

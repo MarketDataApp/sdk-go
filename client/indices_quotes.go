@@ -77,15 +77,24 @@ func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 
 // Packed sends the IndexQuoteRequest and returns the IndexQuotesResponse.
 // This method checks if the IndexQuoteRequest receiver is nil, returning an error if true.
+// An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the IndexQuotesResponse along with any error encountered during the request.
-//
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.IndexQuotesResponse: A pointer to the IndexQuotesResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (iqr *IndexQuoteRequest) Packed() (*models.IndexQuotesResponse, error) {
+func (iqr *IndexQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*models.IndexQuotesResponse, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		iqr.baseRequest.client = optionalClients[0]
+	}
+
 	var iqrResp models.IndexQuotesResponse
 	_, err := iqr.baseRequest.client.GetFromRequest(iqr.baseRequest, &iqrResp)
 	if err != nil {
@@ -100,17 +109,20 @@ func (iqr *IndexQuoteRequest) Packed() (*models.IndexQuotesResponse, error) {
 // from the index quote request. The method first checks if the IndexQuoteRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of IndexQuote using the Unpack method from the response.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.IndexQuote: A slice of IndexQuote containing the unpacked quote data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (iqr *IndexQuoteRequest) Get() ([]models.IndexQuote, error) {
+func (iqr *IndexQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]models.IndexQuote, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
 	
-	// Use the Packed method to make the request
-	iqrResp, err := iqr.Packed()
+	// Use the Packed method to make the request, passing along any optional client
+	iqrResp, err := iqr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

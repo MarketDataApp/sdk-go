@@ -125,18 +125,27 @@ func (icr *IndicesCandlesRequest) getParams() ([]parameters.MarketDataParam, err
 	params := []parameters.MarketDataParam{icr.dateParams, icr.symbolParams, icr.resolutionParams}
 	return params, nil
 }
+
 // Packed sends the IndicesCandlesRequest and returns the IndicesCandlesResponse.
 // This method checks if the IndicesCandlesRequest receiver is nil, returning an error if true.
+// An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the IndicesCandlesResponse along with any error encountered during the request.
 // Parameters:
-// - None
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.IndicesCandlesResponse: A pointer to the IndicesCandlesResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (icr *IndicesCandlesRequest) Packed() (*models.IndicesCandlesResponse, error) {
+func (icr *IndicesCandlesRequest) Packed(optionalClients ...*MarketDataClient) (*models.IndicesCandlesResponse, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		icr.baseRequest.client = optionalClients[0]
+	}
+
 	var icrResp models.IndicesCandlesResponse
 	_, err := icr.baseRequest.client.GetFromRequest(icr.baseRequest, &icrResp)
 	if err != nil {
@@ -151,18 +160,20 @@ func (icr *IndicesCandlesRequest) Packed() (*models.IndicesCandlesResponse, erro
 // from the indices candles request. The method first checks if the IndicesCandlesRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of IndexCandle using the Unpack method from the response.
+// An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - None
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.IndexCandle: A slice of IndexCandle containing the unpacked candle data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (icr *IndicesCandlesRequest) Get() ([]models.IndexCandle, error) {
+func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.IndexCandle, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
 	
-	// Use the Packed method to make the request
-	icrResp, err := icr.Packed()
+	// Use the Packed method to make the request, passing along any optional client
+	icrResp, err := icr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

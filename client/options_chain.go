@@ -421,15 +421,24 @@ func (ocr *OptionChainRequest) getParams() ([]parameters.MarketDataParam, error)
 
 // Packed sends the OptionChainRequest and returns the OptionChainResponse.
 // This method checks if the OptionChainRequest receiver is nil, returning an error if true.
+// An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the OptionChainResponse along with any error encountered during the request.
-//
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (ocr *OptionChainRequest) Packed() (*models.OptionQuotesResponse, error) {
+func (ocr *OptionChainRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionQuotesResponse, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		ocr.baseRequest.client = optionalClients[0]
+	}
+
 	var ocrResp models.OptionQuotesResponse
 	_, err := ocr.baseRequest.client.GetFromRequest(ocr.baseRequest, &ocrResp)
 	if err != nil {
@@ -444,17 +453,20 @@ func (ocr *OptionChainRequest) Packed() (*models.OptionQuotesResponse, error) {
 // from the option chain request. The method first checks if the OptionChainRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of OptionQuote using the Unpack method from the response.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.OptionQuote: A slice of OptionQuote containing the unpacked option chain data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (ocr *OptionChainRequest) Get() ([]models.OptionQuote, error) {
+func (ocr *OptionChainRequest) Get(optionalClients ...*MarketDataClient) ([]models.OptionQuote, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
 	}
-
-	// Use the Packed method to make the request
-	ocrResp, err := ocr.Packed()
+	
+	// Use the Packed method to make the request, passing along any optional client
+	ocrResp, err := ocr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}

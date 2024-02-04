@@ -65,16 +65,23 @@ func (sqr *StockQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 }
 
 // Packed sends the StockQuoteRequest and returns the StockQuotesResponse.
-// This method checks if the StockQuoteRequest receiver is nil, returning an error if true.
-// Otherwise, it proceeds to send the request and returns the StockQuotesResponse along with any error encountered during the request.
-//
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - *models.StockQuotesResponse: A pointer to the StockQuotesResponse obtained from the request.
 // - error: An error object that indicates a failure in sending the request.
-func (sqr *StockQuoteRequest) Packed() (*models.StockQuotesResponse, error) {
+func (sqr *StockQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockQuotesResponse, error) {
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
+
+	// Replace the client if an optional client is provided
+	if len(optionalClients) > 0 && optionalClients[0] != nil {
+		sqr.baseRequest.client = optionalClients[0]
+	}
+
 	var sqrResp models.StockQuotesResponse
 	_, err := sqr.baseRequest.client.GetFromRequest(sqr.baseRequest, &sqrResp)
 	if err != nil {
@@ -85,21 +92,21 @@ func (sqr *StockQuoteRequest) Packed() (*models.StockQuotesResponse, error) {
 }
 
 // Get sends the StockQuoteRequest, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
-// It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual stock quote data
-// from the stock quotes request. The method first checks if the StockQuoteRequest receiver is nil, which would
-// result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
-// Upon receiving the response, it unpacks the data into a slice of StockQuote using the Unpack method from the response.
-//
+// It returns an error if the request or unpacking fails.
+// An optional MarketDataClient can be passed to replace the client used in the request.
+// Parameters:
+// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   it replaces the current client for this request.
 // Returns:
 // - []models.StockQuote: A slice of StockQuote containing the unpacked quote data from the response.
 // - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (sqr *StockQuoteRequest) Get() ([]models.StockQuote, error) {
+func (sqr *StockQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockQuote, error) {
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
 	
-	// Use the Packed method to make the request
-	sqrResp, err := sqr.Packed()
+	// Use the Packed method to make the request, passing along any optional client
+	sqrResp, err := sqr.Packed(optionalClients...)
 	if err != nil {
 		return nil, err
 	}
