@@ -12,7 +12,7 @@ func TestLogging(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Failed to get market data client: %v", err)
 	}
-	client.Debug(true)
+	client.Debug(false)
 
 	sc, err := StockCandles().Resolution("D").Symbol("AAPL").Date("2023-01-03").Raw()
 	if err != nil {

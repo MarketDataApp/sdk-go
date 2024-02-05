@@ -8,6 +8,8 @@ import (
 	"github.com/iancoleman/orderedmap"
 )
 
+// IndicesCandlesResponse represents the response structure for indices candles data.
+// It includes slices for time, open, high, low, and close values of the indices.
 type IndicesCandlesResponse struct {
 	Time  []int64   `json:"t" human:"Date"`
 	Open  []float64 `json:"o" human:"Open"`
@@ -16,11 +18,19 @@ type IndicesCandlesResponse struct {
 	Close []float64 `json:"c" human:"Close"`
 }
 
+// String returns a string representation of the IndicesCandlesResponse.
+//
+// Returns:
+//   - A formatted string containing the time, open, high, low, and close values.
 func (icr *IndicesCandlesResponse) String() string {
 	return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v",
 		icr.Time, icr.Open, icr.High, icr.Low, icr.Close)
 }
 
+// checkTimeInAscendingOrder checks if the times in the IndicesCandlesResponse are in ascending order.
+//
+// Returns:
+//   - An error if the times are not in ascending order, nil otherwise.
 func (icr *IndicesCandlesResponse) checkTimeInAscendingOrder() error {
 	for i := 1; i < len(icr.Time); i++ {
 		if icr.Time[i] < icr.Time[i-1] {
@@ -32,6 +42,9 @@ func (icr *IndicesCandlesResponse) checkTimeInAscendingOrder() error {
 
 // checkForEqualSlices checks if all slices in the IndicesCandlesResponse struct have the same length.
 // It returns an error if the lengths are not equal.
+//
+// Returns:
+//   - An error if the lengths are not equal.
 func (icr *IndicesCandlesResponse) checkForEqualSlices() error {
 	// Create a slice of the lengths of the Time, Open, High, Low, and Close slices
 	lengths := []int{
@@ -54,6 +67,10 @@ func (icr *IndicesCandlesResponse) checkForEqualSlices() error {
 	return nil
 }
 
+// checkForEmptySlices checks if any of the slices in the IndicesCandlesResponse are empty.
+//
+// Returns:
+//   - An error if one or more slices are empty, nil otherwise.
 func (icr *IndicesCandlesResponse) checkForEmptySlices() error {
 	// Check if any of the slices are empty
 	if len(icr.Time) == 0 || len(icr.Open) == 0 || len(icr.High) == 0 || len(icr.Low) == 0 || len(icr.Close) == 0 {
@@ -64,6 +81,7 @@ func (icr *IndicesCandlesResponse) checkForEmptySlices() error {
 	return nil
 }
 
+// IndexCandle represents a single candle data point with time, open, high, low, and close values.
 type IndexCandle struct {
 	Time  time.Time
 	Open  float64
@@ -72,12 +90,20 @@ type IndexCandle struct {
 	Close float64
 }
 
+// String returns a string representation of the IndexCandle with the time in America/New_York timezone.
+//
+// Returns:
+//   - A formatted string containing the time, open, high, low, and close values.
 func (ic IndexCandle) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
 	return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v",
 		ic.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), ic.Open, ic.High, ic.Low, ic.Close)
 }
 
+// Unpack converts the IndicesCandlesResponse into a slice of IndexCandle.
+//
+// Returns:
+//   - A slice of IndexCandle, error if there's an inconsistency in the data slices.
 func (icr *IndicesCandlesResponse) Unpack() ([]IndexCandle, error) {
 	if err := icr.checkForEqualSlices(); err != nil {
 		return nil, err
@@ -102,7 +128,9 @@ func (icr *IndicesCandlesResponse) Unpack() ([]IndexCandle, error) {
 // The JSON object is an ordered map with keys "s", "t", "o", "h", "l", and "c".
 // The "s" key is always set to "ok".
 // The "t", "o", "h", "l", and "c" keys correspond to the Time, Open, High, Low, and Close slices in the struct.
-// The method returns the JSON object as a byte slice and any error encountered during the marshaling process.
+//
+// Returns:
+//   - A byte slice of the JSON object, error if marshaling fails.
 func (icr *IndicesCandlesResponse) MarshalJSON() ([]byte, error) {
 	// Create a new ordered map
 	o := orderedmap.New()
@@ -121,6 +149,13 @@ func (icr *IndicesCandlesResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o)
 }
 
+// UnmarshalJSON custom unmarshals a JSON object into the IndicesCandlesResponse.
+//
+// Parameters:
+//   - data: A byte slice of the JSON object to be unmarshaled.
+//
+// Returns:
+//   - An error if unmarshaling or validation fails.
 func (icr *IndicesCandlesResponse) UnmarshalJSON(data []byte) error {
 	// Define a secondary type to prevent infinite recursion
 	type Alias IndicesCandlesResponse
@@ -146,6 +181,10 @@ func (icr *IndicesCandlesResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Validate runs multiple checks on the IndicesCandlesResponse: time in ascending order, equal slice lengths, and no empty slices.
+//
+// Returns:
+//   - An error if any of the checks fail, nil otherwise.
 func (icr *IndicesCandlesResponse) Validate() error {
 	// Create a channel to handle errors
 	errChan := make(chan error, 3)
@@ -166,6 +205,10 @@ func (icr *IndicesCandlesResponse) Validate() error {
 	return nil
 }
 
+// IsValid checks if the IndicesCandlesResponse passes all validation checks.
+//
+// Returns:
+//   - A boolean indicating if the response is valid.
 func (icr *IndicesCandlesResponse) IsValid() bool {
 	if err := icr.Validate(); err != nil {
 		return false

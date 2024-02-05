@@ -12,11 +12,11 @@ import (
 // This struct provides methods to set these parameters, such as UnderlyingSymbol(), Date(), Expiration(), and Strike(), among others.
 //
 // Public Methods:
-// - UnderlyingSymbol(q string) *OptionChainRequest: Sets the underlying symbol parameter for the request.
-// - Date(q interface{}) *OptionChainRequest: Sets the date parameter for the request.
-// - Expiration(q interface{}) *OptionChainRequest: Sets the expiration parameter for the request.
-// - Strike(strike float64) *OptionChainRequest: Sets the strike price parameter for the request.
-// - and other option-specific parameter setting methods like Month(), Year(), Weekly(), Monthly(), etc.
+//   - UnderlyingSymbol(q string) *OptionChainRequest: Sets the underlying symbol parameter for the request.
+//   - Date(q interface{}) *OptionChainRequest: Sets the date parameter for the request.
+//   - Expiration(q interface{}) *OptionChainRequest: Sets the expiration parameter for the request.
+//   - Strike(strike float64) *OptionChainRequest: Sets the strike price parameter for the request.
+//   - and other option-specific parameter setting methods like Month(), Year(), Weekly(), Monthly(), etc.
 type OptionChainRequest struct {
 	*baseRequest
 	symbolParams *parameters.SymbolParams
@@ -29,10 +29,10 @@ type OptionChainRequest struct {
 // It modifies the symbolParams field of the OptionChainRequest instance to store the symbol value.
 //
 // Parameters:
-// - q: A string representing the underlying symbol to be set.
+//   - q: A string representing the underlying symbol to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining, where multiple setter methods can be called in a single statement. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining, where multiple setter methods can be called in a single statement. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) UnderlyingSymbol(q string) *OptionChainRequest {
 	if ocr == nil {
 		return nil
@@ -49,10 +49,10 @@ func (ocr *OptionChainRequest) UnderlyingSymbol(q string) *OptionChainRequest {
 // It modifies the dateParams field of the OptionChainRequest instance to store the date value.
 //
 // Parameters:
-// - q: An interface{} representing the date to be set.
+//   - q: An interface{} representing the date to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Date(q interface{}) *OptionChainRequest {
 	if ocr.dateParams == nil {
 		ocr.dateParams = &parameters.DateParams{}
@@ -69,10 +69,10 @@ func (ocr *OptionChainRequest) Date(q interface{}) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the expiration value.
 //
 // Parameters:
-// - q: An interface{} representing the expiration date to be set.
+//   - q: An interface{} representing the expiration date to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Expiration(q interface{}) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -89,10 +89,10 @@ func (ocr *OptionChainRequest) Expiration(q interface{}) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the month value.
 //
 // Parameters:
-// - month: An int representing the month to be set.
+//   - month: An int representing the month to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Month(month int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -109,10 +109,10 @@ func (ocr *OptionChainRequest) Month(month int) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the year value.
 //
 // Parameters:
-// - year: An int representing the year to be set.
+//   - year: An int representing the year to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Year(year int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -129,10 +129,10 @@ func (ocr *OptionChainRequest) Year(year int) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the weekly value.
 //
 // Parameters:
-// - weekly: A bool indicating whether to include weekly options.
+//   - weekly: A bool indicating whether to include weekly options.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Weekly(weekly bool) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -149,10 +149,10 @@ func (ocr *OptionChainRequest) Weekly(weekly bool) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the monthly value.
 //
 // Parameters:
-// - monthly: A bool indicating whether to include monthly options.
+//   - monthly: A bool indicating whether to include monthly options.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Monthly(monthly bool) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -169,10 +169,10 @@ func (ocr *OptionChainRequest) Monthly(monthly bool) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the quarterly value.
 //
 // Parameters:
-// - quarterly: A bool indicating whether to include quarterly options.
+//   - quarterly: A bool indicating whether to include quarterly options.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Quarterly(quarterly bool) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -189,10 +189,10 @@ func (ocr *OptionChainRequest) Quarterly(quarterly bool) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the nonstandard value.
 //
 // Parameters:
-// - nonstandard: A bool indicating whether to include nonstandard options.
+//   - nonstandard: A bool indicating whether to include nonstandard options.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Nonstandard(nonstandard bool) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -209,10 +209,10 @@ func (ocr *OptionChainRequest) Nonstandard(nonstandard bool) *OptionChainRequest
 // It modifies the optionParams field of the OptionChainRequest instance to store the DTE value.
 //
 // Parameters:
-// - dte: An int representing the days to expiration to be set.
+//   - dte: An int representing the days to expiration to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) DTE(dte int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -229,10 +229,10 @@ func (ocr *OptionChainRequest) DTE(dte int) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the Delta value.
 //
 // Parameters:
-// - delta: A float64 representing the Delta value to be set.
+//   - delta: A float64 representing the Delta value to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Delta(delta float64) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -249,10 +249,10 @@ func (ocr *OptionChainRequest) Delta(delta float64) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the side value.
 //
 // Parameters:
-// - side: A string representing the side of the market to be set. Expected values are typically "call" or "put".
+//   - side: A string representing the side of the market to be set. Expected values are typically "call" or "put".
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Side(side string) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -269,10 +269,10 @@ func (ocr *OptionChainRequest) Side(side string) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the range value.
 //
 // Parameters:
-// - rangeParam: A string representing the range of options to be included. The expected values can vary, such as "ITM" (In The Money), "OTM" (Out of The Money), "ATM" (At The Money), etc.
+//   - rangeParam: A string representing the range of options to be included. The expected values can vary, such as "ITM" (In The Money), "OTM" (Out of The Money), "ATM" (At The Money), etc.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Range(rangeParam string) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -289,10 +289,10 @@ func (ocr *OptionChainRequest) Range(rangeParam string) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the strike price value.
 //
 // Parameters:
-// - strike: A float64 representing the strike price to be set.
+//   - strike: A float64 representing the strike price to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) Strike(strike float64) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -309,10 +309,10 @@ func (ocr *OptionChainRequest) Strike(strike float64) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the strike limit value.
 //
 // Parameters:
-// - strikeLimit: An int representing the maximum number of strike prices to be included.
+//   - strikeLimit: An int representing the maximum number of strike prices to be included.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) StrikeLimit(strikeLimit int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -329,10 +329,10 @@ func (ocr *OptionChainRequest) StrikeLimit(strikeLimit int) *OptionChainRequest 
 // It modifies the optionParams field of the OptionChainRequest instance to store the minimum open interest value.
 //
 // Parameters:
-// - minOpenInterest: An int representing the minimum open interest to be set.
+//   - minOpenInterest: An int representing the minimum open interest to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) MinOpenInterest(minOpenInterest int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -349,10 +349,10 @@ func (ocr *OptionChainRequest) MinOpenInterest(minOpenInterest int) *OptionChain
 // It modifies the optionParams field of the OptionChainRequest instance to store the minimum volume value.
 //
 // Parameters:
-// - minVolume: An int representing the minimum volume to be set.
+//   - minVolume: An int representing the minimum volume to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) MinVolume(minVolume int) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -369,10 +369,10 @@ func (ocr *OptionChainRequest) MinVolume(minVolume int) *OptionChainRequest {
 // It modifies the optionParams field of the OptionChainRequest instance to store the maximum bid-ask spread value.
 //
 // Parameters:
-// - maxBidAskSpread: A float64 representing the maximum bid-ask spread to be set.
+//   - maxBidAskSpread: A float64 representing the maximum bid-ask spread to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) MaxBidAskSpread(maxBidAskSpread float64) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -389,10 +389,10 @@ func (ocr *OptionChainRequest) MaxBidAskSpread(maxBidAskSpread float64) *OptionC
 // It modifies the optionParams field of the OptionChainRequest instance to store the maximum bid-ask spread percentage value.
 //
 // Parameters:
-// - maxBidAskSpreadPct: A float64 representing the maximum bid-ask spread percentage to be set.
+//   - maxBidAskSpreadPct: A float64 representing the maximum bid-ask spread percentage to be set.
 //
 // Returns:
-// - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
 func (ocr *OptionChainRequest) MaxBidAskSpreadPct(maxBidAskSpreadPct float64) *OptionChainRequest {
 	if ocr.optionParams == nil {
 		ocr.optionParams = &parameters.OptionParams{}
@@ -409,8 +409,8 @@ func (ocr *OptionChainRequest) MaxBidAskSpreadPct(maxBidAskSpreadPct float64) *O
 // for easier manipulation and usage in subsequent requests.
 //
 // Returns:
-// - []parameters.MarketDataParam: A slice containing all the parameters set in the OptionChainRequest.
-// - error: An error object indicating failure to pack the parameters, nil if successful.
+//   - []parameters.MarketDataParam: A slice containing all the parameters set in the OptionChainRequest.
+//   - error: An error object indicating failure to pack the parameters, nil if successful.
 func (ocr *OptionChainRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
@@ -424,11 +424,12 @@ func (ocr *OptionChainRequest) getParams() ([]parameters.MarketDataParam, error)
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the OptionChainResponse along with any error encountered during the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//     it replaces the current client for this request.
+//
 // Returns:
-// - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (ocr *OptionChainRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionQuotesResponse, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
@@ -455,16 +456,17 @@ func (ocr *OptionChainRequest) Packed(optionalClients ...*MarketDataClient) (*mo
 // Upon receiving the response, it unpacks the data into a slice of OptionQuote using the Unpack method from the response.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//     it replaces the current client for this request.
+//
 // Returns:
-// - []models.OptionQuote: A slice of OptionQuote containing the unpacked option chain data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.OptionQuote: A slice of OptionQuote containing the unpacked option chain data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (ocr *OptionChainRequest) Get(optionalClients ...*MarketDataClient) ([]models.OptionQuote, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	ocrResp, err := ocr.Packed(optionalClients...)
 	if err != nil {
@@ -485,10 +487,11 @@ func (ocr *OptionChainRequest) Get(optionalClients ...*MarketDataClient) ([]mode
 // with default parameters for symbol, date, and option-specific parameters, and sets the request path based on
 // the predefined endpoints for option chains.
 // Parameters:
-// - clients: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//   - clients: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//     the default client is used.
+//
 // Returns:
-// - *OptionChainRequest: A pointer to the newly created OptionChainRequest with default parameters and associated client.
+//   - *OptionChainRequest: A pointer to the newly created OptionChainRequest with default parameters and associated client.
 func OptionChain(client ...*MarketDataClient) *OptionChainRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["options"]["chain"]

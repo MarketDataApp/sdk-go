@@ -36,8 +36,8 @@ var (
 // It provides methods to manipulate and retrieve log entries.
 //
 // Public Methods:
-// - String() string: Returns a string representation of all HTTP request logs.
-// - PrintLatest(): Prints the latest HTTP request log entry.
+//   - String() string: Returns a string representation of all HTTP request logs.
+//   - PrintLatest(): Prints the latest HTTP request log entry.
 type HttpRequestLogs struct {
 	Logs []HttpRequestLog
 }
@@ -46,9 +46,9 @@ type HttpRequestLogs struct {
 // It includes detailed information about the request and response, such as headers, status code, and response body.
 //
 // Public Methods:
-// - WriteToLog(debug bool): Writes the log entry to the appropriate logger based on the HTTP response status.
-// - String() string: Returns a string representation of the HTTP request log entry.
-// - PrettyPrint(): Prints a formatted representation of the HTTP request log entry.
+//   - WriteToLog(debug bool): Writes the log entry to the appropriate logger based on the HTTP response status.
+//   - String() string: Returns a string representation of the HTTP request log entry.
+//   - PrettyPrint(): Prints a formatted representation of the HTTP request log entry.
 type HttpRequestLog struct {
 	Timestamp         time.Time
 	ReqHeaders        http.Header // The Request Headers
@@ -64,7 +64,7 @@ type HttpRequestLog struct {
 
 // WriteToLog writes the log entry to the appropriate logger based on the HTTP response status.
 // Parameters:
-// - debug: A boolean indicating whether to log as a debug message.
+//   - debug: A boolean indicating whether to log as a debug message.
 func (h HttpRequestLog) WriteToLog(debug bool) {
 	var logger *zap.Logger
 	var logMessage string
@@ -111,7 +111,7 @@ func (h HttpRequestLog) WriteToLog(debug bool) {
 
 // String returns a string representation of the HTTP request log entry.
 // Returns:
-// - A string representing the log entry.
+//   - A string representing the log entry.
 func (h HttpRequestLog) String() string {
 	return fmt.Sprintf("Timestamp: %v, Status: %d, Request: %s, Request Headers: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s",
 		h.Timestamp.Format("2006-01-02 15:04:05"), h.Status, h.Request, h.ReqHeaders, h.RayID, h.RateLimitConsumed, h.Delay, h.ResHeaders, h.Response)
@@ -134,7 +134,7 @@ func (h HttpRequestLog) PrettyPrint() {
 
 // printHeaders prints the HTTP headers in a formatted manner. Headers starting with "X-Api-Ratelimit" are highlighted.
 // Parameters:
-// - headers: The HTTP headers to be printed.
+//   - headers: The HTTP headers to be printed.
 func (h HttpRequestLog) printHeaders(headers http.Header) {
 	keys := make([]string, 0, len(headers))
 	for name := range headers {
@@ -154,7 +154,7 @@ func (h HttpRequestLog) printHeaders(headers http.Header) {
 
 // memoryUsage calculates the memory usage of the log entry.
 // Returns:
-// - An integer representing the memory usage of the log entry in bytes.
+//   - An integer representing the memory usage of the log entry in bytes.
 func (h HttpRequestLog) memoryUsage() int {
 	// Size of time.Time (24 bytes)
 	timestampSize := 24
@@ -183,9 +183,9 @@ func (h HttpRequestLog) memoryUsage() int {
 
 // headerSize calculates the memory usage of HTTP headers.
 // Parameters:
-// - header: The HTTP headers for which the memory usage is calculated.
+//   - header: The HTTP headers for which the memory usage is calculated.
 // Returns:
-// - An integer representing the memory usage of the headers in bytes.
+//   - An integer representing the memory usage of the headers in bytes.
 func (h HttpRequestLog) headerSize(header http.Header) int {
 	size := 0
 	for key, values := range header {
@@ -219,7 +219,7 @@ func NewHttpRequestLog(timestamp time.Time, rayID string, request string, rateLi
 
 // totalMemoryUsage calculates the total memory usage of all log entries.
 // Returns:
-// - An int64 representing the total memory usage of all log entries in bytes.
+//   - An int64 representing the total memory usage of all log entries in bytes.
 func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 	total := int64(0)
 	for _, log := range h.Logs {
@@ -230,7 +230,7 @@ func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 
 // String returns a string representation of all HTTP request logs.
 // Returns:
-// - A string representing all log entries.
+//   - A string representing all log entries.
 func (h *HttpRequestLogs) String() string {
 	var sb strings.Builder
 	for _, log := range h.Logs {
@@ -246,7 +246,7 @@ func (h *HttpRequestLogs) String() string {
 // If logs are present, it calculates the index of the last log entry, accesses it, and returns its response.
 //
 // Returns:
-// - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
+//   - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
 func (h *HttpRequestLogs) GetLastLogResponse() string {
     // Step 2: Check if there are no logs
     if len(h.Logs) == 0 {
@@ -279,19 +279,19 @@ func (h *HttpRequestLogs) PrintLatest() {
 // After adding a new log entry, it trims the log to ensure the total memory usage and the number of log entries are below their limits.
 //
 // Parameters:
-// - h *HttpRequestLogs: A pointer to the HttpRequestLogs to which the new log entry will be added.
-// - timestamp time.Time: The timestamp of the HTTP request.
-// - rayID string: The unique identifier for the request.
-// - request string: The URL of the HTTP request.
-// - rateLimitConsumed int: The amount of rate limit consumed by the request.
-// - delay int64: The delay experienced during the request, in milliseconds.
-// - status int: The HTTP status code of the response.
-// - body string: The body of the HTTP response.
-// - reqHeaders http.Header: The HTTP headers of the request.
-// - resHeaders http.Header: The HTTP headers of the response.
+//   - h *HttpRequestLogs: A pointer to the HttpRequestLogs to which the new log entry will be added.
+//   - timestamp time.Time: The timestamp of the HTTP request.
+//   - rayID string: The unique identifier for the request.
+//   - request string: The URL of the HTTP request.
+//   - rateLimitConsumed int: The amount of rate limit consumed by the request.
+//   - delay int64: The delay experienced during the request, in milliseconds.
+//   - status int: The HTTP status code of the response.
+//   - body string: The body of the HTTP response.
+//   - reqHeaders http.Header: The HTTP headers of the request.
+//   - resHeaders http.Header: The HTTP headers of the response.
 //
 // Returns:
-// - *HttpRequestLog: A pointer to the newly added HttpRequestLog entry. Returns nil if the log entry is not added.
+//   - *HttpRequestLog: A pointer to the newly added HttpRequestLog entry. Returns nil if the log entry is not added.
 func AddToLog(h *HttpRequestLogs, timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) *HttpRequestLog {
 	if request == "https://api.marketdata.app/user/" {
 		// If the URL starts with https://api.marketdata.app/user/ do not add it to the log.
@@ -321,10 +321,10 @@ func (h *HttpRequestLogs) trimLog() {
 // init initializes the logging system for the application.
 //
 // This function performs the following operations:
-// - Initializes the Logs variable with an empty HttpRequestLogs.
-// - Checks if the logs directory exists, and creates it if it does not.
-// - Opens or creates the success, client error, and server error log files.
-// - Sets up a zapcore.Core for each log file to enable structured logging.
+//   - Initializes the Logs variable with an empty HttpRequestLogs.
+//   - Checks if the logs directory exists, and creates it if it does not.
+//   - Opens or creates the success, client error, and server error log files.
+//   - Sets up a zapcore.Core for each log file to enable structured logging.
 //
 // The log files are named success.log, client_error.log, and server_error.log respectively.
 // Each log file is opened with append mode, so new log entries are added to the end of the file.

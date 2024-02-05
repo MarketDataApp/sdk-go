@@ -21,16 +21,25 @@ Example API Response JSON:
 
 */
 
+// OptionsStrikes represents the expiration date and strike prices for an option.
 type OptionsStrikes struct {
-	Expiration time.Time
-	Strikes    []float64
+	Expiration time.Time  // Expiration is the date and time when the option expires.
+	Strikes    []float64  // Strikes is a slice of strike prices available for the option.
 }
 
+// OptionsStrikesResponse encapsulates the response structure for a request to retrieve option strikes.
 type OptionsStrikesResponse struct {
-	Updated int                  `json:"updated"`
-	Strikes map[string][]float64 `json:"-"`
+	Updated int                  `json:"updated"` // Updated is a UNIX timestamp indicating when the data was last updated.
+	Strikes map[string][]float64 `json:"-"`       // Strikes is a map where each key is a date string and the value is a slice of strike prices for that date.
 }
 
+// UnmarshalJSON custom unmarshals the JSON data into the OptionsStrikesResponse struct.
+//
+// Parameters:
+//   - data []byte: The JSON data to be unmarshaled.
+//
+// Returns:
+//   - error: An error if unmarshaling fails, nil otherwise.
 func (osr *OptionsStrikesResponse) UnmarshalJSON(data []byte) error {
 	var aux map[string]interface{}
 	if err := json.Unmarshal(data, &aux); err != nil {
@@ -53,6 +62,10 @@ func (osr *OptionsStrikesResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// String returns a string representation of the OptionsStrikes struct.
+//
+// Returns:
+//   - string: The string representation of the OptionsStrikes.
 func (os OptionsStrikes) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
 	dateStr := os.Expiration.In(loc).Format("Jan 02, 2006 15:04 MST")
@@ -70,6 +83,10 @@ func (os OptionsStrikes) String() string {
 	return fmt.Sprintf("Expiration: %s, Strikes: %s", dateStr, strikesStrBuilder.String())
 }
 
+// IsValid checks if the OptionsStrikesResponse is valid.
+//
+// Returns:
+//   - bool: True if the response is valid, false otherwise.
 func (osr *OptionsStrikesResponse) IsValid() bool {
 	if len(osr.Strikes) == 0 {
 		return false
@@ -77,6 +94,10 @@ func (osr *OptionsStrikesResponse) IsValid() bool {
 	return true
 }
 
+// String returns a string representation of the OptionsStrikesResponse struct.
+//
+// Returns:
+//   - string: The string representation of the OptionsStrikesResponse.
 func (osr *OptionsStrikesResponse) String() string {
     // First, unpack the response to get a slice of OptionsStrikes
     unpackedStrikes, err := osr.Unpack()
@@ -100,6 +121,11 @@ func (osr *OptionsStrikesResponse) String() string {
     return sb.String()
 }
 
+// Unpack converts the map of strikes in the response to a slice of OptionsStrikes.
+//
+// Returns:
+//   - []OptionsStrikes: A slice of OptionsStrikes constructed from the response.
+//   - error: An error if the unpacking fails, nil otherwise.
 func (osr *OptionsStrikesResponse) Unpack() ([]OptionsStrikes, error) {
 	if !osr.IsValid() {
 		return nil, fmt.Errorf("invalid OptionsStrikesResponse")

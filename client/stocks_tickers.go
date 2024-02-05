@@ -13,7 +13,7 @@ import (
 // This struct provides the method DateKey() to set this parameter.
 //
 // Public Methods:
-// - DateKey(q string) *TickersRequest: Sets the date parameter for the TickersRequest.
+//   - DateKey(q string) *TickersRequest: Sets the date parameter for the TickersRequest.
 type TickersRequest struct {
 	*baseRequest
 	dateKey *parameters.DateKeyParam
@@ -23,10 +23,10 @@ type TickersRequest struct {
 // This method is used to specify the date for which the stock tickers data is requested.
 //
 // Parameters:
-// - q: A string representing the date to be set.
+//   - q: A string representing the date to be set.
 //
 // Returns:
-// - *TickersRequest: This method returns a pointer to the TickersRequest instance it was called on. This allows for method chaining.
+//   - *TickersRequest: This method returns a pointer to the TickersRequest instance it was called on. This allows for method chaining.
 func (tr *TickersRequest) DateKey(q string) *TickersRequest {
 	if tr == nil {
 		return nil
@@ -52,8 +52,8 @@ func (tr *TickersRequest) getParams() ([]parameters.MarketDataParam, error) {
 // Otherwise, it proceeds to send the request and returns the TickersResponse along with any error encountered during the request.
 //
 // Returns:
-// - *models.TickersResponse: A pointer to the TickersResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.TickersResponse: A pointer to the TickersResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (tr *TickersRequest) Packed() (*models.TickersResponse, error) {
 	if tr == nil {
 		return nil, fmt.Errorf("TickersRequest is nil")
@@ -74,8 +74,8 @@ func (tr *TickersRequest) Packed() (*models.TickersResponse, error) {
 // Upon receiving the response, it unpacks the data into a slice of Ticker using the Unpack method from the response.
 //
 // Returns:
-// - []models.Ticker: A slice of Ticker containing the unpacked tickers data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.Ticker: A slice of Ticker containing the unpacked tickers data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (tr *TickersRequest) Get() ([]models.Ticker, error) {
 	if tr == nil {
 		return nil, fmt.Errorf("TickersRequest is nil")
@@ -102,11 +102,11 @@ func (tr *TickersRequest) Get() ([]models.Ticker, error) {
 // the predefined endpoints for stock tickers.
 //
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //   the default client is used.
 //
 // Returns:
-// - *TickersRequest: A pointer to the newly created TickersRequest with default parameters and associated client.
+//   - *TickersRequest: A pointer to the newly created TickersRequest with default parameters and associated client.
 func StockTickers(client ...*MarketDataClient) *TickersRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[2]["stocks"]["tickers"]

@@ -13,11 +13,11 @@ import (
 // It specifically looks for the "X-Api-RateLimit-Consumed" header and attempts to convert its value to an integer.
 //
 // Parameters:
-// - resp: A pointer to a resty.Response from which the header will be extracted.
+//   - resp: A pointer to a resty.Response from which the header will be extracted.
 //
 // Returns:
-// - int: The integer value of the "X-Api-RateLimit-Consumed" header if present and successfully converted.
-// - error: An error if the header is missing or if the conversion to an integer fails.
+//   - int: The integer value of the "X-Api-RateLimit-Consumed" header if present and successfully converted.
+//   - error: An error if the header is missing or if the conversion to an integer fails.
 func getRateLimitConsumed(resp *resty.Response) (int, error) {
 	rateLimitConsumedStr := resp.Header().Get("X-Api-RateLimit-Consumed")
 	if rateLimitConsumedStr == "" {
@@ -33,11 +33,11 @@ func getRateLimitConsumed(resp *resty.Response) (int, error) {
 // getRayIDFromResponse extracts the "Cf-Ray" header value from the response.
 //
 // Parameters:
-// - resp: A pointer to a resty.Response from which the header will be extracted.
+//   - resp: A pointer to a resty.Response from which the header will be extracted.
 //
 // Returns:
-// - string: The value of the "Cf-Ray" header if present.
-// - error: An error if the "Cf-Ray" header is missing.
+//   - string: The value of the "Cf-Ray" header if present.
+//   - error: An error if the "Cf-Ray" header is missing.
 func getRayIDFromResponse(resp *resty.Response) (string, error) {
 	rayID := resp.Header().Get("Cf-Ray")
 	if rayID == "" {
@@ -49,10 +49,10 @@ func getRayIDFromResponse(resp *resty.Response) (string, error) {
 // getLatencyFromRequest calculates the server processing time for a request.
 //
 // Parameters:
-// - req: A pointer to a resty.Request which has been executed and contains trace information.
+//   - req: A pointer to a resty.Request which has been executed and contains trace information.
 //
 // Returns:
-// - int64: The server processing time in milliseconds.
+//   - int64: The server processing time in milliseconds.
 func getLatencyFromRequest(req *resty.Request) int64 {
 	trace := req.TraceInfo()
 	return trace.ServerTime.Milliseconds()
@@ -62,10 +62,10 @@ func getLatencyFromRequest(req *resty.Request) int64 {
 // The redaction replaces the token with a string that has the same length but with the characters replaced by asterisks, except for the last four characters.
 //
 // Parameters:
-// - headers: The original http.Header object containing the headers.
+//   - headers: The original http.Header object containing the headers.
 //
 // Returns:
-// - http.Header: A new http.Header object with the "Authorization" header value redacted if present.
+//   - http.Header: A new http.Header object with the "Authorization" header value redacted if present.
 func redactAuthorizationHeader(headers http.Header) http.Header {
 	// Copy the headers so we don't modify the original
 	copiedHeaders := make(http.Header)

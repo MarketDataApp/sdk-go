@@ -6,36 +6,49 @@ import (
 	"time"
 )
 
+// StockEarningsResponse represents the response structure for stock earnings data.
+// It includes slices for symbols, fiscal years, fiscal quarters, dates (UNIX timestamp),
+// report dates (UNIX timestamp), report times, currencies, reported EPS (Earnings Per Share),
+// estimated EPS, surprise EPS, surprise EPS percentage, and last updated time (UNIX timestamp).
 type StockEarningsResponse struct {
-	Symbol         []string   `json:"symbol"`
-	FiscalYear     []int64    `json:"fiscalYear"`
-	FiscalQuarter  []int64    `json:"fiscalQuarter"`
-	Date           []int64    `json:"date"`
-	ReportDate     []int64    `json:"reportDate"`
-	ReportTime     []string   `json:"reportTime"`
-	Currency       []string   `json:"currency"`
-	ReportedEPS    []*float64 `json:"reportedEPS"`
-	EstimatedEPS   []*float64 `json:"estimatedEPS"`
-	SurpriseEPS    []*float64 `json:"surpriseEPS"`
-	SurpriseEPSpct []*float64 `json:"surpriseEPSpct"`
-	Updated        []int64    `json:"updated"`
+	Symbol         []string   `json:"symbol"`         // Symbol represents the stock symbols.
+	FiscalYear     []int64    `json:"fiscalYear"`     // FiscalYear represents the fiscal years of the earnings report.
+	FiscalQuarter  []int64    `json:"fiscalQuarter"`  // FiscalQuarter represents the fiscal quarters of the earnings report.
+	Date           []int64    `json:"date"`           // Date represents the earnings announcement dates in UNIX timestamp.
+	ReportDate     []int64    `json:"reportDate"`     // ReportDate represents the report release dates in UNIX timestamp.
+	ReportTime     []string   `json:"reportTime"`     // ReportTime represents the time of day the earnings were reported.
+	Currency       []string   `json:"currency"`       // Currency represents the currency used in the earnings report.
+	ReportedEPS    []*float64 `json:"reportedEPS"`    // ReportedEPS represents the actual earnings per share reported.
+	EstimatedEPS   []*float64 `json:"estimatedEPS"`   // EstimatedEPS represents the consensus earnings per share estimate.
+	SurpriseEPS    []*float64 `json:"surpriseEPS"`    // SurpriseEPS represents the difference between reported EPS and estimated EPS.
+	SurpriseEPSpct []*float64 `json:"surpriseEPSpct"` // SurpriseEPSpct represents the percentage difference between reported and estimated EPS.
+	Updated        []int64    `json:"updated"`        // Updated represents the last update time in UNIX timestamp.
 }
 
+// StockEarningsReport represents a single earnings report for a stock.
+// It includes the stock symbol, fiscal year, fiscal quarter, date of the earnings,
+// report date, report time, currency of the report, reported EPS, estimated EPS,
+// surprise EPS, surprise EPS percentage, and the last updated time.
 type StockEarningsReport struct {
-	Symbol         string
-	FiscalYear     int64
-	FiscalQuarter  int64
-	Date           time.Time
-	ReportDate     time.Time
-	ReportTime     string
-	Currency       string
-	ReportedEPS    *float64
-	EstimatedEPS   *float64
-	SurpriseEPS    *float64
-	SurpriseEPSpct *float64
-	Updated        time.Time
+	Symbol         string    // Symbol represents the stock symbol.
+	FiscalYear     int64     // FiscalYear represents the fiscal year of the earnings report.
+	FiscalQuarter  int64     // FiscalQuarter represents the fiscal quarter of the earnings report.
+	Date           time.Time // Date represents the earnings announcement date.
+	ReportDate     time.Time // ReportDate represents the report release date.
+	ReportTime     string    // ReportTime represents the time of day the earnings were reported.
+	Currency       string    // Currency represents the currency used in the earnings report.
+	ReportedEPS    *float64  // ReportedEPS represents the actual earnings per share reported.
+	EstimatedEPS   *float64  // EstimatedEPS represents the consensus earnings per share estimate.
+	SurpriseEPS    *float64  // SurpriseEPS represents the difference between reported EPS and estimated EPS.
+	SurpriseEPSpct *float64  // SurpriseEPSpct represents the percentage difference between reported and estimated EPS.
+	Updated        time.Time // Updated represents the last update time.
 }
 
+// Unpack converts the StockEarningsResponse struct into a slice of StockEarningsReport structs.
+//
+// Returns:
+//   - []StockEarningsReport: A slice of StockEarningsReport structs constructed from the StockEarningsResponse.
+//   - error: An error if the unpacking process fails, nil otherwise.
 func (ser StockEarningsReport) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
 
@@ -63,6 +76,13 @@ func (ser StockEarningsReport) String() string {
 		ser.Symbol, ser.FiscalYear, ser.FiscalQuarter, ser.Date.Format("2006-01-02"), ser.ReportDate.Format("2006-01-02"), ser.ReportTime, ser.Currency, reportedEPS, estimatedEPS, surpriseEPS, surpriseEPSpct, ser.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
 }
 
+// Unpack converts the StockEarningsResponse struct into a slice of StockEarningsReport structs.
+//
+// This method iterates over the fields of a StockEarningsResponse struct, creating a StockEarningsReport struct for each symbol present in the response. It then populates the fields of each StockEarningsReport struct with the corresponding data from the StockEarningsResponse struct. The method handles the conversion of Unix timestamps to time.Time objects for the Date, ReportDate, and Updated fields. It also directly assigns pointer fields for ReportedEPS, EstimatedEPS, SurpriseEPS, and SurpriseEPSpct to handle potential nil values gracefully.
+//
+// Returns:
+//   - []StockEarningsReport: A slice of StockEarningsReport structs constructed from the StockEarningsResponse.
+//   - error: An error if the unpacking process fails, nil otherwise.
 func (ser *StockEarningsResponse) Unpack() ([]StockEarningsReport, error) {
 	var stockEarningsReports []StockEarningsReport
 	for i := range ser.Symbol {
@@ -85,6 +105,12 @@ func (ser *StockEarningsResponse) Unpack() ([]StockEarningsReport, error) {
 	return stockEarningsReports, nil
 }
 
+// String generates a string representation of the StockEarningsResponse.
+//
+// This method formats the StockEarningsResponse fields into a readable string, including handling nil values for EPS fields gracefully by displaying them as "nil".
+//
+// Returns:
+//   - A string representation of the StockEarningsResponse.
 func (ser *StockEarningsResponse) String() string {
 	var result strings.Builder
 

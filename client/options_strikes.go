@@ -12,11 +12,11 @@ import (
 // This struct provides methods such as UnderlyingSymbol(), Expiration(), and Date() to set these parameters respectively.
 //
 // Public Methods:
-// - UnderlyingSymbol(symbol string) *OptionsStrikesRequest: Sets the underlying symbol parameter for the request.
-// - Expiration(expiration string) *OptionsStrikesRequest: Sets the expiration parameter for the request.
-// - Date(date string) *OptionsStrikesRequest: Sets the date parameter for the request.
-// - Packed() (*models.OptionsStrikesResponse, error): Sends the OptionsStrikesRequest and returns the OptionsStrikesResponse.
-// - Get() ([]models.OptionsStrikes, error): Sends the OptionsStrikesRequest, unpacks the OptionsStrikesResponse, and returns a slice of OptionsStrikes.
+//   - UnderlyingSymbol(symbol string) *OptionsStrikesRequest: Sets the underlying symbol parameter for the request.
+//   - Expiration(expiration string) *OptionsStrikesRequest: Sets the expiration parameter for the request.
+//   - Date(date string) *OptionsStrikesRequest: Sets the date parameter for the request.
+//   - Packed() (*models.OptionsStrikesResponse, error): Sends the OptionsStrikesRequest and returns the OptionsStrikesResponse.
+//   - Get() ([]models.OptionsStrikes, error): Sends the OptionsStrikesRequest, unpacks the OptionsStrikesResponse, and returns a slice of OptionsStrikes.
 type OptionsStrikesRequest struct {
 	*baseRequest
 	underlyingSymbol *parameters.SymbolParams
@@ -28,10 +28,10 @@ type OptionsStrikesRequest struct {
 // This method is used to specify the symbol of the underlying asset for which options strikes data is requested.
 //
 // Parameters:
-// - underlyingSymbol: A string representing the symbol to be set.
+//   - underlyingSymbol: A string representing the symbol to be set.
 //
 // Returns:
-// - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
+//   - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
 func (o *OptionsStrikesRequest) UnderlyingSymbol(underlyingSymbol string) *OptionsStrikesRequest {
 	if o.underlyingSymbol == nil {
 		o.underlyingSymbol = &parameters.SymbolParams{}
@@ -46,10 +46,10 @@ func (o *OptionsStrikesRequest) UnderlyingSymbol(underlyingSymbol string) *Optio
 // This method is used to specify the expiration date of the options for which strikes data is requested.
 //
 // Parameters:
-// - expiration: A string representing the expiration date to be set.
+//   - expiration: A string representing the expiration date to be set.
 //
 // Returns:
-// - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
+//   - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
 func (o *OptionsStrikesRequest) Expiration(expiration string) *OptionsStrikesRequest {
 	if o.expiration == nil {
 		o.expiration = &parameters.OptionParams{}
@@ -64,10 +64,10 @@ func (o *OptionsStrikesRequest) Expiration(expiration string) *OptionsStrikesReq
 // This method is used to specify the date for which the options strikes data is requested.
 //
 // Parameters:
-// - date: A string representing the date to be set.
+//   - date: A string representing the date to be set.
 //
 // Returns:
-// - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
+//   - *OptionsStrikesRequest: This method returns a pointer to the OptionsStrikesRequest instance it was called on. This allows for method chaining.
 func (o *OptionsStrikesRequest) Date(date string) *OptionsStrikesRequest {
 	if o.date == nil {
 		o.date = &parameters.DateParams{}
@@ -89,11 +89,11 @@ func (o *OptionsStrikesRequest) getParams() ([]parameters.MarketDataParam, error
 // Packed sends the OptionsStrikesRequest and returns the OptionsStrikesResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.OptionsStrikesResponse: A pointer to the OptionsStrikesResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.OptionsStrikesResponse: A pointer to the OptionsStrikesResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (osr *OptionsStrikesRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionsStrikesResponse, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionsStrikesRequest is nil")
@@ -117,11 +117,11 @@ func (osr *OptionsStrikesRequest) Packed(optionalClients ...*MarketDataClient) (
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - []models.OptionsStrikes: A slice of OptionsStrikes containing the unpacked options strikes data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.OptionsStrikes: A slice of OptionsStrikes containing the unpacked options strikes data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (osr *OptionsStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]models.OptionsStrikes, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionsStrikesRequest is nil")
@@ -148,11 +148,11 @@ func (osr *OptionsStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]m
 // the predefined endpoints for options strikes.
 //
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //   the default client is used.
 //
 // Returns:
-// - *OptionsStrikesRequest: A pointer to the newly created OptionsStrikesRequest with default parameters and associated client.
+//   - *OptionsStrikesRequest: A pointer to the newly created OptionsStrikesRequest with default parameters and associated client.
 func OptionsStrikes(client ...*MarketDataClient) *OptionsStrikesRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["options"]["strikes"]

@@ -10,16 +10,23 @@ import (
 	"time"
 )
 
-// IsZeroValue checks if the provided interface{} 'i' holds a value that is considered "zero" or "empty" for its type.
-// This includes:
-// - nil pointers
-// - empty strings
-// - false for booleans
-// - zero for numeric types (integers, unsigned integers, floats)
-// - nil for slices, maps, interfaces, and channels
-// - time.Time structs representing the zero time
-// - structs where all fields are "zero" values
+// IsZeroValue checks if the provided interface{} 'i' holds a value that is considered "zero" or "empty" for its type. 
 // For pointers, it also checks if the pointed-to value is a zero value, except for pointers to integers or booleans.
+//
+// This includes:
+//   - nil pointers
+//   - empty strings
+//   - false for booleans
+//   - zero for numeric types (integers, unsigned integers, floats)
+//   - nil for slices, maps, interfaces, and channels
+//   - time.Time structs representing the zero time
+//   - structs where all fields are "zero" values
+// 
+// Parameters:
+//   - i: The interface{} to check for a "zero" or "empty" value.
+//
+// Returns:
+//   - A bool indicating if 'i' is a "zero" or "empty" value.
 func IsZeroValue(i interface{}) bool {
 	// Check if the interface is nil, which is considered a zero value.
 	if i == nil {
@@ -101,7 +108,13 @@ func IsZeroValue(i interface{}) bool {
 		return false
 	}
 }
-
+// IsAlpha checks if the input string consists only of alphabetic characters.
+//
+// Parameters:
+//   - s: The string to be checked.
+//
+// Returns:
+//   - A boolean value indicating whether the string is alphabetic (true) or not (false).
 func IsAlpha(s string) bool {
 	for _, r := range s {
 		if !('a' <= r && r <= 'z' || 'A' <= r && r <= 'Z') {

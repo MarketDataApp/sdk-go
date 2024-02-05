@@ -20,24 +20,24 @@ func stringDateParser(dateStr string, tz *time.Location) (time.Time, string, err
         return t, precision, nil
     }
 
-	parsedDate, precision, found := tryParseSpecialCases(dateStr)
+	parsedDate, precision, found := tryParseSpecialCases(dateStr, tz)
     if found {
         return parsedDate, precision, nil
     }
-
     return time.Time{}, "", fmt.Errorf("unable to parse date string: %s", dateStr)
 }
 
 // tryParseSpecialCases tries to parse special date strings like "today", "yesterday", and "now".
 // It returns the parsed time, the precision, and a boolean indicating if the parsing was successful.
-func tryParseSpecialCases(dateStr string) (time.Time, string, bool) {
-    now := time.Now()
+// It accepts a location parameter to use for the parsed time.
+func tryParseSpecialCases(dateStr string, loc *time.Location) (time.Time, string, bool) {
+    now := time.Now().In(loc)
     switch strings.ToLower(dateStr) {
     case "today":
-        return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()), "day", true
+        return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc), "day", true
     case "yesterday":
         yesterday := now.AddDate(0, 0, -1)
-        return time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, now.Location()), "day", true
+        return time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, loc), "day", true
     case "now":
         return now, "second", true
     default:

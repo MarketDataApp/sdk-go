@@ -12,8 +12,8 @@ import (
 // This struct provides methods such as Symbol() and FiftyTwoWeek() to set these parameters respectively.
 //
 // Public Methods:
-// - Symbol(q string) *IndexQuoteRequest: Sets the symbol parameter for the request.
-// - FiftyTwoWeek(q bool) *IndexQuoteRequest: Sets the fifty-two-week parameter for the request.
+//   - Symbol(q string) *IndexQuoteRequest: Sets the symbol parameter for the request.
+//   - FiftyTwoWeek(q bool) *IndexQuoteRequest: Sets the fifty-two-week parameter for the request.
 type IndexQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams
@@ -25,13 +25,13 @@ type IndexQuoteRequest struct {
 // It modifies the symbolParams field of the IndexQuoteRequest instance to store the symbol value.
 //
 // Parameters:
-// - q: A string representing the market symbol to be set.
+//   - q: A string representing the market symbol to be set.
 //
 // Returns:
-// - *IndexQuoteRequest: This method returns a pointer to the IndexQuoteRequest instance it was called on. This allows for method chaining, where multiple setter methods can be called in a single statement. If the receiver (*IndexQuoteRequest) is nil, it returns nil to prevent a panic.
+//   - *IndexQuoteRequest: This method returns a pointer to the IndexQuoteRequest instance it was called on. This allows for method chaining, where multiple setter methods can be called in a single statement. If the receiver (*IndexQuoteRequest) is nil, it returns nil to prevent a panic.
 //
 // Note:
-// If an error occurs while setting the symbol (e.g., if the symbol value is not supported), the Error field of the IndexQuoteRequest is set with the encountered error, but the method still returns the IndexQuoteRequest instance to allow for further method calls or error handling by the caller.
+//   - If an error occurs while setting the symbol (e.g., if the symbol value is not supported), the Error field of the IndexQuoteRequest is set with the encountered error, but the method still returns the IndexQuoteRequest instance to allow for further method calls or error handling by the caller.
 func (iqr *IndexQuoteRequest) Symbol(q string) *IndexQuoteRequest {
 	if iqr == nil {
 		return nil
@@ -48,10 +48,10 @@ func (iqr *IndexQuoteRequest) Symbol(q string) *IndexQuoteRequest {
 // It modifies the fiftyTwoWeekParams field of the IndexQuoteRequest instance to store the boolean value.
 //
 // Parameters:
-// - q: A boolean indicating whether to include fifty-two-week data.
+//   - q: A boolean indicating whether to include fifty-two-week data.
 //
 // Returns:
-// - *IndexQuoteRequest: This method returns a pointer to the IndexQuoteRequest instance it was called on. This allows for method chaining. If the receiver (*IndexQuoteRequest) is nil, it returns nil to prevent a panic.
+//   - *IndexQuoteRequest: This method returns a pointer to the IndexQuoteRequest instance it was called on. This allows for method chaining. If the receiver (*IndexQuoteRequest) is nil, it returns nil to prevent a panic.
 func (iqr *IndexQuoteRequest) FiftyTwoWeek(q bool) *IndexQuoteRequest {
 	if iqr == nil {
 		return nil
@@ -65,8 +65,8 @@ func (iqr *IndexQuoteRequest) FiftyTwoWeek(q bool) *IndexQuoteRequest {
 // for easier manipulation and usage in subsequent requests.
 //
 // Returns:
-// - []parameters.MarketDataParam: A slice containing all the parameters set in the IndexQuoteRequest.
-// - error: An error object indicating failure to pack the parameters, nil if successful.
+//   - []parameters.MarketDataParam: A slice containing all the parameters set in the IndexQuoteRequest.
+//   - error: An error object indicating failure to pack the parameters, nil if successful.
 func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
@@ -80,11 +80,12 @@ func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the IndexQuotesResponse along with any error encountered during the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//     it replaces the current client for this request.
+//
 // Returns:
-// - *models.IndexQuotesResponse: A pointer to the IndexQuotesResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.IndexQuotesResponse: A pointer to the IndexQuotesResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (iqr *IndexQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*models.IndexQuotesResponse, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
@@ -111,16 +112,17 @@ func (iqr *IndexQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // Upon receiving the response, it unpacks the data into a slice of IndexQuote using the Unpack method from the response.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//     it replaces the current client for this request.
+//
 // Returns:
-// - []models.IndexQuote: A slice of IndexQuote containing the unpacked quote data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.IndexQuote: A slice of IndexQuote containing the unpacked quote data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (iqr *IndexQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]models.IndexQuote, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	iqrResp, err := iqr.Packed(optionalClients...)
 	if err != nil {
@@ -141,10 +143,11 @@ func (iqr *IndexQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]model
 // with default parameters for symbol and fifty-two-week data, and sets the request path based on
 // the predefined endpoints for index quotes.
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//     the default client is used.
+//
 // Returns:
-// - *IndexQuoteRequest: A pointer to the newly created IndexQuoteRequest with default parameters and associated client.
+//   - *IndexQuoteRequest: A pointer to the newly created IndexQuoteRequest with default parameters and associated client.
 func IndexQuotes(client ...*MarketDataClient) *IndexQuoteRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["indices"]["quotes"]

@@ -11,7 +11,7 @@ import (
 // It encapsulates parameters for user input to be used in the request.
 //
 // Public Methods:
-// - UserInput(userInput string) *OptionLookupRequest: Sets the user input parameter for the request.
+//   - UserInput(userInput string) *OptionLookupRequest: Sets the user input parameter for the request.
 type OptionLookupRequest struct {
 	*baseRequest
 	userInput *parameters.UserInputParams
@@ -20,9 +20,9 @@ type OptionLookupRequest struct {
 // UserInput sets the user input parameter for the OptionsLookupRequest.
 // This method is used to specify the user input for which the options data is requested.
 // Parameters:
-// - userInput: A string representing the user input to be set.
+//   - userInput: A string representing the user input to be set.
 // Returns:
-// - *OptionsLookupRequest: This method returns a pointer to the OptionsLookupRequest instance it was called on, allowing for method chaining.
+//   - *OptionsLookupRequest: This method returns a pointer to the OptionsLookupRequest instance it was called on, allowing for method chaining.
 func (o *OptionLookupRequest) UserInput(userInput string) *OptionLookupRequest {
 	if o.userInput == nil {
 		o.userInput = &parameters.UserInputParams{}
@@ -36,8 +36,8 @@ func (o *OptionLookupRequest) UserInput(userInput string) *OptionLookupRequest {
 // getParams packs the OptionsLookupRequest struct into a slice of interface{} and returns it.
 // This method is used to gather all the parameters set in the OptionsLookupRequest into a single slice for easier manipulation and usage in subsequent requests.
 // Returns:
-// - []parameters.MarketDataParam: A slice containing all the parameters set in the OptionsLookupRequest.
-// - error: An error object indicating failure to pack the parameters, nil if successful.
+//   - []parameters.MarketDataParam: A slice containing all the parameters set in the OptionsLookupRequest.
+//   - error: An error object indicating failure to pack the parameters, nil if successful.
 func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionLookupRequest is nil")
@@ -49,11 +49,11 @@ func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) 
 // Packed sends the OptionLookupRequest and returns the OptionsLookupResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.OptionsLookupResponse: A pointer to the OptionsLookupResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.OptionsLookupResponse: A pointer to the OptionsLookupResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (o *OptionLookupRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionLookupResponse, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsLookupRequest is nil")
@@ -77,11 +77,11 @@ func (o *OptionLookupRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - string: A string containing the unpacked options data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - string: A string containing the unpacked options data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (o *OptionLookupRequest) Get(optionalClients ...*MarketDataClient) (string, error) {
 	if o == nil {
 		return "", fmt.Errorf("OptionsLookupRequest is nil")
@@ -105,9 +105,9 @@ func (o *OptionLookupRequest) Get(optionalClients ...*MarketDataClient) (string,
 // OptionLookup creates a new OptionsLookupRequest and associates it with the provided client.
 // If no client is provided, it uses the default client.
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
 // Returns:
-// - *OptionsLookupRequest: A pointer to the newly created OptionsLookupRequest with default parameters and associated client.
+//   - *OptionsLookupRequest: A pointer to the newly created OptionsLookupRequest with default parameters and associated client.
 func OptionLookup(client ...*MarketDataClient) *OptionLookupRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["options"]["lookup"]

@@ -12,14 +12,14 @@ import (
 // This struct provides methods such as Report(), Symbol(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
 // Public Methods:
-// - Report(q string) *StockEarningsRequest: Sets the report type parameter for the request.
-// - Symbol(q string) *StockEarningsRequest: Sets the symbol parameter for the request.
-// - Date(q interface{}) *StockEarningsRequest: Sets the date parameter for the request.
-// - From(q interface{}) *StockEarningsRequest: Sets the 'from' date parameter for the request.
-// - To(q interface{}) *StockEarningsRequest: Sets the 'to' date parameter for the request.
-// - Countback(q int) *StockEarningsRequest: Sets the countback parameter for the request.
-// - Packed() (*models.StockEarningsResponse, error): Sends the StockEarningsRequest and returns the StockEarningsResponse.
-// - Get() ([]models.StockEarningsReport, error): Sends the StockEarningsRequest, unpacks the StockEarningsResponse, and returns a slice of StockEarningsReport.
+//   - Report(q string) *StockEarningsRequest: Sets the report type parameter for the request.
+//   - Symbol(q string) *StockEarningsRequest: Sets the symbol parameter for the request.
+//   - Date(q interface{}) *StockEarningsRequest: Sets the date parameter for the request.
+//   - From(q interface{}) *StockEarningsRequest: Sets the 'from' date parameter for the request.
+//   - To(q interface{}) *StockEarningsRequest: Sets the 'to' date parameter for the request.
+//   - Countback(q int) *StockEarningsRequest: Sets the countback parameter for the request.
+//   - Packed() (*models.StockEarningsResponse, error): Sends the StockEarningsRequest and returns the StockEarningsResponse.
+//   - Get() ([]models.StockEarningsReport, error): Sends the StockEarningsRequest, unpacks the StockEarningsResponse, and returns a slice of StockEarningsReport.
 type StockEarningsRequest struct {
 	*baseRequest
 	symbolParams        *parameters.SymbolParams
@@ -31,10 +31,10 @@ type StockEarningsRequest struct {
 // This method is used to specify which earnings report to be retrieved.
 //
 // Parameters:
-// - q: A string representing which report to be returned.
+//   - q: A string representing which report to be returned.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) Report(q string) *StockEarningsRequest {
 	if ser == nil {
 		return nil
@@ -50,10 +50,10 @@ func (ser *StockEarningsRequest) Report(q string) *StockEarningsRequest {
 // This method is used to specify the stock symbol for which earnings data is requested.
 //
 // Parameters:
-// - q: A string representing the stock symbol to be set.
+//   - q: A string representing the stock symbol to be set.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) Symbol(q string) *StockEarningsRequest {
 	if ser == nil {
 		return nil
@@ -69,10 +69,10 @@ func (ser *StockEarningsRequest) Symbol(q string) *StockEarningsRequest {
 // This method is used to specify the date for which the stock earnings data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the date to be set.
+//   - q: An interface{} representing the date to be set.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) Date(q interface{}) *StockEarningsRequest {
 	err := ser.dateParams.SetDate(q)
 	if err != nil {
@@ -85,10 +85,10 @@ func (ser *StockEarningsRequest) Date(q interface{}) *StockEarningsRequest {
 // This method is used to specify the starting point of the date range for which the stock earnings data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the starting date.
+//   - q: An interface{} representing the starting date.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) From(q interface{}) *StockEarningsRequest {
 	err := ser.dateParams.SetFrom(q)
 	if err != nil {
@@ -101,10 +101,10 @@ func (ser *StockEarningsRequest) From(q interface{}) *StockEarningsRequest {
 // This method is used to specify the ending point of the date range for which the stock earnings data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the ending date.
+//   - q: An interface{} representing the ending date.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) To(q interface{}) *StockEarningsRequest {
 	err := ser.dateParams.SetTo(q)
 	if err != nil {
@@ -117,10 +117,10 @@ func (ser *StockEarningsRequest) To(q interface{}) *StockEarningsRequest {
 // This method specifies the number of periods to return, counting backwards from the 'to' date.
 //
 // Parameters:
-// - q: An int representing the number of periods to return.
+//   - q: An int representing the number of periods to return.
 //
 // Returns:
-// - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
+//   - *StockEarningsRequest: This method returns a pointer to the StockEarningsRequest instance it was called on. This allows for method chaining.
 func (ser *StockEarningsRequest) Countback(q int) *StockEarningsRequest {
 	err := ser.dateParams.SetCountback(q)
 	if err != nil {
@@ -141,11 +141,11 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 // Packed sends the StockEarningsRequest and returns the StockEarningsResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.StockEarningsResponse: A pointer to the StockEarningsResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.StockEarningsResponse: A pointer to the StockEarningsResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (ser *StockEarningsRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockEarningsResponse, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
@@ -169,11 +169,11 @@ func (ser *StockEarningsRequest) Packed(optionalClients ...*MarketDataClient) (*
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - []models.StockEarningsReport: A slice of StockEarningsReport containing the unpacked earnings data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.StockEarningsReport: A slice of StockEarningsReport containing the unpacked earnings data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (ser *StockEarningsRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockEarningsReport, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
@@ -200,11 +200,11 @@ func (ser *StockEarningsRequest) Get(optionalClients ...*MarketDataClient) ([]mo
 // the predefined endpoints for stock earnings.
 //
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //   the default client is used.
 //
 // Returns:
-// - *StockEarningsRequest: A pointer to the newly created StockEarningsRequest with default parameters and associated client.
+//   - *StockEarningsRequest: A pointer to the newly created StockEarningsRequest with default parameters and associated client.
 func StockEarnings(client ...*MarketDataClient) *StockEarningsRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["stocks"]["earnings"]

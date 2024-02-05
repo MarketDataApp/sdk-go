@@ -14,15 +14,19 @@ import (
 	"github.com/MarketDataApp/sdk-go/helpers/types" // Ensure you import the package where IsZeroValue is defined
 )
 
+// MarketDataParam defines an interface for setting parameters on a resty.Request.
+// Implementations of this interface should provide logic to modify a given resty.Request
+// by setting necessary parameters for making API calls to fetch market data.
 type MarketDataParam interface {
 	SetParams(*resty.Request) error
 }
-
 func ParseAndSetParams(params MarketDataParam, request *resty.Request) error {
+
     if params == nil {
         return errors.New("params cannot be nil")
     }
     kind := reflect.TypeOf(params).Kind()
+
     if kind != reflect.Struct && kind != reflect.Ptr {
         return fmt.Errorf("params must be a struct or a pointer to a struct, got %v", kind)
     }
@@ -43,24 +47,25 @@ func ParseAndSetParams(params MarketDataParam, request *resty.Request) error {
         value := v.Field(i)
         tag := field.Tag
 
-        // Skip setting the parameter if it's not required and has a zero value.
-        if !strings.Contains(tag.Get("path"), "required") && !strings.Contains(tag.Get("query"), "required") && types.IsZeroValue(value.Interface()) {
+        // Determine if the parameter is required or optional based on the 'validate' tag.
+        validationTag := tag.Get("validate")
+        isRequired := strings.Contains(validationTag, "required")
+
+        // Handle missing required parameters.
+        if isRequired && (value.Kind() == reflect.Ptr && value.IsNil() || types.IsZeroValue(value.Interface())) {
+            return fmt.Errorf("required parameter %s is missing", field.Name)
+        }
+
+        // Skip optional parameters that are not set.
+        if !isRequired && (value.Kind() == reflect.Ptr && value.IsNil() || types.IsZeroValue(value.Interface())) {
             continue
         }
 
         // Prepare the value for setting, handling pointers correctly.
         var valueInterface interface{}
         if value.Kind() == reflect.Ptr {
-            if value.IsNil() {
-                // Skip nil pointers unless they are required.
-                continue
-            }
             valueInterface = reflect.Indirect(value).Interface()
         } else {
-            if types.IsZeroValue(value.Interface()) {
-                // Skip zero values unless they are required.
-                continue
-            }
             valueInterface = value.Interface()
         }
 

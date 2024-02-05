@@ -8,13 +8,16 @@ import (
 )
 
 func main() {
-	
+
 	client, err := api.GetClient()
 	if err != nil {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(true)
+	client.Debug(false)
+
+}
+
 /*
 
 	fmt.Println("Staring log example...")
@@ -26,13 +29,12 @@ func main() {
 	fmt.Println("Staring rawResponse example...")
 	rawHttpResponseExample()
 
-	*/
-}
+*/
 
 func optionsExamples() {
 	fmt.Println("Staring Options/Chain example...")
 	optionsChainExample()
-	
+
 	fmt.Println("Staring Options/Strikes example...")
 	optionsStrikesExample()
 

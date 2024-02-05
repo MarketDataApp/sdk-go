@@ -6,27 +6,37 @@ import (
 	"time"
 )
 
+// IndexQuotesResponse represents the response structure for index quotes.
+// It includes slices for symbols, last prices, changes, percentage changes,
+// 52-week highs, 52-week lows, and update timestamps.
 type IndexQuotesResponse struct {
-	Symbol    []string   `json:"symbol"`
-	Last      []float64  `json:"last"`
-	Change    []*float64 `json:"change,omitempty"`
-	ChangePct []*float64 `json:"changepct,omitempty"`
-	High52    *[]float64 `json:"52weekHigh,omitempty"`
-	Low52     *[]float64 `json:"52weekLow,omitempty"`
-	Updated   []int64    `json:"updated"`
+	Symbol    []string   `json:"symbol"`             // Symbols are the stock symbols or tickers.
+	Last      []float64  `json:"last"`               // Last contains the last traded prices.
+	Change    []*float64 `json:"change,omitempty"`   // Change represents the change in price, can be nil if not applicable.
+	ChangePct []*float64 `json:"changepct,omitempty"`// ChangePct represents the percentage change in price, can be nil if not applicable.
+	High52    *[]float64 `json:"52weekHigh,omitempty"`// High52 points to a slice of 52-week high prices, can be nil if not applicable.
+	Low52     *[]float64 `json:"52weekLow,omitempty"` // Low52 points to a slice of 52-week low prices, can be nil if not applicable.
+	Updated   []int64    `json:"updated"`            // Updated contains timestamps of the last updates.
 }
 
+// IndexQuote represents a single quote for an index.
+// It includes the symbol, last price, change, percentage change,
+// 52-week high, 52-week low, volume, and update timestamp.
 type IndexQuote struct {
-	Symbol    string
-	Last      float64
-	Change    *float64
-	ChangePct *float64
-	High52    *float64
-	Low52     *float64
-	Volume    int64
-	Updated   time.Time
+	Symbol    string     // Symbol is the stock symbol or ticker.
+	Last      float64    // Last is the last traded price.
+	Change    *float64   // Change represents the change in price, can be nil if not applicable.
+	ChangePct *float64   // ChangePct represents the percentage change in price, can be nil if not applicable.
+	High52    *float64   // High52 is the 52-week high price, can be nil if not applicable.
+	Low52     *float64   // Low52 is the 52-week low price, can be nil if not applicable.
+	Volume    int64      // Volume is the number of shares traded.
+	Updated   time.Time  // Updated is the timestamp of the last update.
 }
 
+// String returns a string representation of the IndexQuote.
+//
+// Returns:
+//   - A string that represents the IndexQuote.
 func (iq IndexQuote) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
 	if iq.High52 != nil && iq.Low52 != nil && iq.Change != nil && iq.ChangePct != nil {
@@ -44,6 +54,11 @@ func (iq IndexQuote) String() string {
 	}
 }
 
+// Unpack transforms the IndexQuotesResponse into a slice of IndexQuote.
+//
+// Returns:
+//   - A slice of IndexQuote derived from the IndexQuotesResponse.
+//   - An error if any issues occur during the unpacking process.
 func (iqr *IndexQuotesResponse) Unpack() ([]IndexQuote, error) {
 	var indexQuotes []IndexQuote
 	for i := range iqr.Symbol {
@@ -71,6 +86,10 @@ func (iqr *IndexQuotesResponse) Unpack() ([]IndexQuote, error) {
 	return indexQuotes, nil
 }
 
+// String returns a string representation of the IndexQuotesResponse.
+//
+// Returns:
+//   - A string that represents the IndexQuotesResponse.
 func (iqr *IndexQuotesResponse) String() string {
 	var result strings.Builder
 
@@ -94,6 +113,13 @@ func (iqr *IndexQuotesResponse) String() string {
 	return result.String()
 }
 
+// joinFloat64Slice joins a slice of float64 into a single string.
+//
+// Parameters:
+//   - slice: The slice of float64 to be joined.
+//
+// Returns:
+//   - A string representation of the joined slice.
 func joinFloat64Slice(slice []float64) string {
 	strs := make([]string, len(slice))
 	for i, v := range slice {
@@ -102,6 +128,13 @@ func joinFloat64Slice(slice []float64) string {
 	return strings.Join(strs, ", ")
 }
 
+// joinFloat64PointerSlice joins a slice of *float64 into a single string, handling nil pointers gracefully.
+//
+// Parameters:
+//   - slice: The slice of *float64 to be joined.
+//
+// Returns:
+//   - A string representation of the joined slice, with "nil" for nil pointers.
 func joinFloat64PointerSlice(slice []*float64) string {
 	strs := make([]string, len(slice))
 	for i, v := range slice {
@@ -114,6 +147,13 @@ func joinFloat64PointerSlice(slice []*float64) string {
 	return strings.Join(strs, ", ")
 }
 
+// joinInt64Slice joins a slice of int64 into a single string.
+//
+// Parameters:
+//   - slice: The slice of int64 to be joined.
+//
+// Returns:
+//   - A string representation of the joined slice.
 func joinInt64Slice(slice []int64) string {
 	strs := make([]string, len(slice))
 	for i, v := range slice {

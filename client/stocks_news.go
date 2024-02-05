@@ -12,11 +12,11 @@ import (
 // This struct provides methods such as Symbol(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
 // Public Methods:
-// - Symbol(q string) *StockNewsRequest: Sets the symbol parameter for the request.
-// - Date(q interface{}) *StockNewsRequest: Sets the date parameter for the request.
-// - From(q interface{}) *StockNewsRequest: Sets the 'from' date parameter for the request.
-// - To(q interface{}) *StockNewsRequest: Sets the 'to' date parameter for the request.
-// - Countback(q int) *StockNewsRequest: Sets the countback parameter for the request.
+//   - Symbol(q string) *StockNewsRequest: Sets the symbol parameter for the request.
+//   - Date(q interface{}) *StockNewsRequest: Sets the date parameter for the request.
+//   - From(q interface{}) *StockNewsRequest: Sets the 'from' date parameter for the request.
+//   - To(q interface{}) *StockNewsRequest: Sets the 'to' date parameter for the request.
+//   - Countback(q int) *StockNewsRequest: Sets the countback parameter for the request.
 type StockNewsRequest struct {
 	*baseRequest
 	symbolParams *parameters.SymbolParams
@@ -28,10 +28,10 @@ type StockNewsRequest struct {
 // This method is used to specify the stock symbol for which news data is requested.
 //
 // Parameters:
-// - q: A string representing the stock symbol to be set.
+//   - q: A string representing the stock symbol to be set.
 //
 // Returns:
-// - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
+//   - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
 func (snr *StockNewsRequest) Symbol(q string) *StockNewsRequest {
 	if snr == nil {
 		return nil
@@ -47,10 +47,10 @@ func (snr *StockNewsRequest) Symbol(q string) *StockNewsRequest {
 // This method is used to specify the date for which the stock news data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the date to be set.
+//   - q: An interface{} representing the date to be set.
 //
 // Returns:
-// - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
+//   - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
 func (snr *StockNewsRequest) Date(q interface{}) *StockNewsRequest {
 	if snr == nil {
 		return nil
@@ -66,10 +66,10 @@ func (snr *StockNewsRequest) Date(q interface{}) *StockNewsRequest {
 // This method is used to specify the starting point of the date range for which the stock news data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the starting date.
+//   - q: An interface{} representing the starting date.
 //
 // Returns:
-// - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
+//   - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
 func (snr *StockNewsRequest) From(q interface{}) *StockNewsRequest {
 	if snr == nil {
 		return nil
@@ -85,10 +85,10 @@ func (snr *StockNewsRequest) From(q interface{}) *StockNewsRequest {
 // This method is used to specify the ending point of the date range for which the stock news data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the ending date.
+//   - q: An interface{} representing the ending date.
 //
 // Returns:
-// - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
+//   - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
 func (snr *StockNewsRequest) To(q interface{}) *StockNewsRequest {
 	if snr == nil {
 		return nil
@@ -104,10 +104,10 @@ func (snr *StockNewsRequest) To(q interface{}) *StockNewsRequest {
 // This method specifies the number of news items to return, counting backwards from the 'to' date.
 //
 // Parameters:
-// - q: An int representing the number of news items to return.
+//   - q: An int representing the number of news items to return.
 //
 // Returns:
-// - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
+//   - *StockNewsRequest: This method returns a pointer to the StockNewsRequest instance it was called on. This allows for method chaining.
 func (snr *StockNewsRequest) Countback(q int) *StockNewsRequest {
 	if snr == nil {
 		return nil
@@ -131,11 +131,11 @@ func (snr *StockNewsRequest) getParams() ([]parameters.MarketDataParam, error) {
 // Packed sends the StockNewsRequest and returns the StockNewsResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockNewsResponse, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
@@ -159,11 +159,11 @@ func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*mode
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockNews, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
@@ -190,11 +190,11 @@ func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models
 // the predefined endpoints for stock news.
 //
 // Parameters:
-// - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
+//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //   the default client is used.
 //
 // Returns:
-// - *StockNewsRequest: A pointer to the newly created StockNewsRequest with default parameters and associated client.
+//   - *StockNewsRequest: A pointer to the newly created StockNewsRequest with default parameters and associated client.
 func StockNews(client ...*MarketDataClient) *StockNewsRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["stocks"]["news"]

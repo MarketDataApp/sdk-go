@@ -12,18 +12,18 @@ import (
 // This struct provides methods such as Resolution(), Symbol(), Date(), From(), To(), Countback(), AdjustSplits(), AdjustDividends(), Extended(), and Exchange() to set these parameters respectively.
 //
 // Public Methods:
-// - Resolution(q string) *StockCandlesRequest: Sets the resolution parameter for the request.
-// - Symbol(q string) *StockCandlesRequest: Sets the symbol parameter for the request.
-// - Date(q interface{}) *StockCandlesRequest: Sets the date parameter for the request.
-// - From(q interface{}) *StockCandlesRequest: Sets the 'from' date parameter for the request.
-// - To(q interface{}) *StockCandlesRequest: Sets the 'to' date parameter for the request.
-// - Countback(q int) *StockCandlesRequest: Sets the countback parameter for the request.
-// - AdjustSplits(q bool) *StockCandlesRequest: Sets the adjust splits parameter for the request.
-// - AdjustDividends(q bool) *StockCandlesRequest: Sets the adjust dividends parameter for the request.
-// - Extended(q bool) *StockCandlesRequest: Sets the extended hours data parameter for the request.
-// - Exchange(q string) *StockCandlesRequest: Sets the exchange parameter for the request.
-// - Packed() (*models.StockCandlesResponse, error): Sends the StockCandlesRequest and returns the StockCandlesResponse.
-// - Get() ([]models.StockCandle, error): Sends the StockCandlesRequest, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
+//   - Resolution(q string) *StockCandlesRequest: Sets the resolution parameter for the request.
+//   - Symbol(q string) *StockCandlesRequest: Sets the symbol parameter for the request.
+//   - Date(q interface{}) *StockCandlesRequest: Sets the date parameter for the request.
+//   - From(q interface{}) *StockCandlesRequest: Sets the 'from' date parameter for the request.
+//   - To(q interface{}) *StockCandlesRequest: Sets the 'to' date parameter for the request.
+//   - Countback(q int) *StockCandlesRequest: Sets the countback parameter for the request.
+//   - AdjustSplits(q bool) *StockCandlesRequest: Sets the adjust splits parameter for the request.
+//   - AdjustDividends(q bool) *StockCandlesRequest: Sets the adjust dividends parameter for the request.
+//   - Extended(q bool) *StockCandlesRequest: Sets the extended hours data parameter for the request.
+//   - Exchange(q string) *StockCandlesRequest: Sets the exchange parameter for the request.
+//   - Packed() (*models.StockCandlesResponse, error): Sends the StockCandlesRequest and returns the StockCandlesResponse.
+//   - Get() ([]models.StockCandle, error): Sends the StockCandlesRequest, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
 type StockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *parameters.StockCandleParams
@@ -36,10 +36,10 @@ type StockCandlesRequest struct {
 // This method is used to specify the granularity of the candle data to be retrieved.
 //
 // Parameters:
-// - q: A string representing the resolution to be set.
+//   - q: A string representing the resolution to be set.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (cr *StockCandlesRequest) Resolution(q string) *StockCandlesRequest {
 	if cr == nil {
 		return nil
@@ -55,10 +55,10 @@ func (cr *StockCandlesRequest) Resolution(q string) *StockCandlesRequest {
 // This method is used to specify the stock symbol for which candle data is requested.
 //
 // Parameters:
-// - q: A string representing the stock symbol to be set.
+//   - q: A string representing the stock symbol to be set.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (cr *StockCandlesRequest) Symbol(q string) *StockCandlesRequest {
 	if cr == nil {
 		return nil
@@ -74,10 +74,10 @@ func (cr *StockCandlesRequest) Symbol(q string) *StockCandlesRequest {
 // This method is used to specify the date for which the stock candle data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the date to be set.
+//   - q: An interface{} representing the date to be set.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) Date(q interface{}) *StockCandlesRequest {
 	err := scr.dateParams.SetDate(q)
 	if err != nil {
@@ -90,10 +90,10 @@ func (scr *StockCandlesRequest) Date(q interface{}) *StockCandlesRequest {
 // This method is used to specify the starting point of the date range for which the stock candle data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the starting date.
+//   - q: An interface{} representing the starting date.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) From(q interface{}) *StockCandlesRequest {
 	err := scr.dateParams.SetFrom(q)
 	if err != nil {
@@ -106,10 +106,10 @@ func (scr *StockCandlesRequest) From(q interface{}) *StockCandlesRequest {
 // This method is used to specify the ending point of the date range for which the stock candle data is requested.
 //
 // Parameters:
-// - q: An interface{} representing the ending date.
+//   - q: An interface{} representing the ending date.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on
 func (scr *StockCandlesRequest) To(q interface{}) *StockCandlesRequest {
 	err := scr.dateParams.SetTo(q)
 	if err != nil {
@@ -122,10 +122,10 @@ func (scr *StockCandlesRequest) To(q interface{}) *StockCandlesRequest {
 // This method specifies the number of candles to return, counting backwards from the 'to' date.
 //
 // Parameters:
-// - q: An int representing the number of candles to return.
+//   - q: An int representing the number of candles to return.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) Countback(q int) *StockCandlesRequest {
 	err := scr.dateParams.SetCountback(q)
 	if err != nil {
@@ -138,10 +138,10 @@ func (scr *StockCandlesRequest) Countback(q int) *StockCandlesRequest {
 // This method indicates whether the returned data should be adjusted for stock splits.
 //
 // Parameters:
-// - q: A bool indicating whether to adjust for splits.
+//   - q: A bool indicating whether to adjust for splits.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) AdjustSplits(q bool) *StockCandlesRequest {
 	if scr == nil {
 		return nil
@@ -154,10 +154,10 @@ func (scr *StockCandlesRequest) AdjustSplits(q bool) *StockCandlesRequest {
 // This method indicates whether the returned data should be adjusted for dividends.
 //
 // Parameters:
-// - q: A bool indicating whether to adjust for dividends.
+//   - q: A bool indicating whether to adjust for dividends.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) AdjustDividends(q bool) *StockCandlesRequest {
 	if scr == nil {
 		return nil
@@ -170,10 +170,10 @@ func (scr *StockCandlesRequest) AdjustDividends(q bool) *StockCandlesRequest {
 // This method indicates whether the returned data should include extended hours trading data.
 //
 // Parameters:
-// - q: A bool indicating whether to include extended hours data.
+//   - q: A bool indicating whether to include extended hours data.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) Extended(q bool) *StockCandlesRequest {
 	if scr == nil {
 		return nil
@@ -186,10 +186,10 @@ func (scr *StockCandlesRequest) Extended(q bool) *StockCandlesRequest {
 // This method is used to specify the exchange from which the stock candle data is requested.
 //
 // Parameters:
-// - q: A string representing the exchange to be set.
+//   - q: A string representing the exchange to be set.
 //
 // Returns:
-// - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *StockCandlesRequest: This method returns a pointer to the StockCandlesRequest instance it was called on. This allows for method chaining.
 func (scr *StockCandlesRequest) Exchange(q string) *StockCandlesRequest {
 	if scr == nil {
 		return nil
@@ -213,11 +213,11 @@ func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error
 // Packed sends the StockCandlesRequest and returns the StockCandlesResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (scr *StockCandlesRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockCandlesResponse, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
@@ -244,8 +244,8 @@ func (scr *StockCandlesRequest) Packed(optionalClients ...*MarketDataClient) (*m
 // Upon receiving the response, it unpacks the data into a slice of StockCandle using the Unpack method from the response.
 //
 // Returns:
-// - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 	baseReq := newBaseRequest(client...)
 	baseReq.path = endpoints[1]["stocks"]["candles"]
@@ -268,11 +268,11 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scr *StockCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockCandle, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
@@ -349,11 +349,11 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 // Packed sends the StockCandlesRequestV2 and returns the StockCandlesResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
-// - error: An error object that indicates a failure in sending the request.
+//   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
+//   - error: An error object that indicates a failure in sending the request.
 func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient) (*models.StockCandlesResponse, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
@@ -377,11 +377,11 @@ func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient)
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
-// - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //   it replaces the current client for this request.
 // Returns:
-// - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
-// - error: An error object that indicates a failure in sending the request or unpacking the response.
+//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([]models.StockCandle, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")

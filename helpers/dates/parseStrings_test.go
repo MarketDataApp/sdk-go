@@ -72,6 +72,7 @@ func TestTryParseStringTZDatesNoTZ(t *testing.T) {
 }
 
 func TestTryParseSpecialCases(t *testing.T) {
+	loc, _ := time.LoadLocation("America/New_York")
 	tests := []struct {
 		name     string
 		dateStr  string
@@ -82,21 +83,21 @@ func TestTryParseSpecialCases(t *testing.T) {
 		{
 			name:     "Test Today",
 			dateStr:  "today",
-			wantTime: time.Now().Truncate(24 * time.Hour),
+			wantTime: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, loc),
 			wantStr:  "day",
 			wantBool: true,
 		},
 		{
 			name:     "Test Yesterday",
 			dateStr:  "yesterday",
-			wantTime: time.Now().Truncate(24 * time.Hour).AddDate(0, 0, -1),
+			wantTime: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, loc).AddDate(0, 0, -1),
 			wantStr:  "day",
 			wantBool: true,
 		},
 		{
 			name:     "Test Now",
 			dateStr:  "now",
-			wantTime: time.Now(),
+			wantTime: time.Now().In(loc),
 			wantStr:  "second",
 			wantBool: true,
 		},
@@ -111,7 +112,7 @@ func TestTryParseSpecialCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotTime, gotStr, gotBool := tryParseSpecialCases(tt.dateStr)
+			gotTime, gotStr, gotBool := tryParseSpecialCases(tt.dateStr, loc)
 			if gotTime.Truncate(time.Second) != tt.wantTime.Truncate(time.Second) {
 				t.Errorf("tryParseSpecialCases() gotTime = %v, want %v", gotTime, tt.wantTime)
 			}

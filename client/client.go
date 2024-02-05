@@ -78,8 +78,8 @@ const (
 // The debug field is used to control logging verbosity.
 //
 // Public Methods:
-// - Debug(enable bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
-// - RateLimitExceeded() bool: Checks if the rate limit for API requests has been exceeded.
+//   - Debug(enable bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
+//   - RateLimitExceeded() bool: Checks if the rate limit for API requests has been exceeded.
 
 type MarketDataClient struct {
 	*resty.Client              // Embedding resty.Client to utilize its HTTP client functionalities.
@@ -377,12 +377,12 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 // If an error is found in the response, it is returned as part of the response object.
 //
 // Parameters:
-// - br: A pointer to a baseRequest object containing the request details.
-// - result: An interface where the result of the request will be stored if successful.
+//   - br: A pointer to a baseRequest object containing the request details.
+//   - result: An interface where the result of the request will be stored if successful.
 //
 // Returns:
-// - A pointer to a resty.Response object containing the response from the server.
-// - An error object if an error occurred during the request execution or if the response contains an error.
+//   - A pointer to a resty.Response object containing the response from the server.
+//   - An error object if an error occurred during the request execution or if the response contains an error.
 func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
 	// Execute the prepared request and capture the response and any error.
 	resp, err := c.prepareAndExecuteRequest(br, result)
@@ -405,11 +405,11 @@ func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (
 // This function is useful when the caller needs the raw response for custom processing.
 //
 // Parameters:
-// - br: A pointer to a baseRequest object containing the request details.
+//   - br: A pointer to a baseRequest object containing the request details.
 //
 // Returns:
-// - A pointer to a resty.Response object containing the raw response from the server.
-// - An error object if an error occurred during the request execution.
+//   - A pointer to a resty.Response object containing the raw response from the server.
+//   - An error object if an error occurred during the request execution.
 func (c *MarketDataClient) GetRawResponse(br *baseRequest) (*resty.Response, error) {
 	return c.prepareAndExecuteRequest(br, nil)
 }
@@ -450,10 +450,10 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 // This method allows the client to switch between different environments such as production, testing, and development.
 //
 // Parameters:
-// - env: A string representing the environment to configure. Accepted values are "prodEnv", "testEnv", and "devEnv".
+//   - env: A string representing the environment to configure. Accepted values are "prodEnv", "testEnv", and "devEnv".
 //
 // Returns:
-// - A pointer to the MarketDataClient instance with the configured environment.
+//   - A pointer to the MarketDataClient instance with the configured environment.
 // If an invalid environment is provided, the client's Error field is set, and the same instance is returned.
 func (c *MarketDataClient) Environment(env string) *MarketDataClient {
 	var baseURL string
@@ -494,10 +494,10 @@ func init() {
 // It also makes an initial request to the MarketData API to authorize the token and fetch rate limit information.
 //
 // Parameters:
-// - bearerToken: A string representing the authentication token to be used for API requests.
+//   - bearerToken: A string representing the authentication token to be used for API requests.
 //
 // Returns:
-// - A pointer to the MarketDataClient instance with the configured authentication token.
+//   - A pointer to the MarketDataClient instance with the configured authentication token.
 // If an error occurs during the initial request or if the response indicates a failure, the client's Error field is set,
 // and the same instance is returned.
 func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {

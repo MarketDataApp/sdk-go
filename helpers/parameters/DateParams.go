@@ -16,7 +16,11 @@ type DateParams struct {
 
 // SetDate sets the date parameter of the DateParams.
 // It validates the date using the ToDayString function from the dates package.
-// If the validation fails, it returns an error.
+// Parameters:
+//   - q: The date to be set, can be of any type that ToDayString can process.
+//
+// Returns:
+//   - error: An error if the date validation fails.
 func (dp *DateParams) SetDate(q interface{}) error {
 	date, err := dates.ToDayString(q)
 	if err != nil {
@@ -35,7 +39,11 @@ func (dp *DateParams) SetDate(q interface{}) error {
 
 // SetFrom sets the from parameter of the DateParams.
 // It validates the from date using the ToDayString function from the dates package.
-// If the validation fails, it returns an error.
+// Parameters:
+//   - q: The from date to be set, can be of any type that ToDayString can process.
+//
+// Returns:
+//   - error: An error if the from date validation fails.
 func (dp *DateParams) SetFrom(q interface{}) error {
 	date, err := dates.ToDayString(q)
 	if err != nil {
@@ -55,7 +63,11 @@ func (dp *DateParams) SetFrom(q interface{}) error {
 
 // SetTo sets the to parameter of the DateParams.
 // It validates the to date using the ToDayString function from the dates package.
-// If the validation fails, it returns an error.
+// Parameters:
+//   - q: The to date to be set, can be of any type that ToDayString can process.
+//
+// Returns:
+//   - error: An error if the to date validation fails.
 func (dp *DateParams) SetTo(q interface{}) error {
 	date, err := dates.ToDayString(q)
 	if err != nil {
@@ -74,7 +86,11 @@ func (dp *DateParams) SetTo(q interface{}) error {
 }
 
 // SetCountback sets the countback parameter of the DateParams.
-// If countback is not nil, it clears the date and from parameters.
+// Parameters:
+//   - q: The countback value to be set, must be an integer.
+//
+// Returns:
+//   - error: Always returns nil. Future implementations might return an error if needed.
 func (dp *DateParams) SetCountback(q int) error {
 	dp.Countback = &q
 	if dp.Countback != nil {
@@ -89,8 +105,12 @@ func (dp *DateParams) SetCountback(q int) error {
 }
 
 // SetParams sets the parameters for the DateParams.
-// It uses the parseAndSetParams function to parse and set the parameters.
+// It uses the ParseAndSetParams function to parse and set the parameters.
+// Parameters:
+//   - request: A pointer to a resty.Request to which the parameters will be applied.
+//
+// Returns:
+//   - error: An error if parsing and setting the parameters fail.
 func (dp *DateParams) SetParams(request *resty.Request) error {
 	return ParseAndSetParams(dp, request)
 }
-

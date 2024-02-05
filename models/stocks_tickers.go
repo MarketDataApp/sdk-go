@@ -13,25 +13,35 @@ import (
 	"github.com/iancoleman/orderedmap"
 )
 
-// TickersResponse represents the response from the /stocks/tickers endpoint.
+// TickersResponse represents the response structure for the /stocks/tickers API endpoint.
+// It includes slices for various stock attributes such as symbol, name, type, currency, and exchange.
+// Optional fields are marked with 'omitempty' to exclude them from the JSON output if they are empty.
 type TickersResponse struct {
-	Symbol        []string `json:"symbol"`
-	Name          []string `json:"name,omitempty"`
-	Type          []string `json:"type,omitempty"`
-	Currency      []string `json:"currency,omitempty"`
-	Exchange      []string `json:"exchange,omitempty"`
-	FigiShares    []string `json:"figiShares,omitempty"`
-	FigiComposite []string `json:"figiComposite,omitempty"`
-	Cik           []string `json:"cik,omitempty"`
-	Updated       *[]int64 `json:"updated,omitempty"`
+	Symbol        []string `json:"symbol"`              // Symbol contains the stock symbols.
+	Name          []string `json:"name,omitempty"`      // Name contains the names of the stocks. Optional.
+	Type          []string `json:"type,omitempty"`      // Type contains the types of the stocks. Optional.
+	Currency      []string `json:"currency,omitempty"`  // Currency contains the currencies in which the stocks are traded. Optional.
+	Exchange      []string `json:"exchange,omitempty"`  // Exchange contains the stock exchanges on which the stocks are listed. Optional.
+	FigiShares    []string `json:"figiShares,omitempty"`// FigiShares contains the FIGI codes for the shares. Optional.
+	FigiComposite []string `json:"figiComposite,omitempty"` // FigiComposite contains the composite FIGI codes. Optional.
+	Cik           []string `json:"cik,omitempty"`       // Cik contains the Central Index Key (CIK) numbers. Optional.
+	Updated       *[]int64 `json:"updated,omitempty"`   // Updated contains UNIX timestamps of the last updates. Optional.
 }
 
-// IsValid checks if the TickersResponse is valid.
+// IsValid determines if the TickersResponse has at least one symbol.
+//
+// Returns:
+//   - true if there is at least one symbol; otherwise, false.
 func (tr *TickersResponse) IsValid() bool {
 	return len(tr.Symbol) > 0
 }
 
-// String returns a string representation of TickersResponse.
+// String constructs a string representation of the TickersResponse.
+// It iterates through each symbol and its associated data, formatting them into a readable string.
+// If the 'Updated' field is not nil and contains data, it includes the update time for each symbol.
+//
+// Returns:
+//   - A string detailing the contents of the TickersResponse, including symbols, names, types, currencies, exchanges, FIGI codes, CIK numbers, and update times.
 func (tr *TickersResponse) String() string {
 	var str strings.Builder
 	str.WriteString("TickersResponse{\n")
@@ -47,7 +57,13 @@ func (tr *TickersResponse) String() string {
 	return str.String()
 }
 
-// Unpack converts TickersResponse to a slice of Ticker.
+// Unpack converts a TickersResponse instance into a slice of Ticker structs.
+//
+// This method iterates through the fields of the TickersResponse struct, creating a Ticker struct for each symbol present in the response. It ensures that all corresponding fields are populated correctly. If the 'Updated' field is not nil, it converts the UNIX timestamp to a time.Time object for each Ticker struct.
+//
+// Returns:
+//   - A slice of Ticker structs representing the unpacked tickers.
+//   - An error if the TickersResponse is nil, its 'Updated' field is nil, or if there is a mismatch in the lengths of the slices within the TickersResponse.
 func (tr *TickersResponse) Unpack() ([]Ticker, error) {
 	if tr == nil || tr.Updated == nil {
 		return nil, fmt.Errorf("TickersResponse or its Updated field is nil")
@@ -77,7 +93,10 @@ func (tr *TickersResponse) Unpack() ([]Ticker, error) {
 }
 
 // UniqueSymbols extracts and returns a slice of unique stock symbols from the TickersResponse.
-// It returns the slice of unique symbols and any error encountered during the conversion to a map.
+//
+// Returns:
+//   - []string: A slice of unique stock symbols.
+//   - error: An error encountered during the conversion to a map, if any.
 func (tr *TickersResponse) UniqueSymbols() ([]string, error) {
 	tickerMap, err := tr.ToMap()
 	if err != nil {
@@ -92,7 +111,11 @@ func (tr *TickersResponse) UniqueSymbols() ([]string, error) {
 	return uniqueSymbols, nil
 }
 
-// ToMap converts TickersResponse to a map with the symbol as the key.
+// ToMap converts a TickersResponse into a map where each key is a stock symbol and its value is the corresponding Ticker struct.
+//
+// Returns:
+//   - map[string]Ticker: A map with stock symbols as keys and Ticker structs as values.
+//   - error: An error if the conversion fails.
 func (tr *TickersResponse) ToMap() (map[string]Ticker, error) {
 	tickerInfos, err := tr.Unpack()
 	if err != nil {
@@ -106,7 +129,11 @@ func (tr *TickersResponse) ToMap() (map[string]Ticker, error) {
 	return tickerMap, nil
 }
 
-// MarshalJSON is a method on the TickersResponse struct.
+// MarshalJSON customizes the JSON encoding for the TickersResponse struct.
+//
+// Returns:
+//   - []byte: The JSON-encoded representation of the TickersResponse.
+//   - error: An error if the encoding fails.
 func (tr *TickersResponse) MarshalJSON() ([]byte, error) {
 	if tr == nil {
 		return nil, fmt.Errorf("TickersResponse is nil")
@@ -145,7 +172,10 @@ type Ticker struct {
 	Updated       *time.Time
 }
 
-// String returns a string representation of Ticker.
+// String generates a string representation of the Ticker struct.
+//
+// Returns:
+//   - A string detailing the Ticker's properties in a readable format.
 func (ti *Ticker) String() string {
 	updated := ""
 	if ti.Updated != nil {
@@ -154,7 +184,13 @@ func (ti *Ticker) String() string {
 	return fmt.Sprintf("Ticker{Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s, Updated: %s}", ti.Symbol, ti.Name, ti.Type, ti.Currency, ti.Exchange, ti.FigiShares, ti.FigiComposite, ti.Cik, updated)
 }
 
-// MapToTickersResponse converts a map of Ticker to a TickersResponse.
+// MapToTickersResponse converts a map of Ticker structs into a TickersResponse struct.
+//
+// Parameters:
+//   - tickerMap: A map where the key is a string representing the ticker symbol, and the value is a Ticker struct.
+//
+// Returns:
+//   - A pointer to a TickersResponse struct that aggregates the information from the input map.
 func MapToTickersResponse(tickerMap map[string]Ticker) *TickersResponse {
 	var tr TickersResponse
 	tr.Updated = new([]int64) // Initialize tr.Updated
@@ -183,7 +219,14 @@ func MapToTickersResponse(tickerMap map[string]Ticker) *TickersResponse {
 	return &tr
 }
 
-// SaveToCSV saves the ticker map to a CSV file.
+// SaveToCSV writes the contents of tickerMap to a CSV file specified by filename.
+//
+// Parameters:
+//   - tickerMap: A map where the key is a string representing the ticker symbol, and the value is a Ticker struct.
+//   - filename: The name of the file to which the CSV data will be written.
+//
+// Returns:
+//   - An error if writing to the CSV file fails, otherwise nil.
 func SaveToCSV(tickerMap map[string]Ticker, filename string) error {
 	if tickerMap == nil {
 		return fmt.Errorf("tickerMap is nil")
@@ -219,6 +262,17 @@ func SaveToCSV(tickerMap map[string]Ticker, filename string) error {
 }
 
 // CombineTickerResponses combines multiple TickersResponses into a single map.
+//
+// This function takes a slice of pointers to TickersResponse structs and combines them into a single map
+// where the key is a string representing the ticker symbol and the value is a Ticker struct. It handles
+// concurrent access to the map using a mutex to ensure thread safety.
+//
+// Parameters:
+//   - responses: A slice of pointers to TickersResponse structs that are to be combined.
+//
+// Returns:
+//   - A map where the key is a string representing the ticker symbol and the value is a Ticker struct.
+//   - An error if any of the TickersResponse structs cannot be converted to a map or if any other error occurs during the process.
 func CombineTickerResponses(responses []*TickersResponse) (map[string]Ticker, error) {
 	tickerMap := make(map[string]Ticker)
 	var mutex sync.Mutex
