@@ -2,10 +2,13 @@
 
 > :warning: **Pre-Alpha Version**: This SDK is currently in development and is not stable. Not currently suitable for client use.
 
-
+[![GoDoc](https://godoc.org/github.com/MarketDataApp/sdk-go?status.svg)](https://godoc.org/github.com/MarketDataApp/sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarketDataApp/sdk-go)](https://goreportcard.com/report/github.com/MarketDataApp/sdk-go)
 ![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/go.yml/badge.svg)
-
+[![Coverage](https://codecov.io/gh/MarketDataApp/sdk-go/branch/main/graph/badge.svg)](https://codecov.io/gh/MarketDataApp/sdk-go)
+[![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/releases)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
 
 # Installation
 
