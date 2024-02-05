@@ -4,7 +4,7 @@
 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarketDataApp/sdk-go)](https://goreportcard.com/report/github.com/MarketDataApp/sdk-go)
-![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/main.yml/badge.svg)
+![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/go.yml/badge.svg)
 
 
 # Installation
