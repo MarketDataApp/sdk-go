@@ -70,7 +70,6 @@ func stockEarningsExample() {
 	}
 }
 
-
 func stockNewsExample() {
 	resp, err := api.StockNews().Symbol("AAPL").Get()
 	if err != nil {

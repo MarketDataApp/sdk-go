@@ -17,15 +17,15 @@ import (
 // It includes slices for various stock attributes such as symbol, name, type, currency, and exchange.
 // Optional fields are marked with 'omitempty' to exclude them from the JSON output if they are empty.
 type TickersResponse struct {
-	Symbol        []string `json:"symbol"`              // Symbol contains the stock symbols.
-	Name          []string `json:"name,omitempty"`      // Name contains the names of the stocks. Optional.
-	Type          []string `json:"type,omitempty"`      // Type contains the types of the stocks. Optional.
-	Currency      []string `json:"currency,omitempty"`  // Currency contains the currencies in which the stocks are traded. Optional.
-	Exchange      []string `json:"exchange,omitempty"`  // Exchange contains the stock exchanges on which the stocks are listed. Optional.
-	FigiShares    []string `json:"figiShares,omitempty"`// FigiShares contains the FIGI codes for the shares. Optional.
+	Symbol        []string `json:"symbol"`                  // Symbol contains the stock symbols.
+	Name          []string `json:"name,omitempty"`          // Name contains the names of the stocks. Optional.
+	Type          []string `json:"type,omitempty"`          // Type contains the types of the stocks. Optional.
+	Currency      []string `json:"currency,omitempty"`      // Currency contains the currencies in which the stocks are traded. Optional.
+	Exchange      []string `json:"exchange,omitempty"`      // Exchange contains the stock exchanges on which the stocks are listed. Optional.
+	FigiShares    []string `json:"figiShares,omitempty"`    // FigiShares contains the FIGI codes for the shares. Optional.
 	FigiComposite []string `json:"figiComposite,omitempty"` // FigiComposite contains the composite FIGI codes. Optional.
-	Cik           []string `json:"cik,omitempty"`       // Cik contains the Central Index Key (CIK) numbers. Optional.
-	Updated       *[]int64 `json:"updated,omitempty"`   // Updated contains UNIX timestamps of the last updates. Optional.
+	Cik           []string `json:"cik,omitempty"`           // Cik contains the Central Index Key (CIK) numbers. Optional.
+	Updated       *[]int64 `json:"updated,omitempty"`       // Updated contains UNIX timestamps of the last updates. Optional.
 }
 
 // IsValid determines if the TickersResponse has at least one symbol.

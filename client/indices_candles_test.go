@@ -8,7 +8,7 @@ func ExampleIndicesCandlesRequest_get() {
 		println("Error retrieving VIX index candles:", err.Error())
 		return
 	}
-	
+
 	for _, candle := range vix {
 		fmt.Println(candle)
 	}

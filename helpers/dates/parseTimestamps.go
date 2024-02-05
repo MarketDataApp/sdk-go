@@ -1,9 +1,9 @@
 package dates
 
 import (
-	"time"
-	"math"
 	"fmt"
+	"math"
+	"time"
 )
 
 func int64DateParser(unixTime int64, tz *time.Location) (time.Time, string, error) {

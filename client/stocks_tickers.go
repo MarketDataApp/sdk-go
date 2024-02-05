@@ -80,7 +80,7 @@ func (tr *TickersRequest) Get() ([]models.Ticker, error) {
 	if tr == nil {
 		return nil, fmt.Errorf("TickersRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request
 	trResp, err := tr.Packed()
 	if err != nil {
@@ -103,7 +103,7 @@ func (tr *TickersRequest) Get() ([]models.Ticker, error) {
 //
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//     the default client is used.
 //
 // Returns:
 //   - *TickersRequest: A pointer to the newly created TickersRequest with default parameters and associated client.

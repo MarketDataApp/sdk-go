@@ -173,7 +173,6 @@ func (dr *DateRange) ValidateTimestamps(timestamps ...int64) (validTimestamps, i
 	return validTimestamps, invalidTimestamps
 }
 
-
 // GenerateDateKeys generates a list of date keys for a DateRange based on the provided keyType.
 // The keyType can be "days", "weeks", "months", or "years".
 // The function uses the StartDate and EndDate of the DateRange to generate the keys.
@@ -182,7 +181,6 @@ func (dr *DateRange) ValidateTimestamps(timestamps ...int64) (validTimestamps, i
 func (dr *DateRange) GenerateDateKeys(keyType string) ([]string, error) {
 	return GenerateDateKeys(dr.StartDate, dr.EndDate, keyType)
 }
-
 
 // Contains checks if the provided time or DateRange (the argument) is wholly contained within the DateRange on which the method is called (the reference DateRange).
 func (dr *DateRange) Contains(t interface{}) bool {

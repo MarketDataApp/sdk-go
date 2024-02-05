@@ -7,10 +7,11 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/dates"
 )
+
 // MarketStatusResponse holds the response data for a market status request.
 // It includes a slice of dates and an optional slice of corresponding market statuses.
 type MarketStatusResponse struct {
-	Date   []int64   `json:"date"`           // Date contains UNIX timestamps for each market status entry.
+	Date   []int64   `json:"date"`             // Date contains UNIX timestamps for each market status entry.
 	Status *[]string `json:"status,omitempty"` // Status is a pointer to a slice of market status strings, which can be omitted if empty.
 }
 

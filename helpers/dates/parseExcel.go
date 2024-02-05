@@ -1,8 +1,8 @@
 package dates
 
 import (
-	"time"
 	"math"
+	"time"
 )
 
 // float64DateParser attempts to parse an Excel timestamp and determine its precision.
@@ -59,37 +59,37 @@ func FromExcelTime(excelTime float64, tz *time.Location) (time.Time, error) {
 // The function returns the Excel time as a float64.
 // The function now takes a timezone as input and adjusts the Excel timestamp based on the timezone of the time.Time object.
 func ToExcelTime(t time.Time, tz *time.Location) float64 {
-    // Adjust the time by the timezone offset
-    offset := getTimezoneOffset(t, tz)
-    t = tzToUTC(t, offset)
+	// Adjust the time by the timezone offset
+	offset := getTimezoneOffset(t, tz)
+	t = tzToUTC(t, offset)
 
-    durationSinceExcelEpoch := t.Sub(excelEpoch)
-    excelTime := float64(durationSinceExcelEpoch.Hours() / 24)
+	durationSinceExcelEpoch := t.Sub(excelEpoch)
+	excelTime := float64(durationSinceExcelEpoch.Hours() / 24)
 
-    return excelTime
+	return excelTime
 }
 
 func getTimezoneOffset(t time.Time, tz *time.Location) time.Duration {
-    // Get the time in the specified timezone
-    t = t.In(tz)
+	// Get the time in the specified timezone
+	t = t.In(tz)
 
-    // Get the name of the time zone and its offset from UTC in seconds
-    _, offset := t.Zone()
+	// Get the name of the time zone and its offset from UTC in seconds
+	_, offset := t.Zone()
 
-    // Convert the offset to a time.Duration and return it
-    return time.Duration(offset) * time.Second
+	// Convert the offset to a time.Duration and return it
+	return time.Duration(offset) * time.Second
 }
 
 func utcToTZ(utcTime time.Time, offset time.Duration) time.Time {
-    // Adjust the time by the offset
-    adjustedTime := utcTime.Add(-offset)
+	// Adjust the time by the offset
+	adjustedTime := utcTime.Add(-offset)
 
-    return adjustedTime
+	return adjustedTime
 }
 
 func tzToUTC(utcTime time.Time, offset time.Duration) time.Time {
-    // Adjust the time by the offset
-    adjustedTime := utcTime.Add(offset)
+	// Adjust the time by the offset
+	adjustedTime := utcTime.Add(offset)
 
-    return adjustedTime
+	return adjustedTime
 }

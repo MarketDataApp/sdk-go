@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// IsZeroValue checks if the provided interface{} 'i' holds a value that is considered "zero" or "empty" for its type. 
+// IsZeroValue checks if the provided interface{} 'i' holds a value that is considered "zero" or "empty" for its type.
 // For pointers, it also checks if the pointed-to value is a zero value, except for pointers to integers or booleans.
 //
 // This includes:
@@ -21,7 +21,7 @@ import (
 //   - nil for slices, maps, interfaces, and channels
 //   - time.Time structs representing the zero time
 //   - structs where all fields are "zero" values
-// 
+//
 // Parameters:
 //   - i: The interface{} to check for a "zero" or "empty" value.
 //
@@ -80,16 +80,16 @@ func IsZeroValue(i interface{}) bool {
 		return v.Len() == 0
 	case reflect.Struct:
 		// Check if the struct has an IsZero method.
-        if method := v.MethodByName("IsZero"); method.IsValid() {
-            // Ensure the method has the correct signature: func() bool
-            if method.Type().NumIn() == 0 && method.Type().NumOut() == 1 && method.Type().Out(0).Kind() == reflect.Bool {
-                // Call the IsZero method and return its result.
-                result := method.Call(nil)
-                if len(result) == 1 && result[0].Kind() == reflect.Bool {
-                    return result[0].Bool()
-                }
-            }
-        }
+		if method := v.MethodByName("IsZero"); method.IsValid() {
+			// Ensure the method has the correct signature: func() bool
+			if method.Type().NumIn() == 0 && method.Type().NumOut() == 1 && method.Type().Out(0).Kind() == reflect.Bool {
+				// Call the IsZero method and return its result.
+				result := method.Call(nil)
+				if len(result) == 1 && result[0].Kind() == reflect.Bool {
+					return result[0].Bool()
+				}
+			}
+		}
 		// Special case for time.Time: check if it represents the zero time.
 		if t, ok := v.Interface().(time.Time); ok {
 			return t.IsZero()
@@ -108,6 +108,7 @@ func IsZeroValue(i interface{}) bool {
 		return false
 	}
 }
+
 // IsAlpha checks if the input string consists only of alphabetic characters.
 //
 // Parameters:

@@ -27,6 +27,7 @@ type StockNews struct {
 	Source          string    // Source is the source from which the news article was obtained.
 	PublicationDate time.Time // PublicationDate is the publication date of the news article.
 }
+
 // String returns a formatted string representation of the StockNews struct.
 //
 // This method formats the StockNews fields into a readable string, including the publication date in America/New_York timezone.

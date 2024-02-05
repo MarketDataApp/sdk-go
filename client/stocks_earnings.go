@@ -142,7 +142,8 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.StockEarningsResponse: A pointer to the StockEarningsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -170,7 +171,8 @@ func (ser *StockEarningsRequest) Packed(optionalClients ...*MarketDataClient) (*
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.StockEarningsReport: A slice of StockEarningsReport containing the unpacked earnings data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -178,7 +180,7 @@ func (ser *StockEarningsRequest) Get(optionalClients ...*MarketDataClient) ([]mo
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	serResp, err := ser.Packed(optionalClients...)
 	if err != nil {
@@ -201,7 +203,7 @@ func (ser *StockEarningsRequest) Get(optionalClients ...*MarketDataClient) ([]mo
 //
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//     the default client is used.
 //
 // Returns:
 //   - *StockEarningsRequest: A pointer to the newly created StockEarningsRequest with default parameters and associated client.

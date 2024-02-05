@@ -35,7 +35,6 @@ func (oer *OptionsExpirationsResponse) IsValid() bool {
 	return true
 }
 
-
 // String provides a string representation of the OptionsExpirationsResponse.
 //
 // It formats the expirations and the updated timestamp into a readable string.

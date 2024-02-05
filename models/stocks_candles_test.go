@@ -18,82 +18,82 @@ var (
 )
 
 func TestUnpack(t *testing.T) {
-    testCases := []struct {
-        name      string
-        jsonData string
-        expected []StockCandle
-    }{
-        {
-            name: "jsonDataV1",
-            jsonData: jsonDataV1,
-            expected: []StockCandle{
-                {
-                    Time:   time.Unix(1699630200, 0),
-                    Open:   183.78,
-                    High:   183.93,
-                    Low:    183.76,
-                    Close:  183.8716,
-                    Volume: 147185,
-                },
-                {
-                    Time:   time.Unix(1699630260, 0),
-                    Open:   183.88,
-                    High:   183.96,
-                    Low:    183.82,
-                    Close:  183.93,
-                    Volume: 101982,
-                },
-            },
-        },
-        {
-            name: "jsonDataV2",
-            jsonData: jsonDataV2,
-            expected: []StockCandle{
-                {
-                    Time:   time.Unix(1699630200, 0),
-                    Open:   183.78,
-                    High:   183.93,
-                    Low:    183.76,
-                    Close:  183.8716,
-                    Volume: 147185,
-                    VWAP:   185,
-                    N:      147185,
-                },
-                {
-                    Time:   time.Unix(1699630260, 0),
-                    Open:   183.88,
-                    High:   183.96,
-                    Low:    183.82,
-                    Close:  183.93,
-                    Volume: 101982,
-                    VWAP:   182,
-                    N:      101982,
-                },
-            },
-        },
-    }
+	testCases := []struct {
+		name     string
+		jsonData string
+		expected []StockCandle
+	}{
+		{
+			name:     "jsonDataV1",
+			jsonData: jsonDataV1,
+			expected: []StockCandle{
+				{
+					Time:   time.Unix(1699630200, 0),
+					Open:   183.78,
+					High:   183.93,
+					Low:    183.76,
+					Close:  183.8716,
+					Volume: 147185,
+				},
+				{
+					Time:   time.Unix(1699630260, 0),
+					Open:   183.88,
+					High:   183.96,
+					Low:    183.82,
+					Close:  183.93,
+					Volume: 101982,
+				},
+			},
+		},
+		{
+			name:     "jsonDataV2",
+			jsonData: jsonDataV2,
+			expected: []StockCandle{
+				{
+					Time:   time.Unix(1699630200, 0),
+					Open:   183.78,
+					High:   183.93,
+					Low:    183.76,
+					Close:  183.8716,
+					Volume: 147185,
+					VWAP:   185,
+					N:      147185,
+				},
+				{
+					Time:   time.Unix(1699630260, 0),
+					Open:   183.88,
+					High:   183.96,
+					Low:    183.82,
+					Close:  183.93,
+					Volume: 101982,
+					VWAP:   182,
+					N:      101982,
+				},
+			},
+		},
+	}
 
-    for _, tc := range testCases {
-        t.Run(tc.name, func(t *testing.T) {
-            // Unmarshal the JSON data into a StockCandlesResponse instance
-            s := &StockCandlesResponse{}
-            err := s.UnmarshalJSON([]byte(tc.jsonData))
-            if err != nil {
-                t.Fatalf("Failed to unmarshal JSON data: %v", err)
-            }
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Unmarshal the JSON data into a StockCandlesResponse instance
+			s := &StockCandlesResponse{}
+			err := s.UnmarshalJSON([]byte(tc.jsonData))
+			if err != nil {
+				t.Fatalf("Failed to unmarshal JSON data: %v", err)
+			}
 
-            // Call the Unpack method
-            result, err := s.Unpack()
-            if err != nil {
-                t.Fatalf("Failed to unpack StockCandlesResponse: %v", err)
-            }
+			// Call the Unpack method
+			result, err := s.Unpack()
+			if err != nil {
+				t.Fatalf("Failed to unpack StockCandlesResponse: %v", err)
+			}
 
-            // Check if the results match the expected results
-            if !reflect.DeepEqual(result, tc.expected) {
-                t.Errorf("Unpack did not return the expected result in %s. Got: %+v, want: %+v", tc.name, result, tc.expected)
-            }
-        })
-    }
+			// Check if the results match the expected results
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Unpack did not return the expected result in %s. Got: %+v, want: %+v", tc.name, result, tc.expected)
+			}
+		})
+	}
 }
 
 func TestPruneAtIndex(t *testing.T) {
@@ -321,25 +321,25 @@ func TestMarshalJSON(t *testing.T) {
 func TestCombineStockCandlesResponse(t *testing.T) {
 	// Test cases
 	testCases := []struct {
-		name string
+		name      string
 		jsonData1 string
 		jsonData2 string
 		shouldErr bool
 	}{
 		{
-			name: "Different versions and overlapping time ranges",
+			name:      "Different versions and overlapping time ranges",
 			jsonData1: jsonDataV1,
 			jsonData2: jsonDataV2,
 			shouldErr: true,
 		},
 		{
-			name: "Same versions and non-overlapping time ranges AAPL",
+			name:      "Same versions and non-overlapping time ranges AAPL",
 			jsonData1: jsonDataAAPL1,
 			jsonData2: jsonDataAAPL2,
-			shouldErr: false, 
+			shouldErr: false,
 		},
 		{
-			name: "Same versions and non-overlapping time ranges SPY",
+			name:      "Same versions and non-overlapping time ranges SPY",
 			jsonData1: jsonDataSPY1,
 			jsonData2: jsonDataSPY2,
 			shouldErr: true,

@@ -23,7 +23,6 @@ type StockNewsRequest struct {
 	dateParams   *parameters.DateParams
 }
 
-
 // Symbol sets the symbol parameter for the StockNewsRequest.
 // This method is used to specify the stock symbol for which news data is requested.
 //
@@ -132,7 +131,8 @@ func (snr *StockNewsRequest) getParams() ([]parameters.MarketDataParam, error) {
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -160,7 +160,8 @@ func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*mode
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -168,7 +169,7 @@ func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	snrResp, err := snr.Packed(optionalClients...)
 	if err != nil {
@@ -191,7 +192,7 @@ func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models
 //
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//     the default client is used.
 //
 // Returns:
 //   - *StockNewsRequest: A pointer to the newly created StockNewsRequest with default parameters and associated client.

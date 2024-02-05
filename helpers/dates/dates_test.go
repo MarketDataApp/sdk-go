@@ -1,9 +1,9 @@
 package dates
 
 import (
+	"reflect"
 	"testing"
 	"time"
-	"reflect"
 )
 
 func TestSetInterval(t *testing.T) {
@@ -49,7 +49,7 @@ func TestSetFromDateKey(t *testing.T) {
 
 	// Define test cases
 	testCases := []struct {
-		cacheKey     string
+		cacheKey      string
 		expectedStart time.Time
 		expectedEnd   time.Time
 	}{
@@ -287,18 +287,18 @@ func TestDateRange_ValidateTimestamps(t *testing.T) {
 
 	// Define test cases
 	testCases := []struct {
-		input          []int64
-		expectedValid  []int64
+		input           []int64
+		expectedValid   []int64
 		expectedInvalid []int64
 	}{
 		{
-			input:          []int64{1699462680, 1699462740, 1699462800, 1699462860},
-			expectedValid:  []int64{1699462680, 1699462740, 1699462800},
+			input:           []int64{1699462680, 1699462740, 1699462800, 1699462860},
+			expectedValid:   []int64{1699462680, 1699462740, 1699462800},
 			expectedInvalid: []int64{1699462860},
 		},
 		{
-			input:          []int64{1699462920, 1699462980, 1699463040},
-			expectedValid:  []int64{},
+			input:           []int64{1699462920, 1699462980, 1699463040},
+			expectedValid:   []int64{},
 			expectedInvalid: []int64{1699462920, 1699462980, 1699463040},
 		},
 	}
@@ -627,40 +627,40 @@ func TestCombineDateRanges(t *testing.T) {
 
 func TestGetDateKeyType(t *testing.T) {
 	tests := []struct {
-		name     string
-		dateKey  string
-		want     string
-		wantErr  bool
+		name    string
+		dateKey string
+		want    string
+		wantErr bool
 	}{
 		{
-			name:     "Test daily date key",
-			dateKey:  "2022-01-01",
-			want:     "days",
-			wantErr:  false,
+			name:    "Test daily date key",
+			dateKey: "2022-01-01",
+			want:    "days",
+			wantErr: false,
 		},
 		{
-			name:     "Test weekly date key",
-			dateKey:  "2022-W01",
-			want:     "weeks",
-			wantErr:  false,
+			name:    "Test weekly date key",
+			dateKey: "2022-W01",
+			want:    "weeks",
+			wantErr: false,
 		},
 		{
-			name:     "Test monthly date key",
-			dateKey:  "2022-01",
-			want:     "months",
-			wantErr:  false,
+			name:    "Test monthly date key",
+			dateKey: "2022-01",
+			want:    "months",
+			wantErr: false,
 		},
 		{
-			name:     "Test yearly date key",
-			dateKey:  "2022",
-			want:     "years",
-			wantErr:  false,
+			name:    "Test yearly date key",
+			dateKey: "2022",
+			want:    "years",
+			wantErr: false,
 		},
 		{
-			name:     "Test invalid date key",
-			dateKey:  "invalid",
-			want:     "",
-			wantErr:  true,
+			name:    "Test invalid date key",
+			dateKey: "invalid",
+			want:    "",
+			wantErr: true,
 		},
 	}
 

@@ -89,7 +89,6 @@ func TestGenerateDateKeys(t *testing.T) {
 	}
 }
 
-
 func TestIsValidDateKey(t *testing.T) {
 	tests := []struct {
 		name     string

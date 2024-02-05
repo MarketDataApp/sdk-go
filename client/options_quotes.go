@@ -25,6 +25,7 @@ type OptionQuoteRequest struct {
 // This method is used to specify the symbol of the option for which the quote is requested.
 // Parameters:
 //   - symbol: A string representing the symbol to be set.
+//
 // Returns:
 //   - *OptionQuotesRequest: This method returns a pointer to the OptionQuotesRequest instance it was called on, allowing for method chaining.
 func (oqr *OptionQuoteRequest) OptionSymbol(q string) *OptionQuoteRequest {
@@ -43,6 +44,7 @@ func (oqr *OptionQuoteRequest) OptionSymbol(q string) *OptionQuoteRequest {
 // It allows for flexibility in the type of date input (e.g., string, time.Time) through the use of an interface{} parameter.
 // Parameters:
 //   - date: An interface{} representing the date to be set. The actual type accepted can vary (e.g., string, time.Time), depending on implementation.
+//
 // Returns:
 //   - *OptionQuotesRequest: This method returns a pointer to the OptionQuotesRequest instance it was called on, allowing for method chaining. If the receiver (*OptionQuotesRequest) is nil, it returns nil to prevent a panic.
 func (oqr *OptionQuoteRequest) Date(q interface{}) *OptionQuoteRequest {
@@ -61,6 +63,7 @@ func (oqr *OptionQuoteRequest) Date(q interface{}) *OptionQuoteRequest {
 // Similar to the Date method, it accepts a flexible date input through an interface{} parameter.
 // Parameters:
 //   - from: An interface{} representing the start date of the range to be set. The actual type accepted can vary, depending on implementation.
+//
 // Returns:
 //   - *OptionQuotesRequest: This method returns a pointer to the OptionQuotesRequest instance it was called on, allowing for method chaining. If the receiver (*OptionQuotesRequest) is nil, it returns nil to prevent a panic.
 func (oqr *OptionQuoteRequest) From(q interface{}) *OptionQuoteRequest {
@@ -79,6 +82,7 @@ func (oqr *OptionQuoteRequest) From(q interface{}) *OptionQuoteRequest {
 // It accepts a flexible date input through an interface{} parameter, similar to the From method.
 // Parameters:
 //   - to: An interface{} representing the end date of the range to be set. The actual type accepted can vary, depending on implementation.
+//
 // Returns:
 //   - *OptionQuotesRequest: This method returns a pointer to the OptionQuotesRequest instance it was called on, allowing for method chaining. If the receiver (*OptionQuotesRequest) is nil, it returns nil to prevent a panic.
 func (oqr *OptionQuoteRequest) To(q interface{}) *OptionQuoteRequest {
@@ -109,7 +113,8 @@ func (oqr *OptionQuoteRequest) getParams() ([]parameters.MarketDataParam, error)
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -137,7 +142,8 @@ func (oqr *OptionQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*mo
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.OptionQuote: A slice of OptionQuote containing the unpacked options quotes data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -145,7 +151,7 @@ func (oqr *OptionQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]mode
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	oqrResp, err := oqr.Packed(optionalClients...)
 	if err != nil {
@@ -165,6 +171,7 @@ func (oqr *OptionQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]mode
 // If no client is provided, it uses the default client.
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
+//
 // Returns:
 //   - *OptionQuotesRequest: A pointer to the newly created OptionQuotesRequest with default parameters and associated client.
 func OptionQuote(client ...*MarketDataClient) *OptionQuoteRequest {

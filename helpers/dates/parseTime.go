@@ -20,41 +20,41 @@ var precisionOrder = map[string]int{
 
 // dateRangeParser parses the start and end dates of a DateRange and returns the start time, precision, and any error that occurred.
 func dateRangeParser(dr DateRange, tz *time.Location) (time.Time, string, error) {
-    // Parse the StartDate of the DateRange
-    parsedStartTime, startPrecision, err := timeDateParser(dr.StartDate, tz)
-    if err != nil {
-        return time.Time{}, "", err
-    }
+	// Parse the StartDate of the DateRange
+	parsedStartTime, startPrecision, err := timeDateParser(dr.StartDate, tz)
+	if err != nil {
+		return time.Time{}, "", err
+	}
 
-    // Parse the EndDate of the DateRange
-    _, endPrecision, err := timeDateParser(dr.EndDate, tz)
-    if err != nil {
-        return time.Time{}, "", err
-    }
+	// Parse the EndDate of the DateRange
+	_, endPrecision, err := timeDateParser(dr.EndDate, tz)
+	if err != nil {
+		return time.Time{}, "", err
+	}
 
-    // Determine the smallest precision
-    precision := startPrecision
-    if precisionOrder[startPrecision] < precisionOrder[endPrecision] {
-        precision = endPrecision
-    }
+	// Determine the smallest precision
+	precision := startPrecision
+	if precisionOrder[startPrecision] < precisionOrder[endPrecision] {
+		precision = endPrecision
+	}
 
-    // Return the parsed start and end times, precision, and no error
-    return parsedStartTime, precision, nil
+	// Return the parsed start and end times, precision, and no error
+	return parsedStartTime, precision, nil
 }
 
 // timeDateParser converts a time to a specified timezone and infers its precision.
 func timeDateParser(t time.Time, tz *time.Location) (time.Time, string, error) {
-    // Convert the time to the specified timezone
-    t = t.In(tz)
+	// Convert the time to the specified timezone
+	t = t.In(tz)
 
-    // Infer the precision
-    precision, err := inferPrecision(t)
-    if err != nil {
-        return time.Time{}, "", err
-    }
+	// Infer the precision
+	precision, err := inferPrecision(t)
+	if err != nil {
+		return time.Time{}, "", err
+	}
 
-    // Return the time, precision, and no error
-    return t, precision, nil
+	// Return the time, precision, and no error
+	return t, precision, nil
 }
 
 // inferPrecision infers the precision of a time by checking its components from smallest to largest.

@@ -23,8 +23,8 @@ Example API Response JSON:
 
 // OptionsStrikes represents the expiration date and strike prices for an option.
 type OptionsStrikes struct {
-	Expiration time.Time  // Expiration is the date and time when the option expires.
-	Strikes    []float64  // Strikes is a slice of strike prices available for the option.
+	Expiration time.Time // Expiration is the date and time when the option expires.
+	Strikes    []float64 // Strikes is a slice of strike prices available for the option.
 }
 
 // OptionsStrikesResponse encapsulates the response structure for a request to retrieve option strikes.
@@ -99,26 +99,26 @@ func (osr *OptionsStrikesResponse) IsValid() bool {
 // Returns:
 //   - string: The string representation of the OptionsStrikesResponse.
 func (osr *OptionsStrikesResponse) String() string {
-    // First, unpack the response to get a slice of OptionsStrikes
-    unpackedStrikes, err := osr.Unpack()
-    if err != nil {
-        return fmt.Sprintf("Error unpacking strikes: %v", err)
-    }
+	// First, unpack the response to get a slice of OptionsStrikes
+	unpackedStrikes, err := osr.Unpack()
+	if err != nil {
+		return fmt.Sprintf("Error unpacking strikes: %v", err)
+	}
 
-    // Initialize a builder for constructing the output string
-    var sb strings.Builder
+	// Initialize a builder for constructing the output string
+	var sb strings.Builder
 
-    // Loop over each OptionsStrikes in the unpacked slice
-    for _, strike := range unpackedStrikes {
-        // Use the String method of OptionsStrikes to append each to the builder
-        sb.WriteString(strike.String() + "; ")
-    }
+	// Loop over each OptionsStrikes in the unpacked slice
+	for _, strike := range unpackedStrikes {
+		// Use the String method of OptionsStrikes to append each to the builder
+		sb.WriteString(strike.String() + "; ")
+	}
 
-    // Append the "Updated" information last
-    sb.WriteString(fmt.Sprintf("Updated: %v", osr.Updated))
+	// Append the "Updated" information last
+	sb.WriteString(fmt.Sprintf("Updated: %v", osr.Updated))
 
-    // Return the constructed string
-    return sb.String()
+	// Return the constructed string
+	return sb.String()
 }
 
 // Unpack converts the map of strikes in the response to a slice of OptionsStrikes.

@@ -14,10 +14,10 @@ var endpoints = map[int]map[string]map[string]string{
 		},
 		"options": {
 			"expirations": "/v1/options/expirations/{symbol}/",
-			"lookup": "/v1/options/lookup/{userInput}",
-			"strikes": "/v1/options/strikes/{symbol}/",
-			"quotes": "/v1/options/quotes/{symbol}/",
-			"chain": "/v1/options/chain/{symbol}/",
+			"lookup":      "/v1/options/lookup/{userInput}",
+			"strikes":     "/v1/options/strikes/{symbol}/",
+			"quotes":      "/v1/options/quotes/{symbol}/",
+			"chain":       "/v1/options/chain/{symbol}/",
 		},
 		"indices": {
 			"quotes":  "/v1/indices/quotes/{symbol}/",

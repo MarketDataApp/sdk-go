@@ -14,12 +14,12 @@ import (
 // It includes slices for time, open, high, low, close prices, and volume for each candle.
 // Optional fields VWAP and N are available for V2 candles.
 type StockCandlesResponse struct {
-	Time   []int64    `json:"t" human:"Date"`             // Time holds UNIX timestamps for each candle.
-	Open   []float64  `json:"o" human:"Open"`             // Open holds the opening prices for each candle.
-	High   []float64  `json:"h" human:"High"`             // High holds the highest prices reached in each candle.
-	Low    []float64  `json:"l" human:"Low"`              // Low holds the lowest prices reached in each candle.
-	Close  []float64  `json:"c" human:"Close"`            // Close holds the closing prices for each candle.
-	Volume []int64    `json:"v" human:"Volume"`           // Volume represents the trading volume in each candle.
+	Time   []int64    `json:"t" human:"Date"`                              // Time holds UNIX timestamps for each candle.
+	Open   []float64  `json:"o" human:"Open"`                              // Open holds the opening prices for each candle.
+	High   []float64  `json:"h" human:"High"`                              // High holds the highest prices reached in each candle.
+	Low    []float64  `json:"l" human:"Low"`                               // Low holds the lowest prices reached in each candle.
+	Close  []float64  `json:"c" human:"Close"`                             // Close holds the closing prices for each candle.
+	Volume []int64    `json:"v" human:"Volume"`                            // Volume represents the trading volume in each candle.
 	VWAP   *[]float64 `json:"vwap,omitempty" human:"VWAP,omitempty"`       // VWAP holds the Volume Weighted Average Price for each candle, optional.
 	N      *[]int64   `json:"n,omitempty" human:"No. of Trades,omitempty"` // N holds the number of trades for each candle, optional.
 }
@@ -38,7 +38,7 @@ type StockCandle struct {
 }
 
 // String returns a string representation of a StockCandle.
-// 
+//
 // Returns:
 //   - A string representation of the StockCandle.
 func (sc StockCandle) String() string {
@@ -46,14 +46,14 @@ func (sc StockCandle) String() string {
 	if sc.VWAP == 0 && sc.N == 0 {
 		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v",
 			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume)
-		} else {
+	} else {
 		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
 			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume, sc.VWAP, sc.N)
 	}
 }
 
 // Unpack converts a StockCandlesResponse into a slice of StockCandle.
-// 
+//
 // Returns:
 //   - A slice of StockCandle.
 //   - An error if the slices within StockCandlesResponse are not of equal length.
@@ -84,7 +84,7 @@ func (scr *StockCandlesResponse) Unpack() ([]StockCandle, error) {
 }
 
 // String returns a string representation of a StockCandlesResponse.
-// 
+//
 // Returns:
 //   - A string representation of the StockCandlesResponse.
 func (s *StockCandlesResponse) String() string {
@@ -109,7 +109,7 @@ func (s *StockCandlesResponse) String() string {
 }
 
 // checkTimeInAscendingOrder checks if the times in a StockCandlesResponse are in ascending order.
-// 
+//
 // Returns:
 //   - An error if the times are not in ascending order.
 func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
@@ -133,7 +133,7 @@ func (s *StockCandlesResponse) IsValid() bool {
 }
 
 // Validate validates a StockCandlesResponse.
-// 
+//
 // Returns:
 //   - An error if the StockCandlesResponse is not valid.
 func (s *StockCandlesResponse) Validate() error {
@@ -236,7 +236,7 @@ func (s *StockCandlesResponse) getVersion() (int, error) {
 }
 
 // MarshalJSON marshals a StockCandlesResponse into JSON.
-// 
+//
 // Returns:
 //   - A byte slice of the JSON representation.
 //   - An error if marshaling fails.
@@ -270,7 +270,7 @@ func (s *StockCandlesResponse) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON unmarshals JSON into a StockCandlesResponse.
-// 
+//
 // Returns:
 //   - An error if unmarshaling or validation fails.
 func (s *StockCandlesResponse) UnmarshalJSON(data []byte) error {
@@ -299,7 +299,7 @@ func (s *StockCandlesResponse) UnmarshalJSON(data []byte) error {
 }
 
 // GetDateRange returns the date range of a StockCandlesResponse.
-// 
+//
 // Returns:
 //   - A DateRange object.
 //   - An error if calculating the date range fails.
@@ -374,7 +374,7 @@ func (s *StockCandlesResponse) pruneBeforeIndex(index int) {
 //
 // Parameters:
 //   - index: The index after which all data points will be removed.
-// 
+//
 // Returns:
 //   - An error if the index is out of range.
 func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
@@ -408,7 +408,7 @@ func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
 //
 // Parameters:
 //   - dr: A DateRange struct specifying the start and end dates for the range within which data points should be retained.
-// 
+//
 // Returns:
 //   - An error if pruning fails.
 func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
@@ -438,7 +438,7 @@ func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
 //
 // Returns:
 //   - int: The index of the first occurrence of the provided timestamp within the Time slice.
-//          If the timestamp is not found, it returns the length of the Time slice.
+//     If the timestamp is not found, it returns the length of the Time slice.
 func (s *StockCandlesResponse) getIndex(t int64) int {
 	for i, timestamp := range s.Time {
 		if timestamp == t {
@@ -480,6 +480,7 @@ func (s *StockCandlesResponse) pruneIndex(index int) error {
 
 	return nil
 }
+
 // CombineStockCandles merges two StockCandlesResponse structs into a single one.
 // It checks if the versions of the two structs are the same, ensures there is no time overlap between them,
 // and then combines their data into a new StockCandlesResponse struct. If the versions are both V2,

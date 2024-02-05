@@ -25,6 +25,7 @@ type OptionsExpirationsRequest struct {
 // This method is used to specify a particular strike price for filtering the options expirations.
 // Parameters:
 //   - strike: A float64 representing the strike price to be set.
+//
 // Returns:
 //   - *OptionsExpirationsRequest: This method returns a pointer to the OptionsExpirationsRequest instance it was called on, allowing for method chaining.
 func (o *OptionsExpirationsRequest) Strike(strike float64) *OptionsExpirationsRequest {
@@ -41,6 +42,7 @@ func (o *OptionsExpirationsRequest) Strike(strike float64) *OptionsExpirationsRe
 // This method is used to specify the symbol of the underlying asset for which the options expirations are requested.
 // Parameters:
 //   - symbol: A string representing the underlying symbol to be set.
+//
 // Returns:
 //   - *OptionsExpirationsRequest: This method returns a pointer to the OptionsExpirationsRequest instance it was called on, allowing for method chaining.
 func (o *OptionsExpirationsRequest) UnderlyingSymbol(symbol string) *OptionsExpirationsRequest {
@@ -67,7 +69,8 @@ func (o *OptionsExpirationsRequest) getParams() ([]parameters.MarketDataParam, e
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.OptionsExpirationsResponse: A pointer to the OptionsExpirationsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -95,7 +98,8 @@ func (o *OptionsExpirationsRequest) Packed(optionalClients ...*MarketDataClient)
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []time.Time: A slice of time.Time containing the unpacked options expirations data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -103,7 +107,7 @@ func (o *OptionsExpirationsRequest) Get(optionalClients ...*MarketDataClient) ([
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	oResp, err := o.Packed(optionalClients...)
 	if err != nil {
@@ -123,6 +127,7 @@ func (o *OptionsExpirationsRequest) Get(optionalClients ...*MarketDataClient) ([
 // If no client is provided, it uses the default client.
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
+//
 // Returns:
 //   - *OptionsExpirationsRequest: A pointer to the newly created OptionsExpirationsRequest with default parameters and associated client.
 func OptionsExpirations(client ...*MarketDataClient) *OptionsExpirationsRequest {

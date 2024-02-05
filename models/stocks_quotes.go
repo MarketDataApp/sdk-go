@@ -10,38 +10,38 @@ import (
 // It includes slices for symbols, ask prices, ask sizes, bid prices, bid sizes, mid prices, last trade prices,
 // changes, change percentages, 52-week highs, 52-week lows, volumes, and update timestamps.
 type StockQuotesResponse struct {
-	Symbol    []string   `json:"symbol"`            // Symbol holds the stock symbols.
-	Ask       []float64  `json:"ask"`               // Ask holds the asking prices for the stocks.
-	AskSize   []int64    `json:"askSize"`           // AskSize holds the sizes (quantities) of the asks.
-	Bid       []float64  `json:"bid"`               // Bid holds the bidding prices for the stocks.
-	BidSize   []int64    `json:"bidSize"`           // BidSize holds the sizes (quantities) of the bids.
-	Mid       []float64  `json:"mid"`               // Mid holds the mid prices calculated between the ask and bid prices.
-	Last      []float64  `json:"last"`              // Last holds the last traded prices for the stocks.
-	Change    []*float64 `json:"change,omitempty"`  // Change holds the price changes, can be nil if not applicable.
-	ChangePct []*float64 `json:"changepct,omitempty"` // ChangePct holds the percentage changes in prices, can be nil if not applicable.
+	Symbol    []string   `json:"symbol"`               // Symbol holds the stock symbols.
+	Ask       []float64  `json:"ask"`                  // Ask holds the asking prices for the stocks.
+	AskSize   []int64    `json:"askSize"`              // AskSize holds the sizes (quantities) of the asks.
+	Bid       []float64  `json:"bid"`                  // Bid holds the bidding prices for the stocks.
+	BidSize   []int64    `json:"bidSize"`              // BidSize holds the sizes (quantities) of the bids.
+	Mid       []float64  `json:"mid"`                  // Mid holds the mid prices calculated between the ask and bid prices.
+	Last      []float64  `json:"last"`                 // Last holds the last traded prices for the stocks.
+	Change    []*float64 `json:"change,omitempty"`     // Change holds the price changes, can be nil if not applicable.
+	ChangePct []*float64 `json:"changepct,omitempty"`  // ChangePct holds the percentage changes in prices, can be nil if not applicable.
 	High52    *[]float64 `json:"52weekHigh,omitempty"` // High52 holds the 52-week high prices, can be nil if not applicable.
 	Low52     *[]float64 `json:"52weekLow,omitempty"`  // Low52 holds the 52-week low prices, can be nil if not applicable.
-	Volume    []int64    `json:"volume"`            // Volume holds the trading volumes for the stocks.
-	Updated   []int64    `json:"updated"`           // Updated holds the UNIX timestamps for when the quotes were last updated.
+	Volume    []int64    `json:"volume"`               // Volume holds the trading volumes for the stocks.
+	Updated   []int64    `json:"updated"`              // Updated holds the UNIX timestamps for when the quotes were last updated.
 }
 
 // StockQuote represents a single stock quote.
 // It includes the stock symbol, ask price, ask size, bid price, bid size, mid price, last trade price,
 // change, change percentage, 52-week high, 52-week low, volume, and the time of the last update.
 type StockQuote struct {
-	Symbol    string     // Symbol is the stock symbol.
-	Ask       float64    // Ask is the asking price for the stock.
-	AskSize   int64      // AskSize is the size (quantity) of the ask.
-	Bid       float64    // Bid is the bidding price for the stock.
-	BidSize   int64      // BidSize is the size (quantity) of the bid.
-	Mid       float64    // Mid is the mid price calculated between the ask and bid prices.
-	Last      float64    // Last is the last traded price for the stock.
-	Change    *float64   // Change is the price change, can be nil if not applicable.
-	ChangePct *float64   // ChangePct is the percentage change in price, can be nil if not applicable.
-	High52    *float64   // High52 is the 52-week high price, can be nil if not applicable.
-	Low52     *float64   // Low52 is the 52-week low price, can be nil if not applicable.
-	Volume    int64      // Volume is the trading volume for the stock.
-	Updated   time.Time  // Updated is the time when the quote was last updated.
+	Symbol    string    // Symbol is the stock symbol.
+	Ask       float64   // Ask is the asking price for the stock.
+	AskSize   int64     // AskSize is the size (quantity) of the ask.
+	Bid       float64   // Bid is the bidding price for the stock.
+	BidSize   int64     // BidSize is the size (quantity) of the bid.
+	Mid       float64   // Mid is the mid price calculated between the ask and bid prices.
+	Last      float64   // Last is the last traded price for the stock.
+	Change    *float64  // Change is the price change, can be nil if not applicable.
+	ChangePct *float64  // ChangePct is the percentage change in price, can be nil if not applicable.
+	High52    *float64  // High52 is the 52-week high price, can be nil if not applicable.
+	Low52     *float64  // Low52 is the 52-week low price, can be nil if not applicable.
+	Volume    int64     // Volume is the trading volume for the stock.
+	Updated   time.Time // Updated is the time when the quote was last updated.
 }
 
 // String generates a string representation of the StockQuote struct.
@@ -121,7 +121,7 @@ func (sqr *StockQuotesResponse) Unpack() ([]StockQuote, error) {
 func (sqr *StockQuotesResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "Symbol: %v, Ask: %v, Ask Size: %v, Bid: %v, Bid Size: %v, Mid: %v, Last: %v", 
+	fmt.Fprintf(&result, "Symbol: %v, Ask: %v, Ask Size: %v, Bid: %v, Bid Size: %v, Mid: %v, Last: %v",
 		sqr.Symbol, sqr.Ask, sqr.AskSize, sqr.Bid, sqr.BidSize, sqr.Mid, sqr.Last)
 
 	if sqr.Change != nil && len(sqr.Change) > 0 {

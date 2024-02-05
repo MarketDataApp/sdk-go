@@ -10,27 +10,27 @@ import (
 // It includes slices for symbols, last prices, changes, percentage changes,
 // 52-week highs, 52-week lows, and update timestamps.
 type IndexQuotesResponse struct {
-	Symbol    []string   `json:"symbol"`             // Symbols are the stock symbols or tickers.
-	Last      []float64  `json:"last"`               // Last contains the last traded prices.
-	Change    []*float64 `json:"change,omitempty"`   // Change represents the change in price, can be nil if not applicable.
-	ChangePct []*float64 `json:"changepct,omitempty"`// ChangePct represents the percentage change in price, can be nil if not applicable.
-	High52    *[]float64 `json:"52weekHigh,omitempty"`// High52 points to a slice of 52-week high prices, can be nil if not applicable.
-	Low52     *[]float64 `json:"52weekLow,omitempty"` // Low52 points to a slice of 52-week low prices, can be nil if not applicable.
-	Updated   []int64    `json:"updated"`            // Updated contains timestamps of the last updates.
+	Symbol    []string   `json:"symbol"`               // Symbols are the stock symbols or tickers.
+	Last      []float64  `json:"last"`                 // Last contains the last traded prices.
+	Change    []*float64 `json:"change,omitempty"`     // Change represents the change in price, can be nil if not applicable.
+	ChangePct []*float64 `json:"changepct,omitempty"`  // ChangePct represents the percentage change in price, can be nil if not applicable.
+	High52    *[]float64 `json:"52weekHigh,omitempty"` // High52 points to a slice of 52-week high prices, can be nil if not applicable.
+	Low52     *[]float64 `json:"52weekLow,omitempty"`  // Low52 points to a slice of 52-week low prices, can be nil if not applicable.
+	Updated   []int64    `json:"updated"`              // Updated contains timestamps of the last updates.
 }
 
 // IndexQuote represents a single quote for an index.
 // It includes the symbol, last price, change, percentage change,
 // 52-week high, 52-week low, volume, and update timestamp.
 type IndexQuote struct {
-	Symbol    string     // Symbol is the stock symbol or ticker.
-	Last      float64    // Last is the last traded price.
-	Change    *float64   // Change represents the change in price, can be nil if not applicable.
-	ChangePct *float64   // ChangePct represents the percentage change in price, can be nil if not applicable.
-	High52    *float64   // High52 is the 52-week high price, can be nil if not applicable.
-	Low52     *float64   // Low52 is the 52-week low price, can be nil if not applicable.
-	Volume    int64      // Volume is the number of shares traded.
-	Updated   time.Time  // Updated is the timestamp of the last update.
+	Symbol    string    // Symbol is the stock symbol or ticker.
+	Last      float64   // Last is the last traded price.
+	Change    *float64  // Change represents the change in price, can be nil if not applicable.
+	ChangePct *float64  // ChangePct represents the percentage change in price, can be nil if not applicable.
+	High52    *float64  // High52 is the 52-week high price, can be nil if not applicable.
+	Low52     *float64  // Low52 is the 52-week low price, can be nil if not applicable.
+	Volume    int64     // Volume is the number of shares traded.
+	Updated   time.Time // Updated is the timestamp of the last update.
 }
 
 // String returns a string representation of the IndexQuote.

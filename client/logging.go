@@ -184,6 +184,7 @@ func (h HttpRequestLog) memoryUsage() int {
 // headerSize calculates the memory usage of HTTP headers.
 // Parameters:
 //   - header: The HTTP headers for which the memory usage is calculated.
+//
 // Returns:
 //   - An integer representing the memory usage of the headers in bytes.
 func (h HttpRequestLog) headerSize(header http.Header) int {
@@ -248,18 +249,18 @@ func (h *HttpRequestLogs) String() string {
 // Returns:
 //   - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
 func (h *HttpRequestLogs) GetLastLogResponse() string {
-    // Step 2: Check if there are no logs
-    if len(h.Logs) == 0 {
-        // Return an appropriate response for no logs
-        return "No logs available"
-    }
+	// Step 2: Check if there are no logs
+	if len(h.Logs) == 0 {
+		// Return an appropriate response for no logs
+		return "No logs available"
+	}
 
-    // Step 3: Calculate the index of the last log entry and access it
-    lastLogIndex := len(h.Logs) - 1
-    lastLog := h.Logs[lastLogIndex]
+	// Step 3: Calculate the index of the last log entry and access it
+	lastLogIndex := len(h.Logs) - 1
+	lastLog := h.Logs[lastLogIndex]
 
-    // Step 4: Return the Response of the last log entry
-    return lastLog.Response
+	// Step 4: Return the Response of the last log entry
+	return lastLog.Response
 }
 
 // PrintLatest prints the latest HTTP request log entry.
@@ -318,6 +319,7 @@ func (h *HttpRequestLogs) trimLog() {
 		h.Logs = h.Logs[1:]
 	}
 }
+
 // init initializes the logging system for the application.
 //
 // This function performs the following operations:

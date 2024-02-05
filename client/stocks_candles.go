@@ -214,7 +214,8 @@ func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -269,7 +270,8 @@ func StockCandles(client ...*MarketDataClient) *StockCandlesRequest {
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -277,7 +279,7 @@ func (scr *StockCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]mod
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	scrResp, err := scr.Packed(optionalClients...)
 	if err != nil {
@@ -350,7 +352,8 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -378,7 +381,8 @@ func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient)
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -386,7 +390,7 @@ func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	scrResp, err := scrV2.Packed(optionalClients...)
 	if err != nil {

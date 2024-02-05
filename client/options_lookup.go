@@ -21,6 +21,7 @@ type OptionLookupRequest struct {
 // This method is used to specify the user input for which the options data is requested.
 // Parameters:
 //   - userInput: A string representing the user input to be set.
+//
 // Returns:
 //   - *OptionsLookupRequest: This method returns a pointer to the OptionsLookupRequest instance it was called on, allowing for method chaining.
 func (o *OptionLookupRequest) UserInput(userInput string) *OptionLookupRequest {
@@ -50,7 +51,8 @@ func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) 
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.OptionsLookupResponse: A pointer to the OptionsLookupResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -78,7 +80,8 @@ func (o *OptionLookupRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - string: A string containing the unpacked options data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -86,7 +89,7 @@ func (o *OptionLookupRequest) Get(optionalClients ...*MarketDataClient) (string,
 	if o == nil {
 		return "", fmt.Errorf("OptionsLookupRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	oResp, err := o.Packed(optionalClients...)
 	if err != nil {
@@ -106,6 +109,7 @@ func (o *OptionLookupRequest) Get(optionalClients ...*MarketDataClient) (string,
 // If no client is provided, it uses the default client.
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
+//
 // Returns:
 //   - *OptionsLookupRequest: A pointer to the newly created OptionsLookupRequest with default parameters and associated client.
 func OptionLookup(client ...*MarketDataClient) *OptionLookupRequest {

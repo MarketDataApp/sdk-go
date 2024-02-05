@@ -26,6 +26,7 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("Expected nil, got a client")
 	}
 }
+
 /*
 
 func TestRateLimit(t *testing.T) {

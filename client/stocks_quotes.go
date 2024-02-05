@@ -68,7 +68,8 @@ func (sqr *StockQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.StockQuotesResponse: A pointer to the StockQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -96,7 +97,8 @@ func (sqr *StockQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.StockQuote: A slice of StockQuote containing the unpacked quote data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -104,7 +106,7 @@ func (sqr *StockQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]model
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	sqrResp, err := sqr.Packed(optionalClients...)
 	if err != nil {
@@ -127,7 +129,7 @@ func (sqr *StockQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]model
 //
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//     the default client is used.
 //
 // Returns:
 //   - *StockQuoteRequest: A pointer to the newly created StockQuoteRequest with default parameters and associated client.

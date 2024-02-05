@@ -90,7 +90,8 @@ func (o *OptionsStrikesRequest) getParams() ([]parameters.MarketDataParam, error
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - *models.OptionsStrikesResponse: A pointer to the OptionsStrikesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
@@ -118,7 +119,8 @@ func (osr *OptionsStrikesRequest) Packed(optionalClients ...*MarketDataClient) (
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//   it replaces the current client for this request.
+//     it replaces the current client for this request.
+//
 // Returns:
 //   - []models.OptionsStrikes: A slice of OptionsStrikes containing the unpacked options strikes data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
@@ -126,7 +128,7 @@ func (osr *OptionsStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]m
 	if osr == nil {
 		return nil, fmt.Errorf("OptionsStrikesRequest is nil")
 	}
-	
+
 	// Use the Packed method to make the request, passing along any optional client
 	osrResp, err := osr.Packed(optionalClients...)
 	if err != nil {
@@ -149,7 +151,7 @@ func (osr *OptionsStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]m
 //
 // Parameters:
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//   the default client is used.
+//     the default client is used.
 //
 // Returns:
 //   - *OptionsStrikesRequest: A pointer to the newly created OptionsStrikesRequest with default parameters and associated client.

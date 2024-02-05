@@ -9,9 +9,10 @@
 // API requests to the Market Data API.
 //
 // Example:
-//     client := NewClient()
-//     client.Debug(true) // Enable debug mode to log detailed request and response information
-//     quote, err := client.StockQuotes().Symbol("AAPL").Get()
+//
+//	client := NewClient()
+//	client.Debug(true) // Enable debug mode to log detailed request and response information
+//	quote, err := client.StockQuotes().Symbol("AAPL").Get()
 //
 // Authentication:
 // The SDK uses an API token for authentication. The token can be set as an
@@ -82,15 +83,14 @@ const (
 //   - RateLimitExceeded() bool: Checks if the rate limit for API requests has been exceeded.
 
 type MarketDataClient struct {
-	*resty.Client              // Embedding resty.Client to utilize its HTTP client functionalities.
-	RateLimitLimit     int     // RateLimitLimit represents the maximum number of requests that can be made in a rate limit window.
-	RateLimitRemaining int     // RateLimitRemaining tracks the number of requests that can still be made before hitting the rate limit.
-	RateLimitReset     time.Time // RateLimitReset indicates the time when the rate limit will be reset.
+	*resty.Client                 // Embedding resty.Client to utilize its HTTP client functionalities.
+	RateLimitLimit     int        // RateLimitLimit represents the maximum number of requests that can be made in a rate limit window.
+	RateLimitRemaining int        // RateLimitRemaining tracks the number of requests that can still be made before hitting the rate limit.
+	RateLimitReset     time.Time  // RateLimitReset indicates the time when the rate limit will be reset.
 	mu                 sync.Mutex // mu is used to ensure thread-safe access to the client's fields.
 	Error              error      // Error captures any errors that occur during the execution of API calls.
 	debug              bool       // debug indicates whether debug mode is enabled, controlling the verbosity of logs.
 }
-
 
 // RateLimitExceeded checks if the rate limit for API requests has been exceeded.
 // It returns true if the number of remaining requests is less than or equal to zero
@@ -167,7 +167,7 @@ func (c *MarketDataClient) getEnvironment() string {
 	u, err := url.Parse(c.Client.HostURL) // Parse the host URL to extract the hostname.
 	if err != nil {
 		log.Printf("Error parsing host URL: %v", err) // Log any error encountered during URL parsing.
-		return "Unknown" // Default to "Unknown" if there's an error in parsing the URL.
+		return "Unknown"                              // Default to "Unknown" if there's an error in parsing the URL.
 	}
 	switch u.Hostname() { // Match the extracted hostname against predefined hostnames.
 	case prodHost:
@@ -203,7 +203,7 @@ func (c *MarketDataClient) setDefaultResetTime() {
 
 	// If the current time is after 9:30 AM, adjust defaultReset to 9:30 AM on the next day
 	if now.After(defaultReset) {
-		nextDay := now.AddDate(0, 0, 1) // Calculate the next day
+		nextDay := now.AddDate(0, 0, 1)                                                                 // Calculate the next day
 		defaultReset = time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 9, 30, 0, 0, location) // Set defaultReset to 9:30 AM on the next day
 	}
 
@@ -367,7 +367,8 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 			return resp, fmt.Errorf("received non-OK status: %s, error message: %v, URL: %s", resp.Status(), errMsg, resp.Request.URL)
 		}
 		// Return an error with the non-OK status if no specific error message is found in the response.
-		return resp, fmt.Errorf("received non-OK status: %s for URL: %s", resp.Status(), resp.Request.URL)	}
+		return resp, fmt.Errorf("received non-OK status: %s for URL: %s", resp.Status(), resp.Request.URL)
+	}
 
 	return resp, nil
 }
@@ -454,6 +455,7 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 //
 // Returns:
 //   - A pointer to the MarketDataClient instance with the configured environment.
+//
 // If an invalid environment is provided, the client's Error field is set, and the same instance is returned.
 func (c *MarketDataClient) Environment(env string) *MarketDataClient {
 	var baseURL string
@@ -480,7 +482,7 @@ func (c *MarketDataClient) Environment(env string) *MarketDataClient {
 // sets its environment and token based on the retrieved values, and assigns it to the global marketDataClient variable.
 func init() {
 	token := os.Getenv("MARKETDATA_TOKEN") // Retrieve the market data token from environment variables
-	env := os.Getenv("DEFAULT_ENV") // Retrieve the default environment from environment variables
+	env := os.Getenv("DEFAULT_ENV")        // Retrieve the default environment from environment variables
 
 	// Check if both token and environment variables are not empty
 	if token != "" && env != "" {
@@ -498,6 +500,7 @@ func init() {
 //
 // Returns:
 //   - A pointer to the MarketDataClient instance with the configured authentication token.
+//
 // If an error occurs during the initial request or if the response indicates a failure, the client's Error field is set,
 // and the same instance is returned.
 func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {

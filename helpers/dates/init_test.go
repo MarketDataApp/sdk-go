@@ -1,11 +1,9 @@
 package dates
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
-
-
 
 func TestFilterTimeFormats(t *testing.T) {
 	timeFormats := []TimeFormats{
