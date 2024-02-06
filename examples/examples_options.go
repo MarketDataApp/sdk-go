@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	api "github.com/MarketDataApp/sdk-go/client"
 )
 
-func optionsChainExample() {
+func OptionsChainExample() {
 	resp, err := api.OptionChain().UnderlyingSymbol("AAPL").Side("call").DTE(60).StrikeLimit(2).Get()
 	if err != nil {
 		fmt.Print(err)
@@ -19,7 +19,7 @@ func optionsChainExample() {
 
 }
 
-func optionsQuotesExample() {
+func OptionsQuotesExample() {
 	resp, err := api.OptionQuote().OptionSymbol("AAPL250117C00150000").Get()
 	if err != nil {
 		fmt.Print(err)
@@ -30,7 +30,7 @@ func optionsQuotesExample() {
 
 }
 
-func optionsStrikesExample() {
+func OptionsStrikesExample() {
 	resp, err := api.OptionsStrikes().UnderlyingSymbol("AAPL").Get()
 	if err != nil {
 		fmt.Print(err)
@@ -42,7 +42,7 @@ func optionsStrikesExample() {
 	}
 }
 
-func optionsLookupExample() {
+func OptionsLookupExample() {
 	resp, err := api.OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Get()
 	if err != nil {
 		fmt.Print(err)
@@ -52,7 +52,7 @@ func optionsLookupExample() {
 	fmt.Println(resp)
 }
 
-func optionsExpirationsExample() {
+func OptionsExpirationsExample() {
 	resp, err := api.OptionsExpirations().UnderlyingSymbol("AAPL").Strike(200).Get()
 	if err != nil {
 		fmt.Print(err)

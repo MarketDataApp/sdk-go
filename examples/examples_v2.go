@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	md "github.com/MarketDataApp/sdk-go/models"
 )
 
-func stockCandlesV2Example() {
+func StockCandlesV2Example() {
 
 	sce, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Packed()
 	if err != nil {
@@ -29,7 +29,7 @@ func stockCandlesV2Example() {
 	}
 }
 
-func stocksTickersV2Example() {
+func StocksTickersV2Example() {
 	tickers, err := api.StockTickers().DateKey("2023-01-05").Packed()
 	if err != nil {
 		fmt.Print(err)

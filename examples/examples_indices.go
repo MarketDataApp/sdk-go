@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	api "github.com/MarketDataApp/sdk-go/client"
 )
 
-func indexQuoteExample() {
+func IndexQuoteExample() {
 	iqe, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Packed()
 	if err != nil {
 		fmt.Print(err)
@@ -30,7 +30,7 @@ func indexQuoteExample() {
 
 }
 
-func indexCandlesExample() {
+func IndexCandlesExample() {
 	oneWeekAgo := time.Now().AddDate(0, 0, -7)
 	ice, err := api.IndexCandles().Resolution("D").Symbol("VIX").From(oneWeekAgo).To("today").Packed()
 	if err != nil {
