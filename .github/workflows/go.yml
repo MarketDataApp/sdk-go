@@ -26,10 +26,14 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
-      
+    - name: Run Test Coverage Script
+      run: ./tests/test_coverage.sh
+   
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
+      with:
+        file: ./tests/coverage.out
+        fail_ci_if_error: true
+        verbose: true
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
