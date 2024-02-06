@@ -7,12 +7,14 @@
 ![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/go.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/MarketDataApp/sdk-go/branch/main/graph/badge.svg)](https://codecov.io/gh/MarketDataApp/sdk-go)
 [![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
-[![GitHub release](https://img.shields.io/github/release/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/releases)
+![SDK Version](https://img.shields.io/badge/version-0.0.5-blue.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
 
-# Get Help From The Market Data Community
+#### Connect With The Market Data Community
 
 [![Discord](https://img.shields.io/badge/Discord-join%20chat-7389D8.svg?logo=discord&logoColor=ffffff)](https://discord.com/invite/GmdeAVRtnT)
+[![Twitter](https://img.shields.io/twitter/follow/MarketDataApp?style=social)](https://twitter.com/MarketDataApp)
+[![Reddit](https://img.shields.io/reddit/subreddit-subscribers/MarketDataApp?style=social)](https://www.reddit.com/r/MarketDataApp/)
 [![Helpdesk](https://img.shields.io/badge/Support-Ticketing-ff69b4.svg?logo=TicketTailor&logoColor=white)](https://www.marketdata.app/dashboard/)
 
 # Installation
