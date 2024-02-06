@@ -10,6 +10,11 @@
 [![GitHub release](https://img.shields.io/github/release/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/releases)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
 
+# Get Help From The Market Data Community
+
+[![Discord](https://img.shields.io/badge/Discord-join%20chat-7389D8.svg?logo=discord&logoColor=ffffff)](https://discord.com/invite/GmdeAVRtnT)
+[![Helpdesk](https://img.shields.io/badge/Support-Ticketing-ff69b4.svg?logo=TicketTailor&logoColor=white)](https://www.marketdata.app/dashboard/)
+
 # Installation
 
 To install the SDK, you can use the following command:
@@ -118,6 +123,7 @@ Example of a log entry:
     "volume": [29497567]
   }
 }
+```
 
 ### Troubleshooting: Debug Mode
 
