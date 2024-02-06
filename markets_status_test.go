@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -43,4 +44,39 @@ func TestMarketStatusRequestSetters(t *testing.T) {
 	if *msr.dateParams.Countback != countback || msr.dateParams.Date != "" || msr.dateParams.From != "" {
 		t.Errorf("Countback setter failed, got: %d, want: %d.", *msr.dateParams.Countback, countback)
 	}
+}
+
+func ExampleMarketStatus_packed() {
+
+	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Packed()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	fmt.Println(msr)
+	//Output: MarketStatusResponse{Date: [1641013200, 1641099600, 1641186000, 1641272400, 1641358800, 1641445200, 1641531600, 1641618000, 1641704400, 1641790800], Status: ["closed", "closed", "open", "open", "open", "open", "open", "closed", "closed", "open"]}
+}
+
+func ExampleMarketStatus_get() {
+
+	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Get()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	for _, report := range msr {
+		fmt.Println(report)
+	}
+	// Output: MarketStatusReport{Date: 2022-01-01 00:00:00 -0500 EST, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-02 00:00:00 -0500 EST, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-03 00:00:00 -0500 EST, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-04 00:00:00 -0500 EST, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-05 00:00:00 -0500 EST, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-06 00:00:00 -0500 EST, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-07 00:00:00 -0500 EST, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-08 00:00:00 -0500 EST, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-09 00:00:00 -0500 EST, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-10 00:00:00 -0500 EST, Open: true, Closed: false}
 }

@@ -42,7 +42,7 @@ func (oer *OptionsExpirationsResponse) IsValid() bool {
 // Returns:
 //   - A string that represents the OptionsExpirationsResponse object.
 func (oer *OptionsExpirationsResponse) String() string {
-	return fmt.Sprintf("Expirations: %v, Updated: %v", oer.Expirations, oer.Updated)
+	return fmt.Sprintf("OptionsExpirationsResponse{Expirations: %v, Updated: %d}", oer.Expirations, oer.Updated)
 }
 
 // Unpack converts the expiration date strings in the OptionsExpirationsResponse to a slice of time.Time objects.

@@ -46,12 +46,11 @@ func (tr *TickersResponse) String() string {
 	var str strings.Builder
 	str.WriteString("TickersResponse{\n")
 	for i := range tr.Symbol {
-		str.WriteString(fmt.Sprintf("Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s\n", tr.Symbol[i], tr.Name[i], tr.Type[i], tr.Currency[i], tr.Exchange[i], tr.FigiShares[i], tr.FigiComposite[i], tr.Cik[i]))
+		updateTime := ""
 		if tr.Updated != nil && i < len(*tr.Updated) && (*tr.Updated)[i] != 0 {
-			str.WriteString(fmt.Sprintf("Updated: %v\n", time.Unix((*tr.Updated)[i], 0)))
-		} else {
-			str.WriteString("Updated: \n")
+			updateTime = time.Unix((*tr.Updated)[i], 0).String()
 		}
+		str.WriteString(fmt.Sprintf("Ticker{Symbol: %q, Name: %q, Type: %q, Currency: %q, Exchange: %q, FigiShares: %q, FigiComposite: %q, Cik: %q, Updated: %q}\n", tr.Symbol[i], tr.Name[i], tr.Type[i], tr.Currency[i], tr.Exchange[i], tr.FigiShares[i], tr.FigiComposite[i], tr.Cik[i], updateTime))
 	}
 	str.WriteString("}")
 	return str.String()

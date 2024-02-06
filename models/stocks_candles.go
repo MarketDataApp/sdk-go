@@ -91,19 +91,20 @@ func (s *StockCandlesResponse) String() string {
 	// Determine the version of the struct
 	version, _ := s.getVersion()
 
+	vwap := "nil"
+	n := "nil"
+	if s.VWAP != nil {
+		vwap = fmt.Sprint(*s.VWAP)
+	}
+	if s.N != nil {
+		n = fmt.Sprint(*s.N)
+	}
+
 	if version == 1 {
-		return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v",
+		return fmt.Sprintf("StockCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v}",
 			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume)
 	} else {
-		vwap := "nil"
-		n := "nil"
-		if s.VWAP != nil {
-			vwap = fmt.Sprint(*s.VWAP)
-		}
-		if s.N != nil {
-			n = fmt.Sprint(*s.N)
-		}
-		return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
+		return fmt.Sprintf("StockCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v}",
 			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume, vwap, n)
 	}
 }

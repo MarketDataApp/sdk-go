@@ -15,10 +15,7 @@ type OptionLookupResponse struct {
 // Returns:
 //   - bool: True if the OptionLookupResponse has a non-empty OptionSymbol, otherwise false.
 func (olr *OptionLookupResponse) IsValid() bool {
-	if olr.OptionSymbol == "" {
-		return false
-	}
-	return true
+	return olr.OptionSymbol != ""
 }
 
 // String returns a string representation of the OptionLookupResponse.
@@ -26,7 +23,7 @@ func (olr *OptionLookupResponse) IsValid() bool {
 // Returns:
 //   - string: A string that represents the OptionLookupResponse, including the OptionSymbol.
 func (olr *OptionLookupResponse) String() string {
-	return fmt.Sprintf("OptionSymbol: %v", olr.OptionSymbol)
+	return fmt.Sprintf("OptionLookupResponse{OptionSymbol: %q}", olr.OptionSymbol)
 }
 
 // Unpack validates the OptionLookupResponse and returns the OptionSymbol if valid.

@@ -54,19 +54,25 @@ type StockQuote struct {
 //   - A string representation of the StockQuote struct.
 func (sq StockQuote) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
-	if sq.High52 != nil && sq.Low52 != nil && sq.Change != nil && sq.ChangePct != nil {
-		return fmt.Sprintf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %s, High52: %v, Low52: %v, Change: %v, ChangePct: %v",
-			sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *sq.High52, *sq.Low52, *sq.Change, *sq.ChangePct)
-	} else if sq.High52 != nil && sq.Low52 != nil {
-		return fmt.Sprintf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %s, High52: %v, Low52: %v",
-			sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *sq.High52, *sq.Low52)
-	} else if sq.Change != nil && sq.ChangePct != nil {
-		return fmt.Sprintf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %s, Change: %v, ChangePct: %v",
-			sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *sq.Change, *sq.ChangePct)
-	} else {
-		return fmt.Sprintf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %s",
-			sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
+	updatedFormat := sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00")
+	high52 := "nil"
+	if sq.High52 != nil {
+		high52 = fmt.Sprintf("%v", *sq.High52)
 	}
+	low52 := "nil"
+	if sq.Low52 != nil {
+		low52 = fmt.Sprintf("%v", *sq.Low52)
+	}
+	change := "nil"
+	if sq.Change != nil {
+		change = fmt.Sprintf("%v", *sq.Change)
+	}
+	changePct := "nil"
+	if sq.ChangePct != nil {
+		changePct = fmt.Sprintf("%v", *sq.ChangePct)
+	}
+	return fmt.Sprintf("StockQuote{Symbol: %q, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %q, High52: %s, Low52: %s, Change: %s, ChangePct: %s}",
+		sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, updatedFormat, high52, low52, change, changePct)
 }
 
 // Unpack transforms the StockQuotesResponse into a slice of StockQuote structs.
@@ -121,23 +127,23 @@ func (sqr *StockQuotesResponse) Unpack() ([]StockQuote, error) {
 func (sqr *StockQuotesResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "Symbol: %v, Ask: %v, Ask Size: %v, Bid: %v, Bid Size: %v, Mid: %v, Last: %v",
-		sqr.Symbol, sqr.Ask, sqr.AskSize, sqr.Bid, sqr.BidSize, sqr.Mid, sqr.Last)
+	fmt.Fprintf(&result, "StockQuotesResponse{Symbol: [%v], Ask: [%v], AskSize: [%v], Bid: [%v], BidSize: [%v], Mid: [%v], Last: [%v]",
+		strings.Join(sqr.Symbol, ", "), joinFloat64Slice(sqr.Ask), joinInt64Slice(sqr.AskSize), joinFloat64Slice(sqr.Bid), joinInt64Slice(sqr.BidSize), joinFloat64Slice(sqr.Mid), joinFloat64Slice(sqr.Last))
 
 	if sqr.Change != nil && len(sqr.Change) > 0 {
-		fmt.Fprintf(&result, ", Change: %v", sqr.Change[0])
+		fmt.Fprintf(&result, ", Change: [%v]", joinFloat64PointerSlice(sqr.Change))
 	}
 	if sqr.ChangePct != nil && len(sqr.ChangePct) > 0 {
-		fmt.Fprintf(&result, ", ChangePct: %v", sqr.ChangePct[0])
+		fmt.Fprintf(&result, ", ChangePct: [%v]", joinFloat64PointerSlice(sqr.ChangePct))
 	}
 	if sqr.High52 != nil && len(*sqr.High52) > 0 {
-		fmt.Fprintf(&result, ", High52: %v", *sqr.High52)
+		fmt.Fprintf(&result, ", High52: [%v]", joinFloat64Slice(*sqr.High52))
 	}
 	if sqr.Low52 != nil && len(*sqr.Low52) > 0 {
-		fmt.Fprintf(&result, ", Low52: %v", *sqr.Low52)
+		fmt.Fprintf(&result, ", Low52: [%v]", joinFloat64Slice(*sqr.Low52))
 	}
 
-	fmt.Fprintf(&result, ", Volume: %v, Updated: %v", sqr.Volume, sqr.Updated)
+	fmt.Fprintf(&result, ", Volume: [%v], Updated: [%v]}", joinInt64Slice(sqr.Volume), joinInt64Slice(sqr.Updated))
 
 	return result.String()
 }

@@ -39,19 +39,25 @@ type IndexQuote struct {
 //   - A string that represents the IndexQuote.
 func (iq IndexQuote) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
-	if iq.High52 != nil && iq.Low52 != nil && iq.Change != nil && iq.ChangePct != nil {
-		return fmt.Sprintf("Symbol: %s, Last: %v, Volume: %v, Updated: %s, High52: %v, Low52: %v, Change: %v, ChangePct: %v",
-			iq.Symbol, iq.Last, iq.Volume, iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *iq.High52, *iq.Low52, *iq.Change, *iq.ChangePct)
-	} else if iq.High52 != nil && iq.Low52 != nil {
-		return fmt.Sprintf("Symbol: %s, Last: %v, Volume: %v, Updated: %s, High52: %v, Low52: %v",
-			iq.Symbol, iq.Last, iq.Volume, iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *iq.High52, *iq.Low52)
-	} else if iq.Change != nil && iq.ChangePct != nil {
-		return fmt.Sprintf("Symbol: %s, Last: %v, Volume: %v, Updated: %s, Change: %v, ChangePct: %v",
-			iq.Symbol, iq.Last, iq.Volume, iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), *iq.Change, *iq.ChangePct)
-	} else {
-		return fmt.Sprintf("Symbol: %s, Last: %v, Volume: %v, Updated: %s",
-			iq.Symbol, iq.Last, iq.Volume, iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
+	updatedFormat := iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00")
+	high52 := "nil"
+	if iq.High52 != nil {
+		high52 = fmt.Sprintf("%v", *iq.High52)
 	}
+	low52 := "nil"
+	if iq.Low52 != nil {
+		low52 = fmt.Sprintf("%v", *iq.Low52)
+	}
+	change := "nil"
+	if iq.Change != nil {
+		change = fmt.Sprintf("%v", *iq.Change)
+	}
+	changePct := "nil"
+	if iq.ChangePct != nil {
+		changePct = fmt.Sprintf("%v", *iq.ChangePct)
+	}
+	return fmt.Sprintf("IndexQuote{Symbol: %q, Last: %v, Volume: %v, Updated: %q, High52: %s, Low52: %s, Change: %s, ChangePct: %s}",
+		iq.Symbol, iq.Last, iq.Volume, updatedFormat, high52, low52, change, changePct)
 }
 
 // Unpack transforms the IndexQuotesResponse into a slice of IndexQuote.
@@ -93,22 +99,22 @@ func (iqr *IndexQuotesResponse) Unpack() ([]IndexQuote, error) {
 func (iqr *IndexQuotesResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "Symbol: [%v], Last: [%v]", strings.Join(iqr.Symbol, ", "), joinFloat64Slice(iqr.Last))
+	result.WriteString(fmt.Sprintf("IndexQuotesResponse{Symbol: [%v], Last: [%v]", strings.Join(iqr.Symbol, ", "), joinFloat64Slice(iqr.Last)))
 
 	if iqr.Change != nil {
-		fmt.Fprintf(&result, ", Change: [%v]", joinFloat64PointerSlice(iqr.Change))
+		result.WriteString(fmt.Sprintf(", Change: [%v]", joinFloat64PointerSlice(iqr.Change)))
 	}
 	if iqr.ChangePct != nil {
-		fmt.Fprintf(&result, ", ChangePct: [%v]", joinFloat64PointerSlice(iqr.ChangePct))
+		result.WriteString(fmt.Sprintf(", ChangePct: [%v]", joinFloat64PointerSlice(iqr.ChangePct)))
 	}
 	if iqr.High52 != nil {
-		fmt.Fprintf(&result, ", High52: [%v]", joinFloat64Slice(*iqr.High52))
+		result.WriteString(fmt.Sprintf(", High52: [%v]", joinFloat64Slice(*iqr.High52)))
 	}
 	if iqr.Low52 != nil {
-		fmt.Fprintf(&result, ", Low52: [%v]", joinFloat64Slice(*iqr.Low52))
+		result.WriteString(fmt.Sprintf(", Low52: [%v]", joinFloat64Slice(*iqr.Low52)))
 	}
 
-	fmt.Fprintf(&result, ", Updated: [%v]", joinInt64Slice(iqr.Updated))
+	result.WriteString(fmt.Sprintf(", Updated: [%v]}", joinInt64Slice(iqr.Updated)))
 
 	return result.String()
 }

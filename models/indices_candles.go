@@ -23,7 +23,7 @@ type IndicesCandlesResponse struct {
 // Returns:
 //   - A formatted string containing the time, open, high, low, and close values.
 func (icr *IndicesCandlesResponse) String() string {
-	return fmt.Sprintf("Time: %v, Open: %v, High: %v, Low: %v, Close: %v",
+	return fmt.Sprintf("IndicesCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v}",
 		icr.Time, icr.Open, icr.High, icr.Low, icr.Close)
 }
 
@@ -96,7 +96,7 @@ type IndexCandle struct {
 //   - A formatted string containing the time, open, high, low, and close values.
 func (ic IndexCandle) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
-	return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v",
+	return fmt.Sprintf("IndexCandle{Time: %s, Open: %v, High: %v, Low: %v, Close: %v}",
 		ic.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), ic.Open, ic.High, ic.Low, ic.Close)
 }
 

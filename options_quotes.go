@@ -105,7 +105,7 @@ func (oqr *OptionQuoteRequest) getParams() ([]parameters.MarketDataParam, error)
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
-	params := []parameters.MarketDataParam{oqr.symbolParams}
+	params := []parameters.MarketDataParam{oqr.symbolParams, oqr.dateParams}
 	return params, nil
 }
 

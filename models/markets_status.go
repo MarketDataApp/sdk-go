@@ -28,17 +28,19 @@ func (msr *MarketStatusResponse) IsValid() bool {
 // Returns:
 //   - string: A string representation of the MarketStatusResponse.
 func (msr *MarketStatusResponse) String() string {
-	var parts []string
-	if msr.Status != nil && len(msr.Date) == len(*msr.Status) {
-		for i, date := range msr.Date {
-			t := time.Unix(date, 0)
-			dateStr := t.Format("2006-01-02")
-			status := (*msr.Status)[i]
-			part := fmt.Sprintf("Date: %s, Status: %s", dateStr, status)
-			parts = append(parts, part)
-		}
-	}
-	return "MarketStatusResponse{\n" + strings.Join(parts, ",\n") + "\n}"
+    dateParts := make([]string, len(msr.Date))
+    for i, date := range msr.Date {
+        dateParts[i] = fmt.Sprintf("%v", date)
+    }
+    statusParts := "nil"
+    if msr.Status != nil {
+        statusSlice := make([]string, len(*msr.Status))
+        for i, status := range *msr.Status {
+            statusSlice[i] = fmt.Sprintf("%q", status)
+        }
+        statusParts = "[" + strings.Join(statusSlice, ", ") + "]"
+    }
+    return fmt.Sprintf("MarketStatusResponse{Date: [%s], Status: %s}", strings.Join(dateParts, ", "), statusParts)
 }
 
 // String returns a string representation of the MarketStatusReport.
@@ -46,7 +48,7 @@ func (msr *MarketStatusResponse) String() string {
 // Returns:
 //   - string: A string representation of the MarketStatusReport.
 func (ms MarketStatusReport) String() string {
-	return fmt.Sprintf("MarketStatus{Date: %v, Open: %v, Closed: %v}", ms.Date, ms.Open, ms.Closed)
+	return fmt.Sprintf("MarketStatusReport{Date: %v, Open: %v, Closed: %v}", ms.Date, ms.Open, ms.Closed)
 }
 
 // Unpack unpacks the MarketStatusResponse into a slice of MarketStatusReport.

@@ -19,6 +19,27 @@ type OptionsExpirationsRequest struct {
 	*baseRequest
 	underlyingSymbol *parameters.SymbolParams
 	strike           *parameters.OptionParams
+	dateParams       *parameters.DateParams
+}
+
+// Date sets the date parameter for the OptionsExpirationsRequest.
+// This method is used to specify the date for which the options expirations are requested.
+// It modifies the dateParams field of the OptionsExpirationsRequest instance to store the date value.
+//
+// Parameters:
+//   - q: An interface{} representing the date to be set.
+//
+// Returns:
+//   - *OptionsExpirationsRequest: This method returns a pointer to the OptionsExpirationsRequest instance it was called on. This allows for method chaining. If the receiver (*OptionsExpirationsRequest) is nil, it returns nil to prevent a panic.
+func (oer *OptionsExpirationsRequest) Date(q interface{}) *OptionsExpirationsRequest {
+	if oer.dateParams == nil {
+		oer.dateParams = &parameters.DateParams{}
+	}
+	err := oer.dateParams.SetDate(q)
+	if err != nil {
+		oer.Error = err
+	}
+	return oer
 }
 
 // Strike sets the strike price parameter for the OptionsExpirationsRequest.
@@ -61,7 +82,7 @@ func (o *OptionsExpirationsRequest) getParams() ([]parameters.MarketDataParam, e
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
-	params := []parameters.MarketDataParam{o.underlyingSymbol, o.strike}
+	params := []parameters.MarketDataParam{o.underlyingSymbol, o.strike, o.dateParams}
 	return params, nil
 }
 
@@ -138,6 +159,7 @@ func OptionsExpirations(client ...*MarketDataClient) *OptionsExpirationsRequest 
 		baseRequest:      baseReq,
 		underlyingSymbol: &parameters.SymbolParams{},
 		strike:           &parameters.OptionParams{},
+		dateParams:       &parameters.DateParams{},
 	}
 
 	baseReq.child = oer

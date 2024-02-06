@@ -36,10 +36,9 @@ type StockNews struct {
 //   - A string representation of the StockNews struct.
 func (sn StockNews) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
-	return fmt.Sprintf("Symbol: %s, Headline: %s, Content: %s, Source: %s, PublicationDate: %s",
+	return fmt.Sprintf("StockNews{Symbol: %q, Headline: %q, Content: %q, Source: %q, PublicationDate: %q}",
 		sn.Symbol, sn.Headline, sn.Content, sn.Source, sn.PublicationDate.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
 }
-
 // Unpack transforms the StockNewsResponse struct into a slice of StockNews structs.
 //
 // Returns:
@@ -71,8 +70,9 @@ func (snr *StockNewsResponse) Unpack() ([]StockNews, error) {
 func (snr *StockNewsResponse) String() string {
 	var result strings.Builder
 
+	result.WriteString("StockNewsResponse{")
 	for i := range snr.Symbol {
-		fmt.Fprintf(&result, "Symbol: %s, Headline: %s, Content: %s, Source: %s, Publication Date: %v",
+		fmt.Fprintf(&result, "Symbol: %q, Headline: %q, Content: %q, Source: %q, PublicationDate: %v",
 			snr.Symbol[i], snr.Headline[i], snr.Content[i], snr.Source[i], snr.PublicationDate[i])
 
 		if i < len(snr.Symbol)-1 {
@@ -84,5 +84,6 @@ func (snr *StockNewsResponse) String() string {
 		fmt.Fprintf(&result, ", Updated: %v", snr.Updated)
 	}
 
+	result.WriteString("}")
 	return result.String()
 }

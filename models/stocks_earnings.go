@@ -12,8 +12,8 @@ import (
 // estimated EPS, surprise EPS, surprise EPS percentage, and last updated time (UNIX timestamp).
 type StockEarningsResponse struct {
 	Symbol         []string   `json:"symbol"`         // Symbol represents the stock symbols.
-	FiscalYear     []int64    `json:"fiscalYear"`     // FiscalYear represents the fiscal years of the earnings report.
-	FiscalQuarter  []int64    `json:"fiscalQuarter"`  // FiscalQuarter represents the fiscal quarters of the earnings report.
+	FiscalYear     []*int64   `json:"fiscalYear"`     // FiscalYear represents the fiscal years of the earnings report.
+	FiscalQuarter  []*int64   `json:"fiscalQuarter"`  // FiscalQuarter represents the fiscal quarters of the earnings report.
 	Date           []int64    `json:"date"`           // Date represents the earnings announcement dates in UNIX timestamp.
 	ReportDate     []int64    `json:"reportDate"`     // ReportDate represents the report release dates in UNIX timestamp.
 	ReportTime     []string   `json:"reportTime"`     // ReportTime represents the time of day the earnings were reported.
@@ -31,8 +31,8 @@ type StockEarningsResponse struct {
 // surprise EPS, surprise EPS percentage, and the last updated time.
 type StockEarningsReport struct {
 	Symbol         string    // Symbol represents the stock symbol.
-	FiscalYear     int64     // FiscalYear represents the fiscal year of the earnings report.
-	FiscalQuarter  int64     // FiscalQuarter represents the fiscal quarter of the earnings report.
+	FiscalYear     *int64     // FiscalYear represents the fiscal year of the earnings report.
+	FiscalQuarter  *int64     // FiscalQuarter represents the fiscal quarter of the earnings report.
 	Date           time.Time // Date represents the earnings announcement date.
 	ReportDate     time.Time // ReportDate represents the report release date.
 	ReportTime     string    // ReportTime represents the time of day the earnings were reported.
@@ -44,11 +44,6 @@ type StockEarningsReport struct {
 	Updated        time.Time // Updated represents the last update time.
 }
 
-// Unpack converts the StockEarningsResponse struct into a slice of StockEarningsReport structs.
-//
-// Returns:
-//   - []StockEarningsReport: A slice of StockEarningsReport structs constructed from the StockEarningsResponse.
-//   - error: An error if the unpacking process fails, nil otherwise.
 func (ser StockEarningsReport) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
 
@@ -72,7 +67,7 @@ func (ser StockEarningsReport) String() string {
 		surpriseEPSpct = fmt.Sprintf("%f", *ser.SurpriseEPSpct)
 	}
 
-	return fmt.Sprintf("Symbol: %s, Fiscal Year: %v, Fiscal Quarter: %v, Date: %v, Report Date: %v, Report Time: %v, Currency: %v, Reported EPS: %v, Estimated EPS: %v, Surprise EPS: %v, Surprise EPS Pct: %v, Updated: %s",
+	return fmt.Sprintf("StockEarningsReport{Symbol: %q, FiscalYear: %d, FiscalQuarter: %d, Date: %q, ReportDate: %q, ReportTime: %q, Currency: %q, ReportedEPS: %s, EstimatedEPS: %s, SurpriseEPS: %s, SurpriseEPSPct: %s, Updated: %q}",
 		ser.Symbol, ser.FiscalYear, ser.FiscalQuarter, ser.Date.Format("2006-01-02"), ser.ReportDate.Format("2006-01-02"), ser.ReportTime, ser.Currency, reportedEPS, estimatedEPS, surpriseEPS, surpriseEPSpct, ser.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
 }
 
@@ -107,17 +102,43 @@ func (ser *StockEarningsResponse) Unpack() ([]StockEarningsReport, error) {
 
 // String generates a string representation of the StockEarningsResponse.
 //
-// This method formats the StockEarningsResponse fields into a readable string, including handling nil values for EPS fields gracefully by displaying them as "nil".
+// This method formats the StockEarningsResponse fields into a readable string, including handling nil values for EPS fields and empty values for fiscalYear and fiscalQuarter gracefully by displaying them as "nil" or "empty" respectively.
 //
 // Returns:
 //   - A string representation of the StockEarningsResponse.
 func (ser *StockEarningsResponse) String() string {
 	var result strings.Builder
 
-	fmt.Fprintf(&result, "Symbol: %v, Fiscal Year: %v, Fiscal Quarter: %v, Date: %v, Report Date: %v, Report Time: %v, Currency: %v, ",
-		ser.Symbol, ser.FiscalYear, ser.FiscalQuarter, ser.Date, ser.ReportDate, ser.ReportTime, ser.Currency)
+	fiscalYear := "nil"
+	if ser.FiscalYear != nil && len(ser.FiscalYear) > 0 {
+		fiscalYearValues := make([]string, len(ser.FiscalYear))
+		for i, v := range ser.FiscalYear {
+			if v != nil {
+				fiscalYearValues[i] = fmt.Sprintf("%d", *v)
+			} else {
+				fiscalYearValues[i] = "nil"
+			}
+		}
+		fiscalYear = strings.Join(fiscalYearValues, ", ")
+	}
 
-	fmt.Fprintf(&result, "Reported EPS: [")
+	fiscalQuarter := "nil"
+	if ser.FiscalQuarter != nil && len(ser.FiscalQuarter) > 0 {
+		fiscalQuarterValues := make([]string, len(ser.FiscalQuarter))
+		for i, v := range ser.FiscalQuarter {
+			if v != nil {
+				fiscalQuarterValues[i] = fmt.Sprintf("%d", *v)
+			} else {
+				fiscalQuarterValues[i] = "nil"
+			}
+		}
+		fiscalQuarter = strings.Join(fiscalQuarterValues, ", ")
+	}
+
+	fmt.Fprintf(&result, "StockEarningsResponse{Symbol: %v, FiscalYear: %v, FiscalQuarter: %v, Date: %v, ReportDate: %v, ReportTime: %v, Currency: %v, ",
+		ser.Symbol, fiscalYear, fiscalQuarter, ser.Date, ser.ReportDate, ser.ReportTime, ser.Currency)
+
+	fmt.Fprintf(&result, "ReportedEPS: [")
 	for _, v := range ser.ReportedEPS {
 		if v != nil {
 			fmt.Fprintf(&result, "%f ", *v)
@@ -127,7 +148,7 @@ func (ser *StockEarningsResponse) String() string {
 	}
 	fmt.Fprintf(&result, "], ")
 
-	fmt.Fprintf(&result, "Estimated EPS: [")
+	fmt.Fprintf(&result, "EstimatedEPS: [")
 	for _, v := range ser.EstimatedEPS {
 		if v != nil {
 			fmt.Fprintf(&result, "%f ", *v)
@@ -137,7 +158,7 @@ func (ser *StockEarningsResponse) String() string {
 	}
 	fmt.Fprintf(&result, "], ")
 
-	fmt.Fprintf(&result, "Surprise EPS: [")
+	fmt.Fprintf(&result, "SurpriseEPS: [")
 	for _, v := range ser.SurpriseEPS {
 		if v != nil {
 			fmt.Fprintf(&result, "%f ", *v)
@@ -147,7 +168,7 @@ func (ser *StockEarningsResponse) String() string {
 	}
 	fmt.Fprintf(&result, "], ")
 
-	fmt.Fprintf(&result, "Surprise EPS Pct: [")
+	fmt.Fprintf(&result, "SurpriseEPSpct: [")
 	for _, v := range ser.SurpriseEPSpct {
 		if v != nil {
 			fmt.Fprintf(&result, "%f ", *v)
@@ -157,7 +178,7 @@ func (ser *StockEarningsResponse) String() string {
 	}
 	fmt.Fprintf(&result, "], ")
 
-	fmt.Fprintf(&result, "Updated: %v", ser.Updated)
+	fmt.Fprintf(&result, "Updated: %v}", ser.Updated)
 
 	return result.String()
 }

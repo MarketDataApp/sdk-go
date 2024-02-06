@@ -3,8 +3,11 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
+
+	"github.com/iancoleman/orderedmap"
 )
 
 /*
@@ -29,8 +32,8 @@ type OptionsStrikes struct {
 
 // OptionsStrikesResponse encapsulates the response structure for a request to retrieve option strikes.
 type OptionsStrikesResponse struct {
-	Updated int                  `json:"updated"` // Updated is a UNIX timestamp indicating when the data was last updated.
-	Strikes map[string][]float64 `json:"-"`       // Strikes is a map where each key is a date string and the value is a slice of strike prices for that date.
+	Updated int                    `json:"updated"` // Updated is a UNIX timestamp indicating when the data was last updated.
+	Strikes *orderedmap.OrderedMap `json:"-"`       // Strikes is a map where each key is a date string and the value is a slice of strike prices for that date.
 }
 
 // UnmarshalJSON custom unmarshals the JSON data into the OptionsStrikesResponse struct.
@@ -40,25 +43,50 @@ type OptionsStrikesResponse struct {
 //
 // Returns:
 //   - error: An error if unmarshaling fails, nil otherwise.
+//
+// UnmarshalJSON custom unmarshals the JSON data into the OptionsStrikesResponse struct.
 func (osr *OptionsStrikesResponse) UnmarshalJSON(data []byte) error {
 	var aux map[string]interface{}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
 
-	osr.Strikes = make(map[string][]float64)
-	for key, value := range aux {
+	// Initialize the OrderedMap
+	osr.Strikes = orderedmap.New()
+
+	// Extract and sort the keys (excluding "updated" and "s")
+	var keys []string
+	for key := range aux {
 		if key != "updated" && key != "s" {
-			values := value.([]interface{})
-			floats := make([]float64, len(values))
-			for i, v := range values {
-				floats[i] = v.(float64)
-			}
-			osr.Strikes[key] = floats
-		} else if key == "updated" {
-			osr.Updated = int(value.(float64))
+			keys = append(keys, key)
 		}
 	}
+	sort.Strings(keys) // Sorts the keys alphabetically, which works well for ISO 8601 dates
+
+	// Iterate over the sorted keys and add them to the OrderedMap
+	for _, key := range keys {
+		values, ok := aux[key].([]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type for key %s", key)
+		}
+		floats := make([]float64, len(values))
+		for i, v := range values {
+			floatVal, ok := v.(float64)
+			if !ok {
+				return fmt.Errorf("unexpected type for value in key %s", key)
+			}
+			floats[i] = floatVal
+		}
+		osr.Strikes.Set(key, floats)
+	}
+
+	// Handle the "updated" key separately
+	if updated, ok := aux["updated"].(float64); ok {
+		osr.Updated = int(updated)
+	} else {
+		return fmt.Errorf("unexpected type or missing 'updated' key")
+	}
+
 	return nil
 }
 
@@ -68,30 +96,36 @@ func (osr *OptionsStrikesResponse) UnmarshalJSON(data []byte) error {
 //   - string: The string representation of the OptionsStrikes.
 func (os OptionsStrikes) String() string {
 	loc, _ := time.LoadLocation("America/New_York")
-	dateStr := os.Expiration.In(loc).Format("Jan 02, 2006 15:04 MST")
+	dateStr := os.Expiration.In(loc).Format("2006-01-02")
 
-	var strikesStrBuilder strings.Builder
-	strikesStrBuilder.WriteString("[")
-	for i, strike := range os.Strikes {
-		if i > 0 {
-			strikesStrBuilder.WriteString(", ")
-		}
-		strikesStrBuilder.WriteString(fmt.Sprintf("%.2f", strike))
+	// Convert each strike price to a string with two decimal places
+	var strikesStrParts []string
+	for _, strike := range os.Strikes {
+		strikesStrParts = append(strikesStrParts, fmt.Sprintf("%.2f", strike))
 	}
-	strikesStrBuilder.WriteString("]")
+	// Join the formatted strike prices with a space
+	strikesStr := strings.Join(strikesStrParts, " ")
 
-	return fmt.Sprintf("Expiration: %s, Strikes: %s", dateStr, strikesStrBuilder.String())
+	return fmt.Sprintf("OptionsStrikes{Expiration: %s, Strikes: [%s]}", dateStr, strikesStr)
 }
 
-// IsValid checks if the OptionsStrikesResponse is valid.
+// IsValid checks if the OptionsStrikesResponse is valid by leveraging the Validate method.
 //
 // Returns:
 //   - bool: True if the response is valid, false otherwise.
 func (osr *OptionsStrikesResponse) IsValid() bool {
-	if len(osr.Strikes) == 0 {
-		return false
+	return osr.Validate() == nil
+}
+
+// Validate checks if the OptionsStrikesResponse is valid.
+//
+// Returns:
+//   - error: An error if the response is not valid, nil otherwise.
+func (osr *OptionsStrikesResponse) Validate() error {
+	if len(osr.Strikes.Keys()) == 0 {
+		return fmt.Errorf("invalid OptionsStrikesResponse: no strikes data")
 	}
-	return true
+	return nil
 }
 
 // String returns a string representation of the OptionsStrikesResponse struct.
@@ -99,36 +133,34 @@ func (osr *OptionsStrikesResponse) IsValid() bool {
 // Returns:
 //   - string: The string representation of the OptionsStrikesResponse.
 func (osr *OptionsStrikesResponse) String() string {
-	// First, unpack the response to get a slice of OptionsStrikes
-	unpackedStrikes, err := osr.Unpack()
-	if err != nil {
-		return fmt.Sprintf("Error unpacking strikes: %v", err)
-	}
-
-	// Initialize a builder for constructing the output string
 	var sb strings.Builder
+	sb.WriteString("OptionsStrikesResponse{Strikes: [")
+	first := true
+	for _, key := range osr.Strikes.Keys() {
+		if !first {
+			sb.WriteString(", ")
+		}
+		first = false
+		value, _ := osr.Strikes.Get(key)
+		strikes, _ := value.([]float64) // Assuming the type assertion is always successful.
 
-	// Loop over each OptionsStrikes in the unpacked slice
-	for _, strike := range unpackedStrikes {
-		// Use the String method of OptionsStrikes to append each to the builder
-		sb.WriteString(strike.String() + "; ")
+		// Convert strike prices to strings and join them
+		var strikeStrs []string
+		for _, strike := range strikes {
+			strikeStrs = append(strikeStrs, fmt.Sprintf("%.2f", strike))
+		}
+		strikesStr := strings.Join(strikeStrs, " ")
+
+		sb.WriteString(fmt.Sprintf("%s:[%s]", key, strikesStr))
 	}
-
-	// Append the "Updated" information last
-	sb.WriteString(fmt.Sprintf("Updated: %v", osr.Updated))
-
-	// Return the constructed string
+	sb.WriteString(fmt.Sprintf("], Updated: %d}", osr.Updated))
 	return sb.String()
 }
 
-// Unpack converts the map of strikes in the response to a slice of OptionsStrikes.
-//
-// Returns:
-//   - []OptionsStrikes: A slice of OptionsStrikes constructed from the response.
-//   - error: An error if the unpacking fails, nil otherwise.
+// Unpack converts the ordered map of strikes in the response to a slice of OptionsStrikes.
 func (osr *OptionsStrikesResponse) Unpack() ([]OptionsStrikes, error) {
-	if !osr.IsValid() {
-		return nil, fmt.Errorf("invalid OptionsStrikesResponse")
+	if err := osr.Validate(); err != nil {
+		return nil, err
 	}
 
 	loc, err := time.LoadLocation("America/New_York")
@@ -137,13 +169,14 @@ func (osr *OptionsStrikesResponse) Unpack() ([]OptionsStrikes, error) {
 	}
 
 	var unpackedStrikes []OptionsStrikes
-	for dateStr, strikes := range osr.Strikes {
-		// Parse the date in the given location
-		date, err := time.ParseInLocation("2006-01-02", dateStr, loc)
+	for _, key := range osr.Strikes.Keys() {
+		value, _ := osr.Strikes.Get(key)
+		strikes := value.([]float64)
+
+		date, err := time.ParseInLocation("2006-01-02", key, loc)
 		if err != nil {
-			return nil, fmt.Errorf("error parsing date %s: %v", dateStr, err)
+			return nil, fmt.Errorf("error parsing date %s: %v", key, err)
 		}
-		// Set the time to 16:00:00
 		date = time.Date(date.Year(), date.Month(), date.Day(), 16, 0, 0, 0, loc)
 
 		unpackedStrikes = append(unpackedStrikes, OptionsStrikes{
