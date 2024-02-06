@@ -3,7 +3,7 @@ package examples
 import (
 	"fmt"
 
-	api "github.com/MarketDataApp/sdk-go/client"
+	api "github.com/MarketDataApp/sdk-go"
 )
 
 func RawHttpResponseExample() {

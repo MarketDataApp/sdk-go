@@ -1,15 +1,13 @@
-package main
+package examples
 
 import (
 	"fmt"
 	"log"
 
-	api "github.com/MarketDataApp/sdk-go/client"
-
-	. "github.com/MarketDataApp/sdk-go/examples"
+	api "github.com/MarketDataApp/sdk-go"
 )
 
-func main() {
+func Start() {
 
 	client, err := api.GetClient()
 	if err != nil {
@@ -20,14 +18,13 @@ func main() {
 
 	fmt.Println("Staring log example...")
 	LogExample()
-/*
-	//fmt.Println("Starting market status request...")
-	//marketstatusExample()
+	/*
+	   //fmt.Println("Starting market status request...")
+	   //marketstatusExample()
 
-	fmt.Println("Staring rawResponse example...")
-	rawHttpResponseExample()
-
-*/
+	   fmt.Println("Staring rawResponse example...")
+	   rawHttpResponseExample()
+	*/
 }
 
 func optionsExamples() {

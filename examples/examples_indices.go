@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	api "github.com/MarketDataApp/sdk-go/client"
+	api "github.com/MarketDataApp/sdk-go"
 )
 
 func IndexQuoteExample() {
