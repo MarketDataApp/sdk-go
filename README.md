@@ -7,7 +7,7 @@
 ![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/go.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/MarketDataApp/sdk-go/branch/main/graph/badge.svg)](https://codecov.io/gh/MarketDataApp/sdk-go)
 [![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
-![SDK Version](https://img.shields.io/badge/version-0.0.5-blue.svg)
+![SDK Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
 
 #### Connect With The Market Data Community

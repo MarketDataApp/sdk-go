@@ -57,7 +57,7 @@ import (
 var marketDataClient *MarketDataClient
 
 const (
-	Version = "0.0.5" // Version specifies the current version of the SDK.
+	Version = "0.1.0" // Version specifies the current version of the SDK.
 
 	prodEnv = "prod" // prodEnv is the environment name for production.
 	testEnv = "test" // testEnv is the environment name for testing.
