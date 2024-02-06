@@ -14,7 +14,7 @@
 
 [![Discord](https://img.shields.io/badge/Discord-join%20chat-7389D8.svg?logo=discord&logoColor=ffffff)](https://discord.com/invite/GmdeAVRtnT)
 [![Twitter](https://img.shields.io/twitter/follow/MarketDataApp?style=social)](https://twitter.com/MarketDataApp)
-[![Reddit](https://img.shields.io/reddit/subreddit-subscribers/MarketDataApp?style=social)](https://www.reddit.com/r/MarketDataApp/)
+[![Reddit](https://img.shields.io/reddit/subreddit-subscribers/MarketDataApp)](https://www.reddit.com/r/MarketDataApp/)
 [![Helpdesk](https://img.shields.io/badge/Support-Ticketing-ff69b4.svg?logo=TicketTailor&logoColor=white)](https://www.marketdata.app/dashboard/)
 
 # Installation
