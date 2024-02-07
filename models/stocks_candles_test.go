@@ -21,14 +21,14 @@ func TestUnpack(t *testing.T) {
 	testCases := []struct {
 		name     string
 		jsonData string
-		expected []StockCandle
+		expected []Candle
 	}{
 		{
 			name:     "jsonDataV1",
 			jsonData: jsonDataV1,
-			expected: []StockCandle{
+			expected: []Candle{
 				{
-					Time:   time.Unix(1699630200, 0),
+					Date:   time.Unix(1699630200, 0),
 					Open:   183.78,
 					High:   183.93,
 					Low:    183.76,
@@ -36,7 +36,7 @@ func TestUnpack(t *testing.T) {
 					Volume: 147185,
 				},
 				{
-					Time:   time.Unix(1699630260, 0),
+					Date:   time.Unix(1699630260, 0),
 					Open:   183.88,
 					High:   183.96,
 					Low:    183.82,
@@ -48,9 +48,9 @@ func TestUnpack(t *testing.T) {
 		{
 			name:     "jsonDataV2",
 			jsonData: jsonDataV2,
-			expected: []StockCandle{
+			expected: []Candle{
 				{
-					Time:   time.Unix(1699630200, 0),
+					Date:   time.Unix(1699630200, 0),
 					Open:   183.78,
 					High:   183.93,
 					Low:    183.76,
@@ -60,7 +60,7 @@ func TestUnpack(t *testing.T) {
 					N:      147185,
 				},
 				{
-					Time:   time.Unix(1699630260, 0),
+					Date:   time.Unix(1699630260, 0),
 					Open:   183.88,
 					High:   183.96,
 					Low:    183.82,
@@ -107,7 +107,7 @@ func TestPruneAtIndex(t *testing.T) {
 			jsonData: jsonDataV1,
 			index:    1,
 			expected: &StockCandlesResponse{
-				Time:   []int64{1699630200},
+				Date:   []int64{1699630200},
 				Open:   []float64{183.78},
 				High:   []float64{183.93},
 				Low:    []float64{183.76},
@@ -121,7 +121,7 @@ func TestPruneAtIndex(t *testing.T) {
 			jsonData: jsonDataV2,
 			index:    1,
 			expected: &StockCandlesResponse{
-				Time:   []int64{1699630200},
+				Date:   []int64{1699630200},
 				Open:   []float64{183.78},
 				High:   []float64{183.93},
 				Low:    []float64{183.76},
@@ -166,7 +166,7 @@ func TestPruneAtIndex(t *testing.T) {
 func TestPruneBeforeIndex(t *testing.T) {
 	// Initialize a StockCandlesResponse instance
 	s := &StockCandlesResponse{
-		Time:   []int64{1, 2, 3, 4, 5},
+		Date:   []int64{1, 2, 3, 4, 5},
 		Open:   []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 		High:   []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 		Low:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
@@ -180,8 +180,8 @@ func TestPruneBeforeIndex(t *testing.T) {
 	s.pruneBeforeIndex(2)
 
 	// Check the results
-	if len(s.Time) != 2 || s.Time[0] != 4 {
-		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Time, []int64{4, 5})
+	if len(s.Date) != 2 || s.Date[0] != 4 {
+		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Date, []int64{4, 5})
 	}
 	if len(s.Open) != 2 || s.Open[0] != 4.4 {
 		t.Errorf("Open was incorrect, got: %v, want: %v.", s.Open, []float64{4.4, 5.5})
@@ -191,7 +191,7 @@ func TestPruneBeforeIndex(t *testing.T) {
 func TestPruneAfterIndex(t *testing.T) {
 	// Initialize a StockCandlesResponse instance
 	s := &StockCandlesResponse{
-		Time:   []int64{1, 2, 3, 4, 5},
+		Date:   []int64{1, 2, 3, 4, 5},
 		Open:   []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 		High:   []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 		Low:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
@@ -205,8 +205,8 @@ func TestPruneAfterIndex(t *testing.T) {
 	s.pruneAfterIndex(2)
 
 	// Check the results
-	if len(s.Time) != 2 || s.Time[1] != 2 {
-		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Time, []int64{1, 2})
+	if len(s.Date) != 2 || s.Date[1] != 2 {
+		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Date, []int64{1, 2})
 	}
 	if len(s.Open) != 2 || s.Open[1] != 2.2 {
 		t.Errorf("Open was incorrect, got: %v, want: %v.", s.Open, []float64{1.1, 2.2})
@@ -248,8 +248,8 @@ func TestPruneOutsideDateRange(t *testing.T) {
 	}
 
 	// Check the results
-	if len(s.Time) != 3 || s.Time[0] != 978307200 || s.Time[2] != 1041379200 {
-		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Time, []int64{978307200, 1009843200, 1041379200})
+	if len(s.Date) != 3 || s.Date[0] != 978307200 || s.Date[2] != 1041379200 {
+		t.Errorf("Time was incorrect, got: %v, want: %v.", s.Date, []int64{978307200, 1009843200, 1041379200})
 	}
 	if len(s.Open) != 3 || s.Open[0] != 2.2 || s.Open[2] != 4.4 {
 		t.Errorf("Open was incorrect, got: %v, want: %v.", s.Open, []float64{2.2, 3.3, 4.4})
@@ -295,7 +295,7 @@ func TestUnmarshalJSON(t *testing.T) {
 func TestMarshalJSON(t *testing.T) {
 	// Initialize a StockCandlesResponse instance
 	s := &StockCandlesResponse{
-		Time:   []int64{1699630200, 1699630260},
+		Date:   []int64{1699630200, 1699630260},
 		Open:   []float64{183.78, 183.88},
 		High:   []float64{183.93, 183.96},
 		Low:    []float64{183.76, 183.82},
@@ -371,15 +371,15 @@ func TestCombineStockCandlesResponse(t *testing.T) {
 func TestCheckTimeInAscendingOrder(t *testing.T) {
 	// Test cases
 	testCases := []struct {
-		time      []int64
+		date      []int64
 		shouldErr bool
 	}{
 		{
-			time:      []int64{1, 2, 3, 4, 5},
+			date:      []int64{1, 2, 3, 4, 5},
 			shouldErr: false, // Time is in ascending order
 		},
 		{
-			time:      []int64{1, 3, 2, 4, 5},
+			date:      []int64{1, 3, 2, 4, 5},
 			shouldErr: true, // Time is not in ascending order
 		},
 	}
@@ -387,7 +387,7 @@ func TestCheckTimeInAscendingOrder(t *testing.T) {
 	for _, tc := range testCases {
 		// Create a StockCandlesResponse instance with the specified time
 		s := &StockCandlesResponse{
-			Time: tc.time,
+			Date: tc.date,
 		}
 
 		// Call the method

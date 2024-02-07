@@ -7,10 +7,11 @@ var endpoints = map[int]map[string]map[string]string{
 			"status": "/v1/markets/status/",
 		},
 		"stocks": {
-			"candles":  "/v1/stocks/candles/{resolution}/{symbol}/",
-			"quotes":   "/v1/stocks/quotes/{symbol}/",
-			"earnings": "/v1/stocks/earnings/{symbol}/",
-			"news":     "/v1/stocks/news/{symbol}/",
+			"candles":     "/v1/stocks/candles/{resolution}/{symbol}/",
+			"bulkcandles": "/v1/stocks/bulkcandles/{resolution}/",
+			"quotes":      "/v1/stocks/quotes/{symbol}/",
+			"earnings":    "/v1/stocks/earnings/{symbol}/",
+			"news":        "/v1/stocks/news/{symbol}/",
 		},
 		"options": {
 			"expirations": "/v1/options/expirations/{symbol}/",

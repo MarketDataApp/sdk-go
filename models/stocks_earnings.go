@@ -12,8 +12,8 @@ import (
 // estimated EPS, surprise EPS, surprise EPS percentage, and last updated time (UNIX timestamp).
 type StockEarningsResponse struct {
 	Symbol         []string   `json:"symbol"`         // Symbol represents the stock symbols.
-	FiscalYear     []*int64   `json:"fiscalYear"`     // FiscalYear represents the fiscal years of the earnings report.
-	FiscalQuarter  []*int64   `json:"fiscalQuarter"`  // FiscalQuarter represents the fiscal quarters of the earnings report.
+	FiscalYear     []int64   `json:"fiscalYear"`     // FiscalYear represents the fiscal years of the earnings report.
+	FiscalQuarter  []int64   `json:"fiscalQuarter"`  // FiscalQuarter represents the fiscal quarters of the earnings report.
 	Date           []int64    `json:"date"`           // Date represents the earnings announcement dates in UNIX timestamp.
 	ReportDate     []int64    `json:"reportDate"`     // ReportDate represents the report release dates in UNIX timestamp.
 	ReportTime     []string   `json:"reportTime"`     // ReportTime represents the time of day the earnings were reported.
@@ -31,8 +31,8 @@ type StockEarningsResponse struct {
 // surprise EPS, surprise EPS percentage, and the last updated time.
 type StockEarningsReport struct {
 	Symbol         string    // Symbol represents the stock symbol.
-	FiscalYear     *int64     // FiscalYear represents the fiscal year of the earnings report.
-	FiscalQuarter  *int64     // FiscalQuarter represents the fiscal quarter of the earnings report.
+	FiscalYear     int64     // FiscalYear represents the fiscal year of the earnings report.
+	FiscalQuarter  int64     // FiscalQuarter represents the fiscal quarter of the earnings report.
 	Date           time.Time // Date represents the earnings announcement date.
 	ReportDate     time.Time // ReportDate represents the report release date.
 	ReportTime     string    // ReportTime represents the time of day the earnings were reported.
@@ -110,27 +110,19 @@ func (ser *StockEarningsResponse) String() string {
 	var result strings.Builder
 
 	fiscalYear := "nil"
-	if ser.FiscalYear != nil && len(ser.FiscalYear) > 0 {
+	if len(ser.FiscalYear) > 0 {
 		fiscalYearValues := make([]string, len(ser.FiscalYear))
 		for i, v := range ser.FiscalYear {
-			if v != nil {
-				fiscalYearValues[i] = fmt.Sprintf("%d", *v)
-			} else {
-				fiscalYearValues[i] = "nil"
-			}
+			fiscalYearValues[i] = fmt.Sprintf("%d", v)
 		}
 		fiscalYear = strings.Join(fiscalYearValues, ", ")
 	}
 
 	fiscalQuarter := "nil"
-	if ser.FiscalQuarter != nil && len(ser.FiscalQuarter) > 0 {
+	if len(ser.FiscalQuarter) > 0 {
 		fiscalQuarterValues := make([]string, len(ser.FiscalQuarter))
 		for i, v := range ser.FiscalQuarter {
-			if v != nil {
-				fiscalQuarterValues[i] = fmt.Sprintf("%d", *v)
-			} else {
-				fiscalQuarterValues[i] = "nil"
-			}
+			fiscalQuarterValues[i] = fmt.Sprintf("%d", v)
 		}
 		fiscalQuarter = strings.Join(fiscalQuarterValues, ", ")
 	}

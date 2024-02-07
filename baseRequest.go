@@ -58,6 +58,14 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 		return params, nil
 	}
 
+	if sbcr, ok := br.child.(*BulkStockCandlesRequest); ok {
+		params, err := sbcr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
 	if scr, ok := br.child.(*StockCandlesRequestV2); ok {
 		params, err := scr.getParams()
 		if err != nil {

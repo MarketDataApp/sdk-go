@@ -81,38 +81,19 @@ func (icr *IndicesCandlesResponse) checkForEmptySlices() error {
 	return nil
 }
 
-// IndexCandle represents a single candle data point with time, open, high, low, and close values.
-type IndexCandle struct {
-	Time  time.Time
-	Open  float64
-	High  float64
-	Low   float64
-	Close float64
-}
-
-// String returns a string representation of the IndexCandle with the time in America/New_York timezone.
-//
-// Returns:
-//   - A formatted string containing the time, open, high, low, and close values.
-func (ic IndexCandle) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-	return fmt.Sprintf("IndexCandle{Time: %s, Open: %v, High: %v, Low: %v, Close: %v}",
-		ic.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), ic.Open, ic.High, ic.Low, ic.Close)
-}
-
 // Unpack converts the IndicesCandlesResponse into a slice of IndexCandle.
 //
 // Returns:
 //   - A slice of IndexCandle, error if there's an inconsistency in the data slices.
-func (icr *IndicesCandlesResponse) Unpack() ([]IndexCandle, error) {
+func (icr *IndicesCandlesResponse) Unpack() ([]Candle, error) {
 	if err := icr.checkForEqualSlices(); err != nil {
 		return nil, err
 	}
 
-	var indexCandles []IndexCandle
+	var indexCandles []Candle
 	for i := range icr.Time {
-		indexCandle := IndexCandle{
-			Time:  time.Unix(icr.Time[i], 0),
+		indexCandle := Candle{
+			Date:  time.Unix(icr.Time[i], 0),
 			Open:  icr.Open[i],
 			High:  icr.High[i],
 			Low:   icr.Low[i],

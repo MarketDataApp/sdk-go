@@ -12,9 +12,9 @@ func ExampleIndicesCandlesRequest_get() {
 	for _, candle := range vix {
 		fmt.Println(candle)
 	}
-	// Output: IndexCandle{Time: 2022-01-03 00:00:00 -05:00, Open: 17.6, High: 18.54, Low: 16.56, Close: 16.6}
-	// IndexCandle{Time: 2022-01-04 00:00:00 -05:00, Open: 16.57, High: 17.81, Low: 16.34, Close: 16.91}
-	// IndexCandle{Time: 2022-01-05 00:00:00 -05:00, Open: 17.07, High: 20.17, Low: 16.58, Close: 19.73}
+	// Output: Candle{Time: 2022-01-03 00:00:00 -05:00, Open: 17.6, High: 18.54, Low: 16.56, Close: 16.6}
+	// Candle{Time: 2022-01-04 00:00:00 -05:00, Open: 16.57, High: 17.81, Low: 16.34, Close: 16.91}
+	// Candle{Time: 2022-01-05 00:00:00 -05:00, Open: 17.07, High: 20.17, Low: 16.58, Close: 19.73}
 }
 
 func ExampleIndicesCandlesRequest_packed() {

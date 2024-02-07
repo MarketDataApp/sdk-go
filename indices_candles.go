@@ -194,7 +194,7 @@ func (icr *IndicesCandlesRequest) Packed(optionalClients ...*MarketDataClient) (
 // Returns:
 //   - []models.IndexCandle: A slice of IndexCandle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.IndexCandle, error) {
+func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}

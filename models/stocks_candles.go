@@ -14,7 +14,7 @@ import (
 // It includes slices for time, open, high, low, close prices, and volume for each candle.
 // Optional fields VWAP and N are available for V2 candles.
 type StockCandlesResponse struct {
-	Time   []int64    `json:"t" human:"Date"`                              // Time holds UNIX timestamps for each candle.
+	Date   []int64    `json:"t" human:"Date"`                              // Date holds UNIX timestamps for each candle.
 	Open   []float64  `json:"o" human:"Open"`                              // Open holds the opening prices for each candle.
 	High   []float64  `json:"h" human:"High"`                              // High holds the highest prices reached in each candle.
 	Low    []float64  `json:"l" human:"Low"`                               // Low holds the lowest prices reached in each candle.
@@ -24,48 +24,20 @@ type StockCandlesResponse struct {
 	N      *[]int64   `json:"n,omitempty" human:"No. of Trades,omitempty"` // N holds the number of trades for each candle, optional.
 }
 
-// StockCandle represents a single candle in a stock candlestick chart.
-// It includes the time, open, high, low, close prices, volume, and optionally VWAP and number of trades.
-type StockCandle struct {
-	Time   time.Time // Time represents the date and time of the candle.
-	Open   float64   // Open is the opening price of the candle.
-	High   float64   // High is the highest price reached during the candle's time.
-	Low    float64   // Low is the lowest price reached during the candle's time.
-	Close  float64   // Close is the closing price of the candle.
-	Volume int64     // Volume represents the trading volume during the candle's time.
-	VWAP   float64   // VWAP is the Volume Weighted Average Price, optional.
-	N      int64     // N is the number of trades that occurred, optional.
-}
-
-// String returns a string representation of a StockCandle.
-//
-// Returns:
-//   - A string representation of the StockCandle.
-func (sc StockCandle) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-	if sc.VWAP == 0 && sc.N == 0 {
-		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v",
-			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume)
-	} else {
-		return fmt.Sprintf("Time: %s, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v",
-			sc.Time.In(loc).Format("2006-01-02 15:04:05 Z07:00"), sc.Open, sc.High, sc.Low, sc.Close, sc.Volume, sc.VWAP, sc.N)
-	}
-}
-
 // Unpack converts a StockCandlesResponse into a slice of StockCandle.
 //
 // Returns:
 //   - A slice of StockCandle.
 //   - An error if the slices within StockCandlesResponse are not of equal length.
-func (scr *StockCandlesResponse) Unpack() ([]StockCandle, error) {
+func (scr *StockCandlesResponse) Unpack() ([]Candle, error) {
 	if err := scr.checkForEqualSlices(); err != nil {
 		return nil, err
 	}
 
-	var stockCandles []StockCandle
-	for i := range scr.Time {
-		stockCandle := StockCandle{
-			Time:   time.Unix(scr.Time[i], 0),
+	var stockCandles []Candle
+	for i := range scr.Date {
+		stockCandle := Candle{
+			Date:   time.Unix(scr.Date[i], 0),
 			Open:   scr.Open[i],
 			High:   scr.High[i],
 			Low:    scr.Low[i],
@@ -101,11 +73,11 @@ func (s *StockCandlesResponse) String() string {
 	}
 
 	if version == 1 {
-		return fmt.Sprintf("StockCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v}",
-			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume)
+		return fmt.Sprintf("StockCandlesResponse{Date: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v}",
+			s.Date, s.Open, s.High, s.Low, s.Close, s.Volume)
 	} else {
-		return fmt.Sprintf("StockCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v}",
-			s.Time, s.Open, s.High, s.Low, s.Close, s.Volume, vwap, n)
+		return fmt.Sprintf("StockCandlesResponse{Date: %v, Open: %v, High: %v, Low: %v, Close: %v, Volume: %v, VWAP: %v, N: %v}",
+			s.Date, s.Open, s.High, s.Low, s.Close, s.Volume, vwap, n)
 	}
 }
 
@@ -114,8 +86,8 @@ func (s *StockCandlesResponse) String() string {
 // Returns:
 //   - An error if the times are not in ascending order.
 func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
-	for i := 1; i < len(s.Time); i++ {
-		if s.Time[i] < s.Time[i-1] {
+	for i := 1; i < len(s.Date); i++ {
+		if s.Date[i] < s.Date[i-1] {
 			return fmt.Errorf("time is not in ascending order")
 		}
 	}
@@ -164,7 +136,7 @@ func (s *StockCandlesResponse) Validate() error {
 func (s *StockCandlesResponse) checkForEqualSlices() error {
 	// Create a slice of the lengths of the Time, Open, High, Low, Close, and Volume slices
 	lengths := []int{
-		len(s.Time),
+		len(s.Date),
 		len(s.Open),
 		len(s.High),
 		len(s.Low),
@@ -199,7 +171,7 @@ func (s *StockCandlesResponse) checkForEqualSlices() error {
 //   - An error if any of the slices are empty.
 func (s *StockCandlesResponse) checkForEmptySlices() error {
 	// Check if any of the slices are empty
-	if len(s.Time) == 0 || len(s.Open) == 0 || len(s.High) == 0 || len(s.Low) == 0 || len(s.Close) == 0 || len(s.Volume) == 0 {
+	if len(s.Date) == 0 || len(s.Open) == 0 || len(s.High) == 0 || len(s.Low) == 0 || len(s.Close) == 0 || len(s.Volume) == 0 {
 		return fmt.Errorf("one or more slices are empty")
 	}
 
@@ -227,9 +199,9 @@ func (s *StockCandlesResponse) checkForEmptySlices() error {
 //   - An integer representing the version.
 //   - An error if the version is invalid.
 func (s *StockCandlesResponse) getVersion() (int, error) {
-	if s.Time != nil && s.Open != nil && s.High != nil && s.Low != nil && s.Close != nil && s.Volume != nil && s.VWAP == nil && s.N == nil {
+	if s.Date != nil && s.Open != nil && s.High != nil && s.Low != nil && s.Close != nil && s.Volume != nil && s.VWAP == nil && s.N == nil {
 		return 1, nil
-	} else if s.Time != nil && s.Open != nil && s.High != nil && s.Low != nil && s.Close != nil && s.Volume != nil && s.VWAP != nil && s.N != nil && len(*s.VWAP) > 0 && len(*s.N) > 0 {
+	} else if s.Date != nil && s.Open != nil && s.High != nil && s.Low != nil && s.Close != nil && s.Volume != nil && s.VWAP != nil && s.N != nil && len(*s.VWAP) > 0 && len(*s.N) > 0 {
 		return 2, nil
 	} else {
 		return 0, fmt.Errorf("invalid StockCandle version")
@@ -249,7 +221,7 @@ func (s *StockCandlesResponse) MarshalJSON() ([]byte, error) {
 	o.Set("s", "ok")
 
 	// Set the "t", "o", "h", "l", "c", and "v" keys to the corresponding slices in the struct
-	o.Set("t", s.Time)
+	o.Set("t", s.Date)
 	o.Set("o", s.Open)
 	o.Set("h", s.High)
 	o.Set("l", s.Low)
@@ -306,8 +278,8 @@ func (s *StockCandlesResponse) UnmarshalJSON(data []byte) error {
 //   - An error if calculating the date range fails.
 func (s *StockCandlesResponse) GetDateRange() (dates.DateRange, error) {
 	// Pass the slice of timestamps directly to Earliest and Latest
-	min, err1 := dates.Earliest(s.Time)
-	max, err2 := dates.Latest(s.Time)
+	min, err1 := dates.Earliest(s.Date)
+	max, err2 := dates.Latest(s.Date)
 	if err1 != nil || err2 != nil {
 		return dates.DateRange{}, fmt.Errorf("error calculating date ranges: %v, %v", err1, err2)
 	}
@@ -328,10 +300,10 @@ func (s *StockCandlesResponse) GetDateRange() (dates.DateRange, error) {
 func (s *StockCandlesResponse) pruneIndices(indices ...int) {
 	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
 	for _, index := range indices {
-		if index < 0 || index >= len(s.Time) {
+		if index < 0 || index >= len(s.Date) {
 			continue
 		}
-		s.Time = append(s.Time[:index], s.Time[index+1:]...)
+		s.Date = append(s.Date[:index], s.Date[index+1:]...)
 		s.Open = append(s.Open[:index], s.Open[index+1:]...)
 		s.High = append(s.High[:index], s.High[index+1:]...)
 		s.Low = append(s.Low[:index], s.Low[index+1:]...)
@@ -353,8 +325,8 @@ func (s *StockCandlesResponse) pruneIndices(indices ...int) {
 // Parameters:
 //   - index: The index before which all data points will be removed.
 func (s *StockCandlesResponse) pruneBeforeIndex(index int) {
-	if index+1 < len(s.Time) {
-		s.Time = s.Time[index+1:]
+	if index+1 < len(s.Date) {
+		s.Date = s.Date[index+1:]
 		s.Open = s.Open[index+1:]
 		s.High = s.High[index+1:]
 		s.Low = s.Low[index+1:]
@@ -380,12 +352,12 @@ func (s *StockCandlesResponse) pruneBeforeIndex(index int) {
 //   - An error if the index is out of range.
 func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
 	// Check if the index is within the range of the slices
-	if index < 0 || index >= len(s.Time) {
-		return fmt.Errorf("index %d out of range (0-%d)", index, len(s.Time)-1)
+	if index < 0 || index >= len(s.Date) {
+		return fmt.Errorf("index %d out of range (0-%d)", index, len(s.Date)-1)
 	}
 
 	// Prune the Time, Open, High, Low, Close, and Volume slices
-	s.Time = s.Time[:index]
+	s.Date = s.Date[:index]
 	s.Open = s.Open[:index]
 	s.High = s.High[:index]
 	s.Low = s.Low[:index]
@@ -414,7 +386,7 @@ func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
 //   - An error if pruning fails.
 func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
 	// Validate all timestamps
-	validTimestamps, invalidTimestamps := dr.ValidateTimestamps(s.Time...)
+	validTimestamps, invalidTimestamps := dr.ValidateTimestamps(s.Date...)
 	fmt.Println("Valid timestamps: ", validTimestamps)
 	fmt.Println("Invalid timestamps: ", invalidTimestamps)
 
@@ -422,7 +394,7 @@ func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
 	for _, invalidTimestamp := range invalidTimestamps {
 		for {
 			index := s.getIndex(invalidTimestamp)
-			if index >= len(s.Time) || s.Time[index] != invalidTimestamp {
+			if index >= len(s.Date) || s.Date[index] != invalidTimestamp {
 				break
 			}
 			s.pruneIndex(index)
@@ -441,12 +413,12 @@ func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
 //   - int: The index of the first occurrence of the provided timestamp within the Time slice.
 //     If the timestamp is not found, it returns the length of the Time slice.
 func (s *StockCandlesResponse) getIndex(t int64) int {
-	for i, timestamp := range s.Time {
+	for i, timestamp := range s.Date {
 		if timestamp == t {
 			return i
 		}
 	}
-	return len(s.Time)
+	return len(s.Date)
 }
 
 // pruneIndex removes the element at the specified index from all slices within the StockCandlesResponse struct.
@@ -457,12 +429,12 @@ func (s *StockCandlesResponse) getIndex(t int64) int {
 // Returns:
 //   - error: An error if the index is out of range. Otherwise, returns nil.
 func (s *StockCandlesResponse) pruneIndex(index int) error {
-	if index < 0 || index >= len(s.Time) {
-		return fmt.Errorf("index %d out of range (0-%d)", index, len(s.Time)-1)
+	if index < 0 || index >= len(s.Date) {
+		return fmt.Errorf("index %d out of range (0-%d)", index, len(s.Date)-1)
 	}
 
 	// Remove the element at the index from the Time, Open, High, Low, Close, and Volume slices
-	s.Time = append(s.Time[:index], s.Time[index+1:]...)
+	s.Date = append(s.Date[:index], s.Date[index+1:]...)
 	s.Open = append(s.Open[:index], s.Open[index+1:]...)
 	s.High = append(s.High[:index], s.High[index+1:]...)
 	s.Low = append(s.Low[:index], s.Low[index+1:]...)
@@ -523,7 +495,7 @@ func CombineStockCandles(s1, s2 *StockCandlesResponse) (*StockCandlesResponse, e
 
 	// Combine the structs
 	combined := &StockCandlesResponse{
-		Time:   append(s1.Time, s2.Time...),
+		Date:   append(s1.Date, s2.Date...),
 		Open:   append(s1.Open, s2.Open...),
 		High:   append(s1.High, s2.High...),
 		Low:    append(s1.Low, s2.Low...),

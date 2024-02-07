@@ -8,7 +8,7 @@ import (
 )
 
 // MarketStatusRequest represents a request for market status information.
-// It encapsulates parameters for country, universal, and date to be used in the request.
+// It encapsulates parameters for country, and date to be used in the request.
 // This struct provides methods such as Country(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
 // Public Methods:
@@ -114,6 +114,7 @@ func (msr *MarketStatusRequest) To(q interface{}) *MarketStatusRequest {
 }
 
 // Countback sets the countback parameter for the MarketStatusRequest. It specifies the number of days to return, counting backwards from the 'to' date.
+//
 // Parameters:
 //   - q: An int representing the number of days to return.
 //
@@ -131,6 +132,7 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 // This method checks if the MarketStatusRequest receiver is nil, returning an error if true.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 // Otherwise, it proceeds to send the request and returns the MarketStatusResponse along with any error encountered during the request.
+//
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //     it replaces the current client for this request.
@@ -163,6 +165,7 @@ func (msr *MarketStatusRequest) Packed(optionalClients ...*MarketDataClient) (*m
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of MarketStatusReport using the Unpack method from the response.
 // An optional MarketDataClient can be passed to replace the client used in the request.
+//
 // Parameters:
 //   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //     it replaces the current client for this request.
@@ -194,6 +197,7 @@ func (msr *MarketStatusRequest) Get(optionalClients ...*MarketDataClient) ([]mod
 // If no client is provided, it uses the default client. This function initializes the request
 // with default parameters for country, universal, and date, and sets the request path based on
 // the predefined endpoints for market status.
+//
 // Parameters:
 //   - clients: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //     the default client is used.
