@@ -1,6 +1,6 @@
-# Market Data's Official Go SDK
+# Go SDK for Market Data: Access Financial Data with Ease
 
-> :warning: **Pre-Alpha Version**: This SDK is currently in development and is not stable. Not currently suitable for client use.
+> The official Go SDK for accessing Market Data provides developers with a powerful, easy-to-use interface to obtain real-time and historical financial data. Ideal for building financial applications, trading bots, and investment strategies.
 
 [![GoDoc](https://godoc.org/github.com/MarketDataApp/sdk-go?status.svg)](https://godoc.org/github.com/MarketDataApp/sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarketDataApp/sdk-go)](https://goreportcard.com/report/github.com/MarketDataApp/sdk-go)
@@ -12,6 +12,7 @@
 
 #### Connect With The Market Data Community
 
+[![Website](https://img.shields.io/badge/Website-marketdata.app-blue)](https://www.marketdata.app/)
 [![Discord](https://img.shields.io/badge/Discord-join%20chat-7389D8.svg?logo=discord&logoColor=ffffff)](https://discord.com/invite/GmdeAVRtnT)
 [![Twitter](https://img.shields.io/twitter/follow/MarketDataApp?style=social)](https://twitter.com/MarketDataApp)
 [![Helpdesk](https://img.shields.io/badge/Support-Ticketing-ff69b4.svg?logo=TicketTailor&logoColor=white)](https://www.marketdata.app/dashboard/)
@@ -30,13 +31,17 @@ After installation, you can import it in your project like this:
 import api "github.com/MarketDataApp/sdk-go"
 ```
 
-# Endpoints Status:
+# Go SDK Endpoint Coverage:
+
+Market Data's Go SDK covers almost all v1 endponts. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
 
  | Endpoint Category | Endpoint     | v1 Status | v2 Status |
  |-------------------|--------------|-----------|-----------|
  | Markets           | Status       | ✅        |           |
  | Stocks            | Candles      | ✅        |     ✅    |
+ | Stocks            | Bulk Candles | ❌        |           |
  | Stocks            | Quotes       | ✅        |           |
+ | Stocks            | Bulk Quotes  | ❌        |           |
  | Stocks            | Earnings     | ✅        |           |
  | Stocks            | Tickers      | ❌        |     ✅    |
  | Stocks            | News         | ✅        |     ❌    |
@@ -50,9 +55,15 @@ import api "github.com/MarketDataApp/sdk-go"
 
 Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should onlly use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
 
-# Example Usage
+# Getting Started
 
-See the examples files for each data type for examples of how to use each endpoint.
+### Sign-Up For A Free Market Data Account
+
+Signing up for a Market Data account is straightforward and grants you immediate access to our wealth of market data. We offer a free account tier that allows you to explore the capabilities of our API without any cost. Additionally, all our paid plans come with a free 30-day trial, giving you the opportunity to test out the advanced features and decide which plan best suits your needs.
+
+- To sign up, simply visit our website at [Market Data](https://www.marketdata.app/). The process is quick and only requires your basic information. Once signed up, you can start using the API right away with the free tier or take advantage of the 30-day trial to explore our premium offerings.
+
+Remember, no credit card is required for the free account tier, and you can upgrade, downgrade, or cancel your subscription at any time during or after the trial period.
 
 ### Authentication
 
@@ -70,7 +81,7 @@ The SDK systematically logs API responses to facilitate troubleshooting and anal
 - **Server Errors:** Responses with status codes in the range 500-599 are logged to `server_error.log`.
 - **Successful Requests:** If debug mode is activated, responses with status codes in the range 200-299 are logged to `success.log`.
 
-All log files are formatted in JSON and stored within the `/logs` directory. Each entry captures comprehensive details including the request URL, request headers, CF Ray ID (a unique identifier for the request), response status code, response headers, and the response body, providing a full context for each logged event.
+All log files are formatted in JSON and stored within the `/logs` subdirectory. Each entry captures comprehensive details including the request URL, request headers, CF Ray ID (a unique identifier for the request), response status code, response headers, and the response body, providing a full context for each logged event.
 
 Example of a log entry:
 
