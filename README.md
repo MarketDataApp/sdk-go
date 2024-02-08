@@ -42,7 +42,7 @@ Market Data's Go SDK covers almost all v1 endponts. See our complete list of end
  | Stocks            | Candles      | ✅        |     ✅    |
  | Stocks            | Bulk Candles | ✅        |           |
  | Stocks            | Quotes       | ✅        |           |
- | Stocks            | Bulk Quotes  | ❌        |           |
+ | Stocks            | Bulk Quotes  | ✅        |           |
  | Stocks            | Earnings     | ✅        |           |
  | Stocks            | Tickers      | ❌        |     ✅    |
  | Stocks            | News         | ✅        |     ❌    |
