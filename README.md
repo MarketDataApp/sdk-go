@@ -39,7 +39,7 @@ import api "github.com/MarketDataApp/sdk-go"
 
 # Documentation
 
-For advanced usage, review the module'scomplete documentation:
+For advanced usage, review the module's complete documentation:
 
 - [Go SDK Documentation at GoDoc](https://godoc.org/github.com/MarketDataApp/sdk-go)
 - [Go SDK Documentation at Market Data](https://www.marketdata.app/docs/sdk/go)
