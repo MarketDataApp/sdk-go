@@ -2,7 +2,7 @@
 
 To add a new endpoint to the Market Data Go SDK, follow these steps:
 
-1. **Update Endpoints File**: Add the new endpoint to the endpoints map in endpoints.go. Specify the version and category it belongs to.
+### 1. **Update Endpoints File**: Add the new endpoint to the endpoints map in endpoints.go. Specify the version and category it belongs to.
 
 ```go
 // Example for adding a new "futures" quote in version 1
@@ -12,7 +12,7 @@ To add a new endpoint to the Market Data Go SDK, follow these steps:
     },
 ```
 
-2. **Update baseRequest.go**: Add a type assertion for the new request type.
+### 2. **Update baseRequest.go**: Add a type assertion for the new request type.
 
 ```go
 // Example for adding a new FuturesQuoteRequest in version 1
@@ -72,7 +72,7 @@ func FuturesQuote(client ...*MarketDataClient) *FuturesQuoteRequest {
 }
 ```
 
-4. **Create Response Struct**: Define a struct in the `models` package to unmarshal the JSON response from the Market Data API. This struct should mirror the JSON structure returned by the new endpoint. Market Data structs are typically JSON arrays.
+### 4. **Create Response Struct**: Define a struct in the `models` package to unmarshal the JSON response from the Market Data API. This struct should mirror the JSON structure returned by the new endpoint. Market Data structs are typically JSON arrays.
 
 ```go
 package models
@@ -86,7 +86,7 @@ type FuturesQuoteResponse struct {
 }
 ```
 
-5. **Create Struct for Unpacked Object**: Define a struct that represents the unpacked object. This struct is what the Unpack method will return.
+### 5. **Create Struct for Unpacked Object**: Define a struct that represents the unpacked object. This struct is what the Unpack method will return.
 
 ```go
 // FuturesQuote represents a single futures quote.
@@ -98,7 +98,7 @@ type FuturesQuote struct {
 }
 ```
 
-6. **Create Unpack Method**: Implement an Unpack method for your response struct to convert the packed JSON array format into individual struct objects. This method should be part of the response struct in the `models` package.
+### 6. **Create Unpack Method**: Implement an Unpack method for your response struct to convert the packed JSON array format into individual struct objects. This method should be part of the response struct in the `models` package.
 
 ```go
 // Unpack converts packed FuturesQuoteResponse into a slice of individual structs.
@@ -116,7 +116,7 @@ func (fpr *FuturesQuoteResponse) Unpack() ([]FuturesQuote, error) {
     return quotes, nil
 ```
 
-7. **Implement Packed and Get Methods**: In the client package, create methods for your endpoint that return the packed response (Packed) and the unpacked response (Get). These methods should utilize the base request functionality and your response struct.
+### 7. **Implement Packed and Get Methods**: In the client package, create methods for your endpoint that return the packed response (Packed) and the unpacked response (Get). These methods should utilize the base request functionality and your response struct.
 
 By following these steps, you can extend the Market Data Go SDK to support new endpoints, ensuring that the SDK remains a comprehensive tool for accessing financial data.
 
