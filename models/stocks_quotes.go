@@ -53,8 +53,6 @@ type StockQuote struct {
 // Returns:
 //   - A string representation of the StockQuote struct.
 func (sq StockQuote) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-	updatedFormat := sq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00")
 	high52 := "nil"
 	if sq.High52 != nil {
 		high52 = fmt.Sprintf("%v", *sq.High52)
@@ -72,7 +70,7 @@ func (sq StockQuote) String() string {
 		changePct = fmt.Sprintf("%v", *sq.ChangePct)
 	}
 	return fmt.Sprintf("StockQuote{Symbol: %q, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, Updated: %q, High52: %s, Low52: %s, Change: %s, ChangePct: %s}",
-		sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, updatedFormat, high52, low52, change, changePct)
+		sq.Symbol, sq.Ask, sq.AskSize, sq.Bid, sq.BidSize, sq.Mid, sq.Last, sq.Volume, formatTime(sq.Updated), high52, low52, change, changePct)
 }
 
 // Unpack transforms the StockQuotesResponse into a slice of StockQuote structs.

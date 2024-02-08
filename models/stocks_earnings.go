@@ -45,8 +45,6 @@ type StockEarningsReport struct {
 }
 
 func (ser StockEarningsReport) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-
 	reportedEPS := "nil"
 	if ser.ReportedEPS != nil {
 		reportedEPS = fmt.Sprintf("%f", *ser.ReportedEPS)
@@ -68,7 +66,7 @@ func (ser StockEarningsReport) String() string {
 	}
 
 	return fmt.Sprintf("StockEarningsReport{Symbol: %q, FiscalYear: %d, FiscalQuarter: %d, Date: %q, ReportDate: %q, ReportTime: %q, Currency: %q, ReportedEPS: %s, EstimatedEPS: %s, SurpriseEPS: %s, SurpriseEPSPct: %s, Updated: %q}",
-		ser.Symbol, ser.FiscalYear, ser.FiscalQuarter, ser.Date.Format("2006-01-02"), ser.ReportDate.Format("2006-01-02"), ser.ReportTime, ser.Currency, reportedEPS, estimatedEPS, surpriseEPS, surpriseEPSpct, ser.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
+		ser.Symbol, ser.FiscalYear, ser.FiscalQuarter, ser.Date.Format("2006-01-02"), formatTime(ser.ReportDate), ser.ReportTime, ser.Currency, reportedEPS, estimatedEPS, surpriseEPS, surpriseEPSpct, formatTime(ser.Updated))
 }
 
 // Unpack converts the StockEarningsResponse struct into a slice of StockEarningsReport structs.

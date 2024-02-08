@@ -42,7 +42,7 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 		return params, nil
 	}
 
-	if tr, ok := br.child.(*TickersRequest); ok {
+	if tr, ok := br.child.(*StockTickersRequestV2); ok {
 		params, err := tr.getParams()
 		if err != nil {
 			return nil, err
@@ -76,6 +76,14 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 
 	if sqr, ok := br.child.(*StockQuoteRequest); ok {
 		params, err := sqr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
+	if bsqr, ok := br.child.(*BulkStockQuotesRequest); ok {
+		params, err := bsqr.getParams()
 		if err != nil {
 			return nil, err
 		}

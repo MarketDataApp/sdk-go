@@ -23,8 +23,8 @@ func ExampleBulkStockCandlesRequest_get() {
 	for _, candle := range bscr {
 		fmt.Println(candle)
 	}
-	// Output: Candle{Symbol: AAPL, Time: 2024-02-06 00:00:00 -05:00, Open: 186.86, High: 189.31, Low: 186.7695, Close: 189.3, Volume: 43490759}
-	// Candle{Symbol: META, Time: 2024-02-06 00:00:00 -05:00, Open: 464, High: 467.12, Low: 453, Close: 454.72, Volume: 21653114}
-	// Candle{Symbol: MSFT, Time: 2024-02-06 00:00:00 -05:00, Open: 405.88, High: 407.97, Low: 402.91, Close: 405.49, Volume: 18382624}
+	// Output: Candle{Symbol: AAPL, Date: 2024-02-06, Open: 186.86, High: 189.31, Low: 186.7695, Close: 189.3, Volume: 43490759}
+	// Candle{Symbol: META, Date: 2024-02-06, Open: 464, High: 467.12, Low: 453, Close: 454.72, Volume: 21653114}
+	// Candle{Symbol: MSFT, Date: 2024-02-06, Open: 405.88, High: 407.97, Low: 402.91, Close: 405.49, Volume: 18382624}
 
 }

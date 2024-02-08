@@ -48,7 +48,7 @@ func (msr *MarketStatusResponse) String() string {
 // Returns:
 //   - string: A string representation of the MarketStatusReport.
 func (ms MarketStatusReport) String() string {
-	return fmt.Sprintf("MarketStatusReport{Date: %v, Open: %v, Closed: %v}", ms.Date, ms.Open, ms.Closed)
+	return fmt.Sprintf("MarketStatusReport{Date: %v, Open: %v, Closed: %v}", formatTime(ms.Date), ms.Open, ms.Closed)
 }
 
 // Unpack unpacks the MarketStatusResponse into a slice of MarketStatusReport.
@@ -145,7 +145,7 @@ func (msr *MarketStatusResponse) GetDateRange() (*dates.DateRange, error) {
 
 // MarketStatusReport represents the status of a market.
 type MarketStatusReport struct {
-	Date   time.Time
-	Open   bool
-	Closed bool
+	Date   time.Time `json:"date"`
+	Open   bool      `json:"open"`
+	Closed bool      `json:"closed"`
 }

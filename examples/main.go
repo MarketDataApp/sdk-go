@@ -14,10 +14,13 @@ func Start() {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(false)
+	client.Debug(false) // Turn off debug mode to see the log example clearly.
 
 	fmt.Println("Staring log example...")
 	LogExample()
+
+	client.Debug(true)
+
 	/*
 	   //fmt.Println("Starting market status request...")
 	   //marketstatusExample()

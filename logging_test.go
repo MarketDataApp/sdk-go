@@ -21,7 +21,7 @@ func TestLogging(t *testing.T) {
 	}
 
 	scBodyString := sc.String()
-	lastLogResponse := Logs.GetLastLogResponse()
+	lastLogResponse := GetLogs().GetLastLogResponse()
 
 	if scBodyString != lastLogResponse {
 		t.Errorf("Expected last log response to be %v, got %v instead", scBodyString, lastLogResponse)

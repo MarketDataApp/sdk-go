@@ -95,9 +95,6 @@ func (osr *OptionsStrikesResponse) UnmarshalJSON(data []byte) error {
 // Returns:
 //   - string: The string representation of the OptionsStrikes.
 func (os OptionsStrikes) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-	dateStr := os.Expiration.In(loc).Format("2006-01-02")
-
 	// Convert each strike price to a string with two decimal places
 	var strikesStrParts []string
 	for _, strike := range os.Strikes {
@@ -106,7 +103,7 @@ func (os OptionsStrikes) String() string {
 	// Join the formatted strike prices with a space
 	strikesStr := strings.Join(strikesStrParts, " ")
 
-	return fmt.Sprintf("OptionsStrikes{Expiration: %s, Strikes: [%s]}", dateStr, strikesStr)
+	return fmt.Sprintf("OptionsStrikes{Expiration: %s, Strikes: [%s]}", formatTime(os.Expiration), strikesStr)
 }
 
 // IsValid checks if the OptionsStrikesResponse is valid by leveraging the Validate method.
@@ -177,7 +174,6 @@ func (osr *OptionsStrikesResponse) Unpack() ([]OptionsStrikes, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error parsing date %s: %v", key, err)
 		}
-		date = time.Date(date.Year(), date.Month(), date.Day(), 16, 0, 0, 0, loc)
 
 		unpackedStrikes = append(unpackedStrikes, OptionsStrikes{
 			Expiration: date,

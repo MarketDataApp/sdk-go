@@ -50,10 +50,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/MarketDataApp/sdk-go/helpers/logging"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
 
+// marketDataClient is the default *MarketDataClient
 var marketDataClient *MarketDataClient
 
 const (
@@ -81,7 +83,6 @@ const (
 // Public Methods:
 //   - Debug(enable bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
 //   - RateLimitExceeded() bool: Checks if the rate limit for API requests has been exceeded.
-
 type MarketDataClient struct {
 	*resty.Client                 // Embedding resty.Client to utilize its HTTP client functionalities.
 	RateLimitLimit     int        // RateLimitLimit represents the maximum number of requests that can be made in a rate limit window.
@@ -148,7 +149,7 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 	body := string(resp.Body())
 
 	// Create a new log entry with the gathered information.
-	logEntry := AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
+	logEntry := logging.AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
 	// If debug mode is enabled and the log entry is not nil, pretty print the log entry.
 	if c.debug && logEntry != nil {
 		logEntry.PrettyPrint()
@@ -527,6 +528,6 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 
 // GetLogs returns a pointer to the HttpRequestLogs instance.
 // This function is useful for accessing the logs that have been collected during HTTP requests.
-func GetLogs() *HttpRequestLogs {
-	return Logs
+func GetLogs() *logging.HttpRequestLogs {
+	return logging.Logs
 }

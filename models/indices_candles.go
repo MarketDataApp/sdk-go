@@ -11,7 +11,7 @@ import (
 // IndicesCandlesResponse represents the response structure for indices candles data.
 // It includes slices for time, open, high, low, and close values of the indices.
 type IndicesCandlesResponse struct {
-	Time  []int64   `json:"t" human:"Date"`
+	Date  []int64   `json:"t" human:"Date"`
 	Open  []float64 `json:"o" human:"Open"`
 	High  []float64 `json:"h" human:"High"`
 	Low   []float64 `json:"l" human:"Low"`
@@ -24,7 +24,7 @@ type IndicesCandlesResponse struct {
 //   - A formatted string containing the time, open, high, low, and close values.
 func (icr *IndicesCandlesResponse) String() string {
 	return fmt.Sprintf("IndicesCandlesResponse{Time: %v, Open: %v, High: %v, Low: %v, Close: %v}",
-		icr.Time, icr.Open, icr.High, icr.Low, icr.Close)
+		icr.Date, icr.Open, icr.High, icr.Low, icr.Close)
 }
 
 // checkTimeInAscendingOrder checks if the times in the IndicesCandlesResponse are in ascending order.
@@ -32,8 +32,8 @@ func (icr *IndicesCandlesResponse) String() string {
 // Returns:
 //   - An error if the times are not in ascending order, nil otherwise.
 func (icr *IndicesCandlesResponse) checkTimeInAscendingOrder() error {
-	for i := 1; i < len(icr.Time); i++ {
-		if icr.Time[i] < icr.Time[i-1] {
+	for i := 1; i < len(icr.Date); i++ {
+		if icr.Date[i] < icr.Date[i-1] {
 			return fmt.Errorf("time is not in ascending order")
 		}
 	}
@@ -48,7 +48,7 @@ func (icr *IndicesCandlesResponse) checkTimeInAscendingOrder() error {
 func (icr *IndicesCandlesResponse) checkForEqualSlices() error {
 	// Create a slice of the lengths of the Time, Open, High, Low, and Close slices
 	lengths := []int{
-		len(icr.Time),
+		len(icr.Date),
 		len(icr.Open),
 		len(icr.High),
 		len(icr.Low),
@@ -73,7 +73,7 @@ func (icr *IndicesCandlesResponse) checkForEqualSlices() error {
 //   - An error if one or more slices are empty, nil otherwise.
 func (icr *IndicesCandlesResponse) checkForEmptySlices() error {
 	// Check if any of the slices are empty
-	if len(icr.Time) == 0 || len(icr.Open) == 0 || len(icr.High) == 0 || len(icr.Low) == 0 || len(icr.Close) == 0 {
+	if len(icr.Date) == 0 || len(icr.Open) == 0 || len(icr.High) == 0 || len(icr.Low) == 0 || len(icr.Close) == 0 {
 		return fmt.Errorf("one or more slices are empty")
 	}
 
@@ -91,9 +91,9 @@ func (icr *IndicesCandlesResponse) Unpack() ([]Candle, error) {
 	}
 
 	var indexCandles []Candle
-	for i := range icr.Time {
+	for i := range icr.Date {
 		indexCandle := Candle{
-			Date:  time.Unix(icr.Time[i], 0),
+			Date:  time.Unix(icr.Date[i], 0),
 			Open:  icr.Open[i],
 			High:  icr.High[i],
 			Low:   icr.Low[i],
@@ -120,7 +120,7 @@ func (icr *IndicesCandlesResponse) MarshalJSON() ([]byte, error) {
 	o.Set("s", "ok")
 
 	// Set the "t", "o", "h", "l", and "c" keys to the corresponding slices in the struct
-	o.Set("t", icr.Time)
+	o.Set("t", icr.Date)
 	o.Set("o", icr.Open)
 	o.Set("h", icr.High)
 	o.Set("l", icr.Low)

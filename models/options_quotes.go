@@ -120,9 +120,8 @@ func (oq OptionQuote) DisplayRho() string {
 // Returns:
 //   - A string that represents the OptionQuote in a human-readable format.
 func (oq OptionQuote) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
 	return fmt.Sprintf("OptionQuote{OptionSymbol: %q, Underlying: %q, Expiration: %v, Side: %q, Strike: %v, FirstTraded: %v, DTE: %v, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, OpenInterest: %v, UnderlyingPrice: %v, InTheMoney: %v, Updated: %q, IV: %s, Delta: %s, Gamma: %s, Theta: %s, Vega: %s, Rho: %s, IntrinsicValue: %v, ExtrinsicValue: %v}",
-		oq.OptionSymbol, oq.Underlying, oq.Expiration.In(loc).Format("2006-01-02 15:04:05 Z07:00"), oq.Side, oq.Strike, oq.FirstTraded.In(loc).Format("2006-01-02 15:04:05 Z07:00"), oq.DTE, oq.Ask, oq.AskSize, oq.Bid, oq.BidSize, oq.Mid, oq.Last, oq.Volume, oq.OpenInterest, oq.UnderlyingPrice, oq.InTheMoney, oq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00"), oq.DisplayIV(), oq.DisplayDelta(), oq.DisplayGamma(), oq.DisplayTheta(), oq.DisplayVega(), oq.DisplayRho(), oq.IntrinsicValue, oq.ExtrinsicValue)
+		oq.OptionSymbol, oq.Underlying, formatTime(oq.Expiration), oq.Side, oq.Strike, formatTime(oq.FirstTraded), oq.DTE, oq.Ask, oq.AskSize, oq.Bid, oq.BidSize, oq.Mid, oq.Last, oq.Volume, oq.OpenInterest, oq.UnderlyingPrice, oq.InTheMoney, formatTime(oq.Updated), oq.DisplayIV(), oq.DisplayDelta(), oq.DisplayGamma(), oq.DisplayTheta(), oq.DisplayVega(), oq.DisplayRho(), oq.IntrinsicValue, oq.ExtrinsicValue)
 }
 
 // IsValid checks if an OptionQuotesResponse is valid by utilizing the Validate method.

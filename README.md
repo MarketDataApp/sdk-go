@@ -39,7 +39,7 @@ Market Data's Go SDK covers almost all v1 endponts. See our complete list of end
  |-------------------|--------------|-----------|-----------|
  | Markets           | Status       | ✅        |           |
  | Stocks            | Candles      | ✅        |     ✅    |
- | Stocks            | Bulk Candles | ❌        |           |
+ | Stocks            | Bulk Candles | ✅        |           |
  | Stocks            | Quotes       | ✅        |           |
  | Stocks            | Bulk Quotes  | ❌        |           |
  | Stocks            | Earnings     | ✅        |           |
@@ -53,7 +53,7 @@ Market Data's Go SDK covers almost all v1 endponts. See our complete list of end
  | Indices           | Candles      | ✅        |           |
  | Indices           | Quotes       | ✅        |           |
 
-Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should onlly use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
+> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should onlly use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
 
 # Getting Started
 
@@ -74,6 +74,44 @@ export MARKETDATA_TOKEN="<your_api_token>"   # mac/linux
 setx MARKETDATA_TOKEN "<your_api_token>"     # windows
 ```
 
+### Making Your First Request
+
+Check the examples folder for working examples for each request. 
+
+Get a stock quote:
+```go
+import (
+  "fmt"
+  "log"
+
+  api "github.com/MarketDataApp/sdk-go"
+)
+
+func main() {
+  // Initalize a new request, set the sybmol parameter, make the request.
+	quotes, err := api.StockQuote().Symbol("AAPL").Get() 
+	if err != nil {
+		log.Fatalf("Failed to get stock quotes: %v", err)
+	}
+
+  // Loop over the quotes and print them out.
+  for _, quote := range quotes {
+		fmt.Println(quote)
+	}
+```
+
+### SDK Usage Instructions
+
+- All requests are initialized using the name of the endpoint and parameters are set using a builder pattern.
+- All requests have 3 methods to get results:
+  - Use the `.Get()` method on any request to get a slice of objects. This is what you will use in most cases.
+  - Use the `.Packed()` method on any request to get a struct that models the Market Data JSON response. If you want to model the objects differently, this method could be useful for you.
+  - Use the `.Raw()` method on any request to get the raw *resty.Response object. This allows you to access the raw JSON or the raw *http.Response object and you can use any of the resty methods on the response.
+
+  > Note: Since all our structs are pre-defined based on the Market Data API's standard response format, our API's universal parameters such as `human`, `columns`, `dateformat`, `format` are not supported in this SDK. If you wish to make use of these parameters, you will need to model your own structs that can unmarshal the modified API response.
+
+- We have already implemeneted `.String()` methods for all `.Get()` and `.Packed()` responses and sorting methods for all candle objects.
+
 ### Logging
 
 The SDK systematically logs API responses to facilitate troubleshooting and analysis, adhering to the following rules:
@@ -84,7 +122,6 @@ The SDK systematically logs API responses to facilitate troubleshooting and anal
 All log files are formatted in JSON and stored within the `/logs` subdirectory. Each entry captures comprehensive details including the request URL, request headers, CF Ray ID (a unique identifier for the request), response status code, response headers, and the response body, providing a full context for each logged event.
 
 Example of a log entry:
-
 ```json
 {
   "level":"info",
@@ -149,8 +186,10 @@ To enable debug mode, you need to call the `Debug` method on the `MarketDataClie
 package main
 
 import (
+  "log"
+  "fmt"
+
 	api "github.com/MarketDataApp/sdk-go"
-	"log"
 )
 
 func main() {
@@ -159,14 +198,16 @@ func main() {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(true)
+	client.Debug(true) // Here is where debug mode is turned on.
 
-	quote, err := client.StockQuotes().Symbol("AAPL").Get()
+	quotes, err := client.StockQuotes().Symbol("AAPL").Get()
 	if err != nil {
 		log.Fatalf("Failed to get stock quotes: %v", err)
 	}
 
-	log.Printf("Quote: %+v\n", quote)
+  for _, quote := range quotes {
+		fmt.Println(quote)
+	}
 }
 ```
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
 )
 
 // Candle represents a single candle in a stock candlestick chart.
@@ -31,8 +33,14 @@ func (c Candle) String() string {
 	if c.Symbol != "" {
 		parts = append(parts, fmt.Sprintf("Symbol: %s", c.Symbol))
 	}
-	timePart := c.Date.In(loc).Format("2006-01-02 15:04:05 Z07:00")
-	parts = append(parts, fmt.Sprintf("Time: %s", timePart))
+	// Use IsStartOfDay to determine if the candle time is at the start of the day
+	if dates.IsStartOfDay(c.Date, loc) {
+		datePart := c.Date.In(loc).Format("2006-01-02")
+		parts = append(parts, fmt.Sprintf("Date: %s", datePart))
+	} else {
+		timePart := c.Date.In(loc).Format("2006-01-02 15:04:05 Z07:00")
+		parts = append(parts, fmt.Sprintf("Time: %s", timePart))
+	}
 	parts = append(parts, fmt.Sprintf("Open: %v", c.Open))
 	parts = append(parts, fmt.Sprintf("High: %v", c.High))
 	parts = append(parts, fmt.Sprintf("Low: %v", c.Low))

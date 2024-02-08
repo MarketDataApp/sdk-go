@@ -102,6 +102,22 @@ func (bscr *BulkStockCandlesRequest) AdjustSplits(q bool) *BulkStockCandlesReque
 	return bscr
 }
 
+// Snapshot sets the snapshot parameter for the BulkStockCandlesRequest.
+// This method is used to enable or disable the snapshot feature in the request.
+//
+// Parameters:
+//   - q: A boolean value representing whether to enable or disable the snapshot feature.
+//
+// Returns:
+//   - *BulkStockCandlesRequest: This method returns a pointer to the BulkStockCandlesRequest instance it was called on. This allows for method chaining.
+func (bscr *BulkStockCandlesRequest) Snapshot(q bool) *BulkStockCandlesRequest {
+	if bscr == nil {
+		return nil
+	}
+	bscr.bulkStockParams.SetSnapshot(q)
+	return bscr
+}
+
 // getParams packs the CandlesRequest struct into a slice of interface{} and returns it.
 func (bscr *BulkStockCandlesRequest) getParams() ([]parameters.MarketDataParam, error) {
 	if bscr == nil {

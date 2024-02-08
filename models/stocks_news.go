@@ -30,15 +30,16 @@ type StockNews struct {
 
 // String returns a formatted string representation of the StockNews struct.
 //
-// This method formats the StockNews fields into a readable string, including the publication date in America/New_York timezone.
+// This method formats the StockNews fields into a readable string. If the publication date is at the start of the day,
+// it prints out the date in YYYY-MM-DD format without any time or timezone info.
 //
 // Returns:
 //   - A string representation of the StockNews struct.
 func (sn StockNews) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
 	return fmt.Sprintf("StockNews{Symbol: %q, Headline: %q, Content: %q, Source: %q, PublicationDate: %q}",
-		sn.Symbol, sn.Headline, sn.Content, sn.Source, sn.PublicationDate.In(loc).Format("2006-01-02 15:04:05 Z07:00"))
+		sn.Symbol, sn.Headline, sn.Content, sn.Source, formatTime(sn.PublicationDate))
 }
+
 // Unpack transforms the StockNewsResponse struct into a slice of StockNews structs.
 //
 // Returns:

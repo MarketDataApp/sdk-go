@@ -481,3 +481,11 @@ func Latest(dates ...interface{}) (time.Time, error) {
 	}
 	return latest, nil
 }
+
+// IsStartOfDay checks if the given time is at the start of the day in the specified timezone.
+func IsStartOfDay(t time.Time, loc *time.Location) bool {
+	// Convert the time to the specified timezone
+	tInLoc := t.In(loc)
+	// Check if the time is at the start of the day (midnight)
+	return tInLoc.Hour() == 0 && tInLoc.Minute() == 0 && tInLoc.Second() == 0 && tInLoc.Nanosecond() == 0
+}

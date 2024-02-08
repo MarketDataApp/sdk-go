@@ -10,6 +10,7 @@ var endpoints = map[int]map[string]map[string]string{
 			"candles":     "/v1/stocks/candles/{resolution}/{symbol}/",
 			"bulkcandles": "/v1/stocks/bulkcandles/{resolution}/",
 			"quotes":      "/v1/stocks/quotes/{symbol}/",
+			"bulkquotes":  "/v1/stocks/bulkquotes/",
 			"earnings":    "/v1/stocks/earnings/{symbol}/",
 			"news":        "/v1/stocks/news/{symbol}/",
 		},

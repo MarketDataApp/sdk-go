@@ -69,14 +69,14 @@ func ExampleMarketStatus_get() {
 	for _, report := range msr {
 		fmt.Println(report)
 	}
-	// Output: MarketStatusReport{Date: 2022-01-01 00:00:00 -0500 EST, Open: false, Closed: true}
-	// MarketStatusReport{Date: 2022-01-02 00:00:00 -0500 EST, Open: false, Closed: true}
-	// MarketStatusReport{Date: 2022-01-03 00:00:00 -0500 EST, Open: true, Closed: false}
-	// MarketStatusReport{Date: 2022-01-04 00:00:00 -0500 EST, Open: true, Closed: false}
-	// MarketStatusReport{Date: 2022-01-05 00:00:00 -0500 EST, Open: true, Closed: false}
-	// MarketStatusReport{Date: 2022-01-06 00:00:00 -0500 EST, Open: true, Closed: false}
-	// MarketStatusReport{Date: 2022-01-07 00:00:00 -0500 EST, Open: true, Closed: false}
-	// MarketStatusReport{Date: 2022-01-08 00:00:00 -0500 EST, Open: false, Closed: true}
-	// MarketStatusReport{Date: 2022-01-09 00:00:00 -0500 EST, Open: false, Closed: true}
-	// MarketStatusReport{Date: 2022-01-10 00:00:00 -0500 EST, Open: true, Closed: false}
+	// Output: MarketStatusReport{Date: 2022-01-01, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-02, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-03, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-04, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-05, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-06, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-07, Open: true, Closed: false}
+	// MarketStatusReport{Date: 2022-01-08, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-09, Open: false, Closed: true}
+	// MarketStatusReport{Date: 2022-01-10, Open: true, Closed: false}
 }

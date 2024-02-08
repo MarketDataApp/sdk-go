@@ -38,8 +38,6 @@ type IndexQuote struct {
 // Returns:
 //   - A string that represents the IndexQuote.
 func (iq IndexQuote) String() string {
-	loc, _ := time.LoadLocation("America/New_York")
-	updatedFormat := iq.Updated.In(loc).Format("2006-01-02 15:04:05 Z07:00")
 	high52 := "nil"
 	if iq.High52 != nil {
 		high52 = fmt.Sprintf("%v", *iq.High52)
@@ -57,7 +55,7 @@ func (iq IndexQuote) String() string {
 		changePct = fmt.Sprintf("%v", *iq.ChangePct)
 	}
 	return fmt.Sprintf("IndexQuote{Symbol: %q, Last: %v, Volume: %v, Updated: %q, High52: %s, Low52: %s, Change: %s, ChangePct: %s}",
-		iq.Symbol, iq.Last, iq.Volume, updatedFormat, high52, low52, change, changePct)
+		iq.Symbol, iq.Last, iq.Volume, formatTime(iq.Updated), high52, low52, change, changePct)
 }
 
 // Unpack transforms the IndexQuotesResponse into a slice of IndexQuote.

@@ -25,7 +25,7 @@ type TickersResponse struct {
 	FigiShares    []string `json:"figiShares,omitempty"`    // FigiShares contains the FIGI codes for the shares. Optional.
 	FigiComposite []string `json:"figiComposite,omitempty"` // FigiComposite contains the composite FIGI codes. Optional.
 	Cik           []string `json:"cik,omitempty"`           // Cik contains the Central Index Key (CIK) numbers. Optional.
-	Updated       *[]int64 `json:"updated,omitempty"`       // Updated contains UNIX timestamps of the last updates. Optional.
+	Updated       []int64  `json:"updated,omitempty"`       // Updated contains UNIX timestamps of the last updates. Optional.
 }
 
 // IsValid determines if the TickersResponse has at least one symbol.
@@ -38,19 +38,19 @@ func (tr *TickersResponse) IsValid() bool {
 
 // String constructs a string representation of the TickersResponse.
 // It iterates through each symbol and its associated data, formatting them into a readable string.
-// If the 'Updated' field is not nil and contains data, it includes the update time for each symbol.
+// If the 'Updated' field has a zero value, it prints as "nil".
 //
 // Returns:
 //   - A string detailing the contents of the TickersResponse, including symbols, names, types, currencies, exchanges, FIGI codes, CIK numbers, and update times.
 func (tr *TickersResponse) String() string {
 	var str strings.Builder
 	str.WriteString("TickersResponse{\n")
-	for i := range tr.Symbol {
-		updateTime := ""
-		if tr.Updated != nil && i < len(*tr.Updated) && (*tr.Updated)[i] != 0 {
-			updateTime = time.Unix((*tr.Updated)[i], 0).String()
+	for i, symbol := range tr.Symbol {
+		updateTime := "nil"
+		if i < len(tr.Updated) && tr.Updated[i] != 0 {
+			updateTime = fmt.Sprint(tr.Updated[i])
 		}
-		str.WriteString(fmt.Sprintf("Ticker{Symbol: %q, Name: %q, Type: %q, Currency: %q, Exchange: %q, FigiShares: %q, FigiComposite: %q, Cik: %q, Updated: %q}\n", tr.Symbol[i], tr.Name[i], tr.Type[i], tr.Currency[i], tr.Exchange[i], tr.FigiShares[i], tr.FigiComposite[i], tr.Cik[i], updateTime))
+		str.WriteString(fmt.Sprintf("Ticker{Symbol: %q, Name: %q, Type: %q, Currency: %q, Exchange: %q, FigiShares: %q, FigiComposite: %q, Cik: %q, Updated: %s}\n", symbol, tr.Name[i], tr.Type[i], tr.Currency[i], tr.Exchange[i], tr.FigiShares[i], tr.FigiComposite[i], tr.Cik[i], updateTime))
 	}
 	str.WriteString("}")
 	return str.String()
@@ -58,37 +58,43 @@ func (tr *TickersResponse) String() string {
 
 // Unpack converts a TickersResponse instance into a slice of Ticker structs.
 //
-// This method iterates through the fields of the TickersResponse struct, creating a Ticker struct for each symbol present in the response. It ensures that all corresponding fields are populated correctly. If the 'Updated' field is not nil, it converts the UNIX timestamp to a time.Time object for each Ticker struct.
+// This method iterates through the fields of the TickersResponse struct, creating a Ticker struct for each symbol present in the response. It ensures that all corresponding fields are populated correctly. It converts the UNIX timestamp to a time.Time object for each Ticker struct if the 'Updated' field is present.
 //
 // Returns:
 //   - A slice of Ticker structs representing the unpacked tickers.
-//   - An error if the TickersResponse is nil, its 'Updated' field is nil, or if there is a mismatch in the lengths of the slices within the TickersResponse.
+//   - An error if the TickersResponse is nil or if there is a mismatch in the lengths of the slices within the TickersResponse.
 func (tr *TickersResponse) Unpack() ([]Ticker, error) {
-	if tr == nil || tr.Updated == nil {
-		return nil, fmt.Errorf("TickersResponse or its Updated field is nil")
+	if tr == nil {
+		return nil, fmt.Errorf("TickersResponse is nil")
 	}
 	var tickerInfos []Ticker
 	for i := range tr.Symbol {
-		if i >= len(tr.Name) || i >= len(tr.Type) || i >= len(tr.Currency) || i >= len(tr.Exchange) || i >= len(tr.FigiShares) || i >= len(tr.FigiComposite) || i >= len(tr.Cik) || (tr.Updated != nil && i >= len(*tr.Updated)) {
-			return nil, fmt.Errorf("index out of range")
-		}
 		tickerInfo := Ticker{
 			Symbol:        tr.Symbol[i],
-			Name:          tr.Name[i],
-			Type:          tr.Type[i],
-			Currency:      tr.Currency[i],
-			Exchange:      tr.Exchange[i],
-			FigiShares:    tr.FigiShares[i],
-			FigiComposite: tr.FigiComposite[i],
-			Cik:           tr.Cik[i],
+			Name:          safeIndex(tr.Name, i),
+			Type:          safeIndex(tr.Type, i),
+			Currency:      safeIndex(tr.Currency, i),
+			Exchange:      safeIndex(tr.Exchange, i),
+			FigiShares:    safeIndex(tr.FigiShares, i),
+			FigiComposite: safeIndex(tr.FigiComposite, i),
+			Cik:           safeIndex(tr.Cik, i),
 		}
-		if tr.Updated != nil && (*tr.Updated)[i] != 0 {
-			t := time.Unix((*tr.Updated)[i], 0)
-			tickerInfo.Updated = &t
+		if len(tr.Updated) > i {
+			tickerInfo.Updated = time.Unix(tr.Updated[i], 0)
+		} else {
+			tickerInfo.Updated = time.Time{} // Assign zero value of time.Time if Updated is not present
 		}
 		tickerInfos = append(tickerInfos, tickerInfo)
 	}
 	return tickerInfos, nil
+}
+
+// safeIndex safely retrieves the string at index i from the slice, or returns an empty string if out of range.
+func safeIndex(slice []string, i int) string {
+	if i < len(slice) {
+		return slice[i]
+	}
+	return ""
 }
 
 // UniqueSymbols extracts and returns a slice of unique stock symbols from the TickersResponse.
@@ -160,25 +166,25 @@ func (tr *TickersResponse) MarshalJSON() ([]byte, error) {
 
 // Ticker represents the information of a ticker.
 type Ticker struct {
-	Symbol        string
-	Name          string
-	Type          string
-	Currency      string
-	Exchange      string
-	FigiShares    string
-	FigiComposite string
-	Cik           string
-	Updated       *time.Time
+	Symbol        string    `json:"symbol"`
+	Name          string    `json:"name,omitempty"`
+	Type          string    `json:"type,omitempty"`
+	Currency      string    `json:"currency,omitempty"`
+	Exchange      string    `json:"exchange,omitempty"`
+	FigiShares    string    `json:"figiShares,omitempty"`
+	FigiComposite string    `json:"figiComposite,omitempty"`
+	Cik           string    `json:"cik,omitempty"`
+	Updated       time.Time `json:"updated,omitempty"`
 }
 
 // String generates a string representation of the Ticker struct.
 //
 // Returns:
 //   - A string detailing the Ticker's properties in a readable format.
-func (ti *Ticker) String() string {
-	updated := ""
-	if ti.Updated != nil {
-		updated = ti.Updated.String()
+func (ti Ticker) String() string {
+	updated := "nil"
+	if !ti.Updated.IsZero() {
+		updated = formatTime(ti.Updated)
 	}
 	return fmt.Sprintf("Ticker{Symbol: %s, Name: %s, Type: %s, Currency: %s, Exchange: %s, FigiShares: %s, FigiComposite: %s, Cik: %s, Updated: %s}", ti.Symbol, ti.Name, ti.Type, ti.Currency, ti.Exchange, ti.FigiShares, ti.FigiComposite, ti.Cik, updated)
 }
@@ -192,7 +198,6 @@ func (ti *Ticker) String() string {
 //   - A pointer to a TickersResponse struct that aggregates the information from the input map.
 func MapToTickersResponse(tickerMap map[string]Ticker) *TickersResponse {
 	var tr TickersResponse
-	tr.Updated = new([]int64) // Initialize tr.Updated
 	keys := make([]string, 0, len(tickerMap))
 	for key := range tickerMap {
 		keys = append(keys, key)
@@ -209,11 +214,7 @@ func MapToTickersResponse(tickerMap map[string]Ticker) *TickersResponse {
 		tr.FigiShares = append(tr.FigiShares, tickerInfo.FigiShares)
 		tr.FigiComposite = append(tr.FigiComposite, tickerInfo.FigiComposite)
 		tr.Cik = append(tr.Cik, tickerInfo.Cik)
-		if tickerInfo.Updated != nil {
-			*tr.Updated = append(*tr.Updated, tickerInfo.Updated.Unix())
-		} else {
-			*tr.Updated = append(*tr.Updated, 0)
-		}
+		tr.Updated = append(tr.Updated, tickerInfo.Updated.Unix())
 	}
 	return &tr
 }
@@ -248,8 +249,8 @@ func SaveToCSV(tickerMap map[string]Ticker, filename string) error {
 	// Write data
 	for _, tickerInfo := range tickerMap {
 		updated := ""
-		if tickerInfo.Updated != nil {
-			updated = tickerInfo.Updated.String()
+		if !tickerInfo.Updated.IsZero() {
+			updated = fmt.Sprintf("%v", tickerInfo.Updated.Unix())
 		}
 		err = writer.Write([]string{tickerInfo.Symbol, tickerInfo.Name, tickerInfo.Type, tickerInfo.Currency, tickerInfo.Exchange, tickerInfo.FigiShares, tickerInfo.FigiComposite, tickerInfo.Cik, updated})
 		if err != nil {
