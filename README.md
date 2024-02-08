@@ -203,11 +203,13 @@ Please note that the information printed in debug mode can be quite verbose. It 
 
 Debug mode can be particularly useful when you are first getting started with the SDK. It can help you understand how the SDK constructs requests, how it handles responses, and how it manages errors. By examining the debug output, you can gain a deeper understanding of the SDK's inner workings and be better prepared to handle any issues that might arise.
 
-# Go SDK Endpoint Coverage:
+# Important Information for SDK Users
 
-Market Data's Go SDK covers all v1 endpoints. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
+### Endpoint Coverage:
 
- | Endpoint Category | Endpoint     | v1 Status | v2 Status |
+Market Data's Go SDK covers the vast majority of v1 endpoints. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
+
+ | **Category** | **Endpoint** | **v1 Status** | **v2 Status** |
  |-------------------|--------------|-----------|-----------|
  | Markets           | Status       | ✅        |           |
  | Stocks            | Candles      | ✅        |     ✅    |
@@ -227,10 +229,40 @@ Market Data's Go SDK covers all v1 endpoints. See our complete list of endpoints
 
 > Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
 
-# Contributions
+ | **Category**         | **Endpoint**     | **v1 Status** | **v2 Status** |
+ |----------------------|------------------|:-------------:|:-------------:|
+ |                      |                  |               |               |
+ | **[MARKETS](https://www.marketdata.app/docs/api/markets)**         |                  |               |               |
+ |                      | [Status](https://www.marketdata.app/docs/api/markets/status)           |       ✅      |       ❌       |
+ |                      |                  |               |               |
+ | **[STOCKS](https://www.marketdata.app/docs/api/stocks)**           |                  |               |               |
+ |                      | [Candles](https://www.marketdata.app/docs/api/stocks/candles)          |       ✅      |       ✅      |
+ |                      | [Bulk Candles](https://www.marketdata.app/docs/api/stocks/bulkcandles)     |       ✅      |       ❌        |
+ |                      | [Quotes](https://www.marketdata.app/docs/api/stocks/quotes)           |       ✅      |       ❌        |
+ |                      | [Bulk Quotes](https://www.marketdata.app/docs/api/stocks/bulkquotes)      |       ✅      |       ❌        |
+ |                      | [Earnings](https://www.marketdata.app/docs/api/stocks/earnings)         |       ✅      |       ❌        |
+ |                      | [Tickers](https://www.marketdata.app/docs/api/stocks/tickers)          |       ❌      |       ✅      |
+ |                      | [News](https://www.marketdata.app/docs/api/stocks/news)             |       ✅      |       ❌      |
+ |                      |                  |               |               |
+ | **[OPTIONS](https://www.marketdata.app/docs/api/options)**          |                  |               |               |
+ |                      | [Expirations](https://www.marketdata.app/docs/api/options/expirations)      |       ✅      |       ❌        |
+ |                      | [Lookup](https://www.marketdata.app/docs/api/options/lookup)           |       ✅      |       ❌       |
+ |                      | [Strikes](https://www.marketdata.app/docs/api/options/strikes)          |       ✅      |       ❌        |
+ |                      | [Option Chain](https://www.marketdata.app/docs/api/options/chain)     |       ✅      |       ❌        |
+ |                      | [Quotes](https://www.marketdata.app/docs/api/options/quotes)           |       ✅      |       ❌        |
+ |                      |                  |               |               |
+ | **[INDICES](https://www.marketdata.app/docs/api/indices)**          |                  |               |               |
+ |                      | [Candles](https://www.marketdata.app/docs/api/indices/candles)          |       ✅      |       ❌         |
+ |                      | [Quotes](https://www.marketdata.app/docs/api/indices/quotes)           |       ✅      |       ❌        |
 
-We warmly welcome and accept contributions from the community. If you're interested in helping improve the Go SDK, whether by adding new features, fixing bugs, or improving documentation, please feel free to submit a pull request or open an issue on our GitHub repository. Your contributions are greatly appreciated and help make our SDK even better for everyone.
+### SDK License & Data Usage Terms
 
-### Getting in Touch
+The license for the Go SDK for Market Data is specifically for the SDK software and does not cover the data provided by the Market Data API. It's crucial to understand that accessing data through the SDK means you're also subject to the Market Data Terms of Service. You can review these terms at [https://www.marketdata.app/terms/](https://www.marketdata.app/terms/) to fully comprehend your rights and responsibilities concerning data usage.
 
-For assistance, the [best way to get in touch with us is through our helpdesk](https://www.marketdata.app/dashboard/). Please refrain from opening GitHub issues for help requests. GitHub issues should only be used for reporting bugs.
+### Contributing to the SDK
+
+Your contributions to the Go SDK are highly valued. Whether you're looking to add new features, rectify bugs, or enhance the documentation, we encourage you to get involved. Please submit your contributions via pull requests or issues on our GitHub repository. Your efforts play a significant role in improving the SDK for the benefit of all users.
+
+### Contact and Support
+
+Should you need any assistance, the most effective way to reach us is through our [helpdesk](https://www.marketdata.app/dashboard/). We kindly ask that you use GitHub issues solely for bug reports and not for support inquiries.
