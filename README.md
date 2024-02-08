@@ -209,26 +209,6 @@ Debug mode can be particularly useful when you are first getting started with th
 
 Market Data's Go SDK covers the vast majority of v1 endpoints. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
 
- | **Category** | **Endpoint** | **v1 Status** | **v2 Status** |
- |-------------------|--------------|-----------|-----------|
- | Markets           | Status       | ✅        |           |
- | Stocks            | Candles      | ✅        |     ✅    |
- | Stocks            | Bulk Candles | ✅        |           |
- | Stocks            | Quotes       | ✅        |           |
- | Stocks            | Bulk Quotes  | ✅        |           |
- | Stocks            | Earnings     | ✅        |           |
- | Stocks            | Tickers      | ❌        |     ✅    |
- | Stocks            | News         | ✅        |     ❌    |
- | Options           | Expirations  | ✅        |           |
- | Options           | Lookup       | ✅        |           |
- | Options           | Strikes      | ✅        |           |
- | Options           | Option Chain | ✅        |           |
- | Options           | Quotes       | ✅        |           |
- | Indices           | Candles      | ✅        |           |
- | Indices           | Quotes       | ✅        |           |
-
-> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
-
  | **Category**         | **Endpoint**     | **v1 Status** | **v2 Status** |
  |----------------------|------------------|:-------------:|:-------------:|
  |                      |                  |               |               |
@@ -254,6 +234,8 @@ Market Data's Go SDK covers the vast majority of v1 endpoints. See our complete 
  | **[INDICES](https://www.marketdata.app/docs/api/indices)**          |                  |               |               |
  |                      | [Candles](https://www.marketdata.app/docs/api/indices/candles)          |       ✅      |       ❌         |
  |                      | [Quotes](https://www.marketdata.app/docs/api/indices/quotes)           |       ✅      |       ❌        |
+
+> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
 
 ### SDK License & Data Usage Terms
 
