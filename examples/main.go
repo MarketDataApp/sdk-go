@@ -7,27 +7,15 @@ import (
 	api "github.com/MarketDataApp/sdk-go"
 )
 
-func Start() {
+func init() {
 
 	client, err := api.GetClient()
 	if err != nil {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(false) // Turn off debug mode to see the log example clearly.
-
-	fmt.Println("Staring log example...")
-	LogExample()
-
 	client.Debug(true)
 
-	/*
-	   //fmt.Println("Starting market status request...")
-	   //marketstatusExample()
-
-	   fmt.Println("Staring rawResponse example...")
-	   rawHttpResponseExample()
-	*/
 }
 
 func optionsExamples() {
