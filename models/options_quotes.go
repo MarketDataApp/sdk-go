@@ -129,10 +129,10 @@ func (oq OptionQuote) String() string {
 // Returns:
 //   - A boolean indicating if the OptionQuotesResponse is valid.
 func (oqr *OptionQuotesResponse) IsValid() bool {
-    if err := oqr.Validate(); err != nil {
-        return false
-    }
-    return true
+	if err := oqr.Validate(); err != nil {
+		return false
+	}
+	return true
 }
 
 // Validate checks the consistency of the OptionQuotesResponse struct.
@@ -140,50 +140,50 @@ func (oqr *OptionQuotesResponse) IsValid() bool {
 // Returns:
 //   - An error if there is an inconsistency in the lengths of slices or if there are no option symbols.
 func (oqr *OptionQuotesResponse) Validate() error {
-    if len(oqr.OptionSymbol) == 0 {
-        return fmt.Errorf("no option symbols found in the response")
-    }
-    expectedLength := len(oqr.OptionSymbol)
-    slices := map[string]int{
-        "Underlying":      len(oqr.Underlying),
-        "Expiration":      len(oqr.Expiration),
-        "Side":            len(oqr.Side),
-        "Strike":          len(oqr.Strike),
-        "FirstTraded":     len(oqr.FirstTraded),
-        "DTE":             len(oqr.DTE),
-        "Ask":             len(oqr.Ask),
-        "AskSize":         len(oqr.AskSize),
-        "Bid":             len(oqr.Bid),
-        "BidSize":         len(oqr.BidSize),
-        "Mid":             len(oqr.Mid),
-        "Last":            len(oqr.Last),
-        "Volume":          len(oqr.Volume),
-        "OpenInterest":    len(oqr.OpenInterest),
-        "UnderlyingPrice": len(oqr.UnderlyingPrice),
-        "InTheMoney":      len(oqr.InTheMoney),
-        "Updated":         len(oqr.Updated),
-        "IV":              len(oqr.IV),
-        "Delta":           len(oqr.Delta),
-        "Gamma":           len(oqr.Gamma),
-        "Theta":           len(oqr.Theta),
-        "Vega":            len(oqr.Vega),
-        "Rho":             len(oqr.Rho),
-        "IntrinsicValue":  len(oqr.IntrinsicValue),
-        "ExtrinsicValue":  len(oqr.ExtrinsicValue),
-    }
+	if len(oqr.OptionSymbol) == 0 {
+		return fmt.Errorf("no option symbols found in the response")
+	}
+	expectedLength := len(oqr.OptionSymbol)
+	slices := map[string]int{
+		"Underlying":      len(oqr.Underlying),
+		"Expiration":      len(oqr.Expiration),
+		"Side":            len(oqr.Side),
+		"Strike":          len(oqr.Strike),
+		"FirstTraded":     len(oqr.FirstTraded),
+		"DTE":             len(oqr.DTE),
+		"Ask":             len(oqr.Ask),
+		"AskSize":         len(oqr.AskSize),
+		"Bid":             len(oqr.Bid),
+		"BidSize":         len(oqr.BidSize),
+		"Mid":             len(oqr.Mid),
+		"Last":            len(oqr.Last),
+		"Volume":          len(oqr.Volume),
+		"OpenInterest":    len(oqr.OpenInterest),
+		"UnderlyingPrice": len(oqr.UnderlyingPrice),
+		"InTheMoney":      len(oqr.InTheMoney),
+		"Updated":         len(oqr.Updated),
+		"IV":              len(oqr.IV),
+		"Delta":           len(oqr.Delta),
+		"Gamma":           len(oqr.Gamma),
+		"Theta":           len(oqr.Theta),
+		"Vega":            len(oqr.Vega),
+		"Rho":             len(oqr.Rho),
+		"IntrinsicValue":  len(oqr.IntrinsicValue),
+		"ExtrinsicValue":  len(oqr.ExtrinsicValue),
+	}
 
-    for sliceName, length := range slices {
-        if sliceName == "IV" || sliceName == "Delta" || sliceName == "Gamma" || sliceName == "Theta" || sliceName == "Vega" || sliceName == "Rho" {
-            if length != 0 && length != expectedLength {
-                return fmt.Errorf("inconsistent length for slice %q: expected %d or 0, got %d", sliceName, expectedLength, length)
-            }
-        } else {
-            if length != expectedLength {
-                return fmt.Errorf("inconsistent length for slice %q: expected %d, got %d", sliceName, expectedLength, length)
-            }
-        }
-    }
-    return nil
+	for sliceName, length := range slices {
+		if sliceName == "IV" || sliceName == "Delta" || sliceName == "Gamma" || sliceName == "Theta" || sliceName == "Vega" || sliceName == "Rho" {
+			if length != 0 && length != expectedLength {
+				return fmt.Errorf("inconsistent length for slice %q: expected %d or 0, got %d", sliceName, expectedLength, length)
+			}
+		} else {
+			if length != expectedLength {
+				return fmt.Errorf("inconsistent length for slice %q: expected %d, got %d", sliceName, expectedLength, length)
+			}
+		}
+	}
+	return nil
 }
 
 // Unpack converts the OptionQuotesResponse into a slice of OptionQuote structs.
@@ -195,49 +195,49 @@ func (oqr *OptionQuotesResponse) Validate() error {
 //   - A slice of OptionQuote structs that represent the unpacked data.
 //   - An error if the time zone loading fails or if the validation fails.
 func (oqr *OptionQuotesResponse) Unpack() ([]OptionQuote, error) {
-    // Validate the OptionQuotesResponse before unpacking.
-    if err := oqr.Validate(); err != nil {
-        return nil, err
-    }
+	// Validate the OptionQuotesResponse before unpacking.
+	if err := oqr.Validate(); err != nil {
+		return nil, err
+	}
 
-    loc, err := time.LoadLocation("America/New_York") // Load the New York time zone
-    if err != nil {
-        return nil, fmt.Errorf("failed to load New York time zone: %v", err)
-    }
+	loc, err := time.LoadLocation("America/New_York") // Load the New York time zone
+	if err != nil {
+		return nil, fmt.Errorf("failed to load New York time zone: %v", err)
+	}
 
-    var optionQuotes []OptionQuote
-    for i := range oqr.OptionSymbol {
-        optionQuote := OptionQuote{
-            OptionSymbol:    oqr.OptionSymbol[i],
-            Underlying:      oqr.Underlying[i],
-            Expiration:      time.Unix(oqr.Expiration[i], 0).In(loc),
-            Side:            oqr.Side[i],
-            Strike:          oqr.Strike[i],
-            FirstTraded:     time.Unix(oqr.FirstTraded[i], 0).In(loc),
-            DTE:             oqr.DTE[i],
-            Ask:             oqr.Ask[i],
-            AskSize:         oqr.AskSize[i],
-            Bid:             oqr.Bid[i],
-            BidSize:         oqr.BidSize[i],
-            Mid:             oqr.Mid[i],
-            Last:            oqr.Last[i],
-            Volume:          oqr.Volume[i],
-            OpenInterest:    oqr.OpenInterest[i],
-            UnderlyingPrice: oqr.UnderlyingPrice[i],
-            InTheMoney:      oqr.InTheMoney[i],
-            Updated:         time.Unix(oqr.Updated[i], 0).In(loc),
-            IV:              nilIfEmpty(oqr.IV, i),
-            Delta:           nilIfEmpty(oqr.Delta, i),
-            Gamma:           nilIfEmpty(oqr.Gamma, i),
-            Theta:           nilIfEmpty(oqr.Theta, i),
-            Vega:            nilIfEmpty(oqr.Vega, i),
-            Rho:             nilIfEmpty(oqr.Rho, i),
-            IntrinsicValue:  oqr.IntrinsicValue[i],
-            ExtrinsicValue:  oqr.ExtrinsicValue[i],
-        }
-        optionQuotes = append(optionQuotes, optionQuote)
-    }
-    return optionQuotes, nil
+	var optionQuotes []OptionQuote
+	for i := range oqr.OptionSymbol {
+		optionQuote := OptionQuote{
+			OptionSymbol:    oqr.OptionSymbol[i],
+			Underlying:      oqr.Underlying[i],
+			Expiration:      time.Unix(oqr.Expiration[i], 0).In(loc),
+			Side:            oqr.Side[i],
+			Strike:          oqr.Strike[i],
+			FirstTraded:     time.Unix(oqr.FirstTraded[i], 0).In(loc),
+			DTE:             oqr.DTE[i],
+			Ask:             oqr.Ask[i],
+			AskSize:         oqr.AskSize[i],
+			Bid:             oqr.Bid[i],
+			BidSize:         oqr.BidSize[i],
+			Mid:             oqr.Mid[i],
+			Last:            oqr.Last[i],
+			Volume:          oqr.Volume[i],
+			OpenInterest:    oqr.OpenInterest[i],
+			UnderlyingPrice: oqr.UnderlyingPrice[i],
+			InTheMoney:      oqr.InTheMoney[i],
+			Updated:         time.Unix(oqr.Updated[i], 0).In(loc),
+			IV:              nilIfEmpty(oqr.IV, i),
+			Delta:           nilIfEmpty(oqr.Delta, i),
+			Gamma:           nilIfEmpty(oqr.Gamma, i),
+			Theta:           nilIfEmpty(oqr.Theta, i),
+			Vega:            nilIfEmpty(oqr.Vega, i),
+			Rho:             nilIfEmpty(oqr.Rho, i),
+			IntrinsicValue:  oqr.IntrinsicValue[i],
+			ExtrinsicValue:  oqr.ExtrinsicValue[i],
+		}
+		optionQuotes = append(optionQuotes, optionQuote)
+	}
+	return optionQuotes, nil
 }
 
 // String returns a formatted string representation of all OptionQuotes contained in the OptionQuotesResponse.
@@ -276,8 +276,8 @@ func formatFloat64Slice(slice []*float64) string {
 // nilIfEmpty checks if the slice is nil or empty and returns nil for the current index if so.
 // This is a helper function to handle nil slices for pointer fields.
 func nilIfEmpty(slice []*float64, index int) *float64 {
-    if len(slice) == 0 {
-        return nil
+	if len(slice) == 0 {
+		return nil
 	}
 	return slice[index]
 }
