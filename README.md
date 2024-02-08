@@ -1,13 +1,16 @@
-# Go SDK for Market Data: Access Financial Data with Ease
+<div align="center">
 
-> The official Go SDK for accessing Market Data provides developers with a powerful, easy-to-use interface to obtain real-time and historical financial data. Ideal for building financial applications, trading bots, and investment strategies.
+# Go SDK for Market Data v1.0
+### Access Financial Data with Ease
+
+> This is the official Go SDK for [Market Data](https://www.marketdata.app/). It provides developers with a powerful, easy-to-use interface to obtain real-time and historical financial data. Ideal for building financial applications, trading bots, and investment strategies.
 
 [![GoDoc](https://godoc.org/github.com/MarketDataApp/sdk-go?status.svg)](https://godoc.org/github.com/MarketDataApp/sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarketDataApp/sdk-go)](https://goreportcard.com/report/github.com/MarketDataApp/sdk-go)
 ![Tests and linters](https://github.com/MarketDataApp/sdk-go/actions/workflows/go.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/MarketDataApp/sdk-go/branch/main/graph/badge.svg)](https://codecov.io/gh/MarketDataApp/sdk-go)
 [![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
-![SDK Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![SDK Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
 ![Lines of Code](https://img.shields.io/badge/lines_of_code-8342-blue)
 
@@ -17,6 +20,8 @@
 [![Discord](https://img.shields.io/badge/Discord-join%20chat-7389D8.svg?logo=discord&logoColor=ffffff)](https://discord.com/invite/GmdeAVRtnT)
 [![Twitter](https://img.shields.io/twitter/follow/MarketDataApp?style=social)](https://twitter.com/MarketDataApp)
 [![Helpdesk](https://img.shields.io/badge/Support-Ticketing-ff69b4.svg?logo=TicketTailor&logoColor=white)](https://www.marketdata.app/dashboard/)
+
+</div>
 
 # Installation
 
@@ -32,33 +37,16 @@ After installation, you can import it in your project like this:
 import api "github.com/MarketDataApp/sdk-go"
 ```
 
-# Go SDK Endpoint Coverage:
+# Documentation
 
-Market Data's Go SDK covers almost all v1 endponts. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
+For advanced usage, review the module'scomplete documentation:
 
- | Endpoint Category | Endpoint     | v1 Status | v2 Status |
- |-------------------|--------------|-----------|-----------|
- | Markets           | Status       | ✅        |           |
- | Stocks            | Candles      | ✅        |     ✅    |
- | Stocks            | Bulk Candles | ✅        |           |
- | Stocks            | Quotes       | ✅        |           |
- | Stocks            | Bulk Quotes  | ✅        |           |
- | Stocks            | Earnings     | ✅        |           |
- | Stocks            | Tickers      | ❌        |     ✅    |
- | Stocks            | News         | ✅        |     ❌    |
- | Options           | Expirations  | ✅        |           |
- | Options           | Lookup       | ✅        |           |
- | Options           | Strikes      | ✅        |           |
- | Options           | Option Chain | ✅        |           |
- | Options           | Quotes       | ✅        |           |
- | Indices           | Candles      | ✅        |           |
- | Indices           | Quotes       | ✅        |           |
+- [Go SDK Documentation at GoDoc](https://godoc.org/github.com/MarketDataApp/sdk-go)
+- [Go SDK Documentation at Market Data](https://www.marketdata.app/docs/sdk/go)
 
-> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should onlly use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
+# Get Started Quickly
 
-# Getting Started
-
-### Sign-Up For A Free Market Data Account
+### 1. Sign-Up For A Free Market Data Account
 
 Signing up for a Market Data account is straightforward and grants you immediate access to our wealth of market data. We offer a free account tier that allows you to explore the capabilities of our API without any cost. Additionally, all our paid plans come with a free 30-day trial, giving you the opportunity to test out the advanced features and decide which plan best suits your needs.
 
@@ -66,7 +54,7 @@ Signing up for a Market Data account is straightforward and grants you immediate
 
 Remember, no credit card is required for the free account tier, and you can upgrade, downgrade, or cancel your subscription at any time during or after the trial period.
 
-### Authentication
+### 2. Set-up Authentication
 
 To authenticate with the Market Data API, you need to set your token, which should have been e-mailed to you when you first signed up for an account. If you do not have a token, request a new one from the [Market Data Dashboard](https://www.marketdata.app/dashboard/). Set the token in the environment variable MARKETDATA_TOKEN. Alternatively, you can hardcode it in your code, but please be aware that this is not secure and could pose a risk if your code is shared.
 
@@ -75,7 +63,7 @@ export MARKETDATA_TOKEN="<your_api_token>"   # mac/linux
 setx MARKETDATA_TOKEN "<your_api_token>"     # windows
 ```
 
-### Making Your First Request
+### 3. Make Your First Request
 
 Check the examples folder for working examples for each request. 
 
@@ -89,7 +77,7 @@ import (
 )
 
 func main() {
-  // Initalize a new request, set the sybmol parameter, make the request.
+  // Initialize a new request, set the symbol parameter, make the request.
 	quotes, err := api.StockQuote().Symbol("AAPL").Get() 
 	if err != nil {
 		log.Fatalf("Failed to get stock quotes: %v", err)
@@ -101,19 +89,18 @@ func main() {
 	}
 ```
 
-### SDK Usage Instructions
+# SDK Usage
 
-- All requests are initialized using the name of the endpoint and parameters are set using a builder pattern.
+- All requests are initialized using the name of the endpoint and parameters are set using a builder pattern. The quickest way to get started is by viewing the examples.
 - All requests have 3 methods to get results:
-  - Use the `.Get()` method on any request to get a slice of objects. This is what you will use in most cases.
-  - Use the `.Packed()` method on any request to get a struct that models the Market Data JSON response. If you want to model the objects differently, this method could be useful for you.
-  - Use the `.Raw()` method on any request to get the raw *resty.Response object. This allows you to access the raw JSON or the raw *http.Response object and you can use any of the resty methods on the response.
+  1.  Use the `.Get()` method on any request **to get a slice of objects**. _This is what you will use in most cases._
+  2.  Use the `.Packed()` method on any request to **get a struct that models the Market Data JSON response**. _If you want to model the objects differently_, this method could be useful for you.
+  3.  Use the `.Raw()` method on any request to **get the raw *resty.Response object**. This allows you to _access the raw JSON or the raw *http.Response_ via any of Resty's methods. You can use any of the Resty methods on the response.
+- We have already implemented `.String()` methods for all `.Get()` and `.Packed()` responses and sorting methods for all candle objects.
 
-  > Note: Since all our structs are pre-defined based on the Market Data API's standard response format, our API's universal parameters such as `human`, `columns`, `dateformat`, `format` are not supported in this SDK. If you wish to make use of these parameters, you will need to model your own structs that can unmarshal the modified API response.
+> Note: Since all our structs are pre-defined based on the Market Data API's standard response format, our API's optional parameters such as `human`, `columns`, `dateformat`, `format` are not supported in this SDK because they modify the API's standard JSON output. If you wish to make use of these parameters, _you will need to model your own structs that can unmarshal the modified API response_.
 
-- We have already implemeneted `.String()` methods for all `.Get()` and `.Packed()` responses and sorting methods for all candle objects.
-
-### Logging
+# Logging
 
 The SDK systematically logs API responses to facilitate troubleshooting and analysis, adhering to the following rules:
 - **Client Errors:** Responses with status codes in the range 400-499 are logged to `client_error.log`.
@@ -175,11 +162,11 @@ Example of a log entry:
 }
 ```
 
-### Troubleshooting: Debug Mode
+# Troubleshooting: Debug Mode
 
 The SDK provides a debug mode that can be enabled to help you understand how the SDK is working and troubleshoot any issues you might encounter. When debug mode is enabled, the SDK will print the log to the console. This includes the full URL of the request, all request and response headers, and more.
 
-To enable debug mode, you need to call the `Debug` method on the `MarketDataClient` instance and pass `true` as the argument. 
+To enable debug mode, you need to call the `.Debug()` method on the `MarketDataClient` instance and pass `true` as the argument. 
 
 #### Debug Code Example
 
@@ -199,7 +186,7 @@ func main() {
 		log.Fatalf("Failed to get client: %v", err)
 	}
 
-	client.Debug(true) // Here is where debug mode is turned on.
+	client.Debug(true) // 👈 Here is where debug mode is turned on.
 
 	quotes, err := client.StockQuotes().Symbol("AAPL").Get()
 	if err != nil {
@@ -215,3 +202,35 @@ func main() {
 Please note that the information printed in debug mode can be quite verbose. It is recommended to use this mode only when you are facing issues and need to understand what's happening under the hood. When debug mode is activated all requests are logged, not just requests that fail.
 
 Debug mode can be particularly useful when you are first getting started with the SDK. It can help you understand how the SDK constructs requests, how it handles responses, and how it manages errors. By examining the debug output, you can gain a deeper understanding of the SDK's inner workings and be better prepared to handle any issues that might arise.
+
+# Go SDK Endpoint Coverage:
+
+Market Data's Go SDK covers all v1 endpoints. See our complete list of endpoints in the [Market Data API Documentation](https://www.marketdata.app/docs/api).
+
+ | Endpoint Category | Endpoint     | v1 Status | v2 Status |
+ |-------------------|--------------|-----------|-----------|
+ | Markets           | Status       | ✅        |           |
+ | Stocks            | Candles      | ✅        |     ✅    |
+ | Stocks            | Bulk Candles | ✅        |           |
+ | Stocks            | Quotes       | ✅        |           |
+ | Stocks            | Bulk Quotes  | ✅        |           |
+ | Stocks            | Earnings     | ✅        |           |
+ | Stocks            | Tickers      | ❌        |     ✅    |
+ | Stocks            | News         | ✅        |     ❌    |
+ | Options           | Expirations  | ✅        |           |
+ | Options           | Lookup       | ✅        |           |
+ | Options           | Strikes      | ✅        |           |
+ | Options           | Option Chain | ✅        |           |
+ | Options           | Quotes       | ✅        |           |
+ | Indices           | Candles      | ✅        |           |
+ | Indices           | Quotes       | ✅        |           |
+
+> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
+
+# Contributions
+
+We warmly welcome and accept contributions from the community. If you're interested in helping improve the Go SDK, whether by adding new features, fixing bugs, or improving documentation, please feel free to submit a pull request or open an issue on our GitHub repository. Your contributions are greatly appreciated and help make our SDK even better for everyone.
+
+### Getting in Touch
+
+For assistance, the [best way to get in touch with us is through our helpdesk](https://www.marketdata.app/dashboard/). Please refrain from opening GitHub issues for help requests. GitHub issues should only be used for reporting bugs.
