@@ -9,7 +9,7 @@ func TestGetOpenDates(t *testing.T) {
 	// Create a mock MarketStatusResponse
 	msr := &MarketStatusResponse{
 		Date:   []int64{time.Now().Unix(), time.Now().AddDate(0, 0, -1).Unix()},
-		Status: &[]string{"open", "closed"},
+		Status: []string{"open", "closed"},
 	}
 
 	openDates, err := msr.GetOpenDates()
@@ -30,7 +30,7 @@ func TestGetClosedDates(t *testing.T) {
 	// Create a mock MarketStatusResponse
 	msr := &MarketStatusResponse{
 		Date:   []int64{time.Now().Unix(), time.Now().AddDate(0, 0, -1).Unix()},
-		Status: &[]string{"open", "closed"},
+		Status: []string{"open", "closed"},
 	}
 
 	closedDates, err := msr.GetClosedDates()

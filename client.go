@@ -33,10 +33,6 @@
 // Debug mode can be enabled by calling the Debug method on the MarketDataClient instance.
 // When enabled, the SDK will log detailed information about each request and response,
 // which is useful for troubleshooting.
-//
-// Environment:
-// The SDK can be configured to work with different environments (production, test, development)
-// by setting the appropriate host URL. The default environment is production.
 package client
 
 import (

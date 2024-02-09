@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"time"
+
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
 )
 
 /* Example Response:
@@ -70,6 +72,15 @@ type OptionQuote struct {
 	ExtrinsicValue  float64   // ExtrinsicValue is the value of the option above its intrinsic value.
 }
 
+// Formats the implied volatility (IV) of an option into a string. This method is primarily used for displaying the IV in a human-readable format, which is useful for logging, debugging, or displaying the IV value in user interfaces.
+//
+// # Returns
+//
+//   - string: The formatted IV value as a string. If the IV is nil, returns "nil".
+//
+// # Notes
+//
+//   - The IV is formatted to a floating-point number as a string. If the IV is not set (nil), the method returns the string "nil".
 func (oq OptionQuote) DisplayIV() string {
 	if oq.IV != nil {
 		return fmt.Sprintf("%f", *oq.IV)
@@ -77,6 +88,24 @@ func (oq OptionQuote) DisplayIV() string {
 	return "nil"
 }
 
+// Formats the mid price of an option into a string. This method is primarily used for displaying the mid price in a human-readable format, which is useful for logging, debugging, or displaying the mid price value in user interfaces.
+//
+// # Returns
+//
+//   - string: The formatted mid price value as a string.
+//
+// # Notes
+//
+//   - The mid price is calculated as the average of the bid and ask prices. This method formats the mid price to a floating-point number as a string.
+func (oq OptionQuote) DisplayMid() string {
+	return fmt.Sprintf("%f", oq.Mid)
+}
+
+// DisplayDelta formats the Delta value of an OptionQuote into a string. Delta measures the rate of change of the option's price with respect to the underlying asset's price. This method is useful for displaying Delta in a human-readable format, especially in user interfaces or logs.
+//
+// # Returns
+//
+//   - string: The formatted Delta value as a string. If Delta is nil, returns "nil".
 func (oq OptionQuote) DisplayDelta() string {
 	if oq.Delta != nil {
 		return fmt.Sprintf("%f", *oq.Delta)
@@ -84,6 +113,11 @@ func (oq OptionQuote) DisplayDelta() string {
 	return "nil"
 }
 
+// DisplayGamma formats the Gamma value of an OptionQuote into a string. Gamma measures the rate of change in Delta over the underlying asset's price movement. This method is useful for displaying Gamma in a human-readable format, particularly in user interfaces or logs.
+//
+// # Returns
+//
+//   - string: The formatted Gamma value as a string. If Gamma is nil, returns "nil".
 func (oq OptionQuote) DisplayGamma() string {
 	if oq.Gamma != nil {
 		return fmt.Sprintf("%f", *oq.Gamma)
@@ -91,6 +125,11 @@ func (oq OptionQuote) DisplayGamma() string {
 	return "nil"
 }
 
+// DisplayTheta formats the Theta value of an OptionQuote into a string. Theta represents the rate of decline in the option's value with time. This method is useful for displaying Theta in a human-readable format, especially in user interfaces or logs.
+//
+// # Returns
+//
+//   - string: The formatted Theta value as a string. If Theta is nil, returns "nil".
 func (oq OptionQuote) DisplayTheta() string {
 	if oq.Theta != nil {
 		return fmt.Sprintf("%f", *oq.Theta)
@@ -98,6 +137,11 @@ func (oq OptionQuote) DisplayTheta() string {
 	return "nil"
 }
 
+// DisplayVega formats the Vega value of an OptionQuote into a string. Vega measures sensitivity to volatility. This method is useful for displaying Vega in a human-readable format, particularly in user interfaces or logs.
+//
+// # Returns
+//
+//   - string: The formatted Vega value as a string. If Vega is nil, returns "nil".
 func (oq OptionQuote) DisplayVega() string {
 	if oq.Vega != nil {
 		return fmt.Sprintf("%f", *oq.Vega)
@@ -105,6 +149,11 @@ func (oq OptionQuote) DisplayVega() string {
 	return "nil"
 }
 
+// DisplayRho formats the Rho value of an OptionQuote into a string. Rho measures sensitivity to the interest rate. This method is useful for displaying Rho in a human-readable format, especially in user interfaces or logs.
+//
+// # Returns
+//
+//   - string: The formatted Rho value as a string. If Rho is nil, returns "nil".
 func (oq OptionQuote) DisplayRho() string {
 	if oq.Rho != nil {
 		return fmt.Sprintf("%f", *oq.Rho)
@@ -112,22 +161,29 @@ func (oq OptionQuote) DisplayRho() string {
 	return "nil"
 }
 
-// String returns a formatted string representation of an OptionQuote.
+// String provides a human-readable representation of an OptionQuote, encapsulating its key details in a formatted string. This method is primarily used for logging, debugging, or displaying the OptionQuote in a format that is easy to read and understand. It includes information such as the option symbol, underlying asset, expiration date, and more, formatted into a single string.
 //
-// Parameters:
-//   - oq: The OptionQuote instance.
+// # Returns
 //
-// Returns:
-//   - A string that represents the OptionQuote in a human-readable format.
+//   - string: A formatted string that encapsulates the OptionQuote details, making it easier to read and understand.
+//
+// # Notes
+//
+//   - This method is particularly useful for debugging purposes or when there's a need to log the OptionQuote details in a human-readable format.
 func (oq OptionQuote) String() string {
 	return fmt.Sprintf("OptionQuote{OptionSymbol: %q, Underlying: %q, Expiration: %v, Side: %q, Strike: %v, FirstTraded: %v, DTE: %v, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v, Mid: %v, Last: %v, Volume: %v, OpenInterest: %v, UnderlyingPrice: %v, InTheMoney: %v, Updated: %q, IV: %s, Delta: %s, Gamma: %s, Theta: %s, Vega: %s, Rho: %s, IntrinsicValue: %v, ExtrinsicValue: %v}",
-		oq.OptionSymbol, oq.Underlying, formatTime(oq.Expiration), oq.Side, oq.Strike, formatTime(oq.FirstTraded), oq.DTE, oq.Ask, oq.AskSize, oq.Bid, oq.BidSize, oq.Mid, oq.Last, oq.Volume, oq.OpenInterest, oq.UnderlyingPrice, oq.InTheMoney, formatTime(oq.Updated), oq.DisplayIV(), oq.DisplayDelta(), oq.DisplayGamma(), oq.DisplayTheta(), oq.DisplayVega(), oq.DisplayRho(), oq.IntrinsicValue, oq.ExtrinsicValue)
+		oq.OptionSymbol, oq.Underlying, dates.TimeString(oq.Expiration), oq.Side, oq.Strike, dates.TimeString(oq.FirstTraded), oq.DTE, oq.Ask, oq.AskSize, oq.Bid, oq.BidSize, oq.Mid, oq.Last, oq.Volume, oq.OpenInterest, oq.UnderlyingPrice, oq.InTheMoney, dates.TimeString(oq.Updated), oq.DisplayIV(), oq.DisplayDelta(), oq.DisplayGamma(), oq.DisplayTheta(), oq.DisplayVega(), oq.DisplayRho(), oq.IntrinsicValue, oq.ExtrinsicValue)
 }
 
-// IsValid checks if an OptionQuotesResponse is valid by utilizing the Validate method.
+// IsValid determines the validity of an OptionQuotesResponse by invoking the Validate method. This method is primarily used to ensure that the OptionQuotesResponse adheres to expected formats and contains all necessary data before proceeding with further processing or operations.
 //
-// Returns:
-//   - A boolean indicating if the OptionQuotesResponse is valid.
+// # Returns
+//
+//   - bool: Indicates whether the OptionQuotesResponse is valid.
+//
+// # Notes
+//
+//   - This method relies on the Validate method to check for inconsistencies or missing data in the OptionQuotesResponse.
 func (oqr *OptionQuotesResponse) IsValid() bool {
 	if err := oqr.Validate(); err != nil {
 		return false
@@ -135,10 +191,15 @@ func (oqr *OptionQuotesResponse) IsValid() bool {
 	return true
 }
 
-// Validate checks the consistency of the OptionQuotesResponse struct.
+// Validate ensures the integrity of the OptionQuotesResponse by verifying the consistency of data lengths across its fields. This method is crucial for maintaining data integrity, especially before performing operations that rely on the uniformity of data structure. It checks for the presence of option symbols and validates that the lengths of all slices are consistent with the expected length or are zero for optional fields.
+
+// # Returns
 //
-// Returns:
-//   - An error if there is an inconsistency in the lengths of slices or if there are no option symbols.
+//   - error: An error if there is an inconsistency in the lengths of slices or if there are no option symbols. Returns nil if all checks pass.
+//
+// # Notes
+//
+//   - This method is particularly important for preventing runtime errors that could occur when processing inconsistent data.
 func (oqr *OptionQuotesResponse) Validate() error {
 	if len(oqr.OptionSymbol) == 0 {
 		return fmt.Errorf("no option symbols found in the response")
@@ -186,14 +247,20 @@ func (oqr *OptionQuotesResponse) Validate() error {
 	return nil
 }
 
-// Unpack converts the OptionQuotesResponse into a slice of OptionQuote structs.
+// Unpack converts the OptionQuotesResponse into a slice of OptionQuote structs, allowing for the individual option quotes contained within the response to be accessed and manipulated more easily. This method is primarily used when there's a need to work with the data of each option quote separately after fetching a bulk response.
 //
-// Parameters:
-//   - oqr: A pointer to the OptionQuotesResponse instance to be unpacked.
+// # Parameters
 //
-// Returns:
-//   - A slice of OptionQuote structs that represent the unpacked data.
-//   - An error if the time zone loading fails or if the validation fails.
+//   - *OptionQuotesResponse oqr: A pointer to the OptionQuotesResponse instance to be unpacked.
+//
+// # Returns
+//
+//   - []OptionQuote: A slice of OptionQuote structs that represent the unpacked data.
+//   - *error: An error if the time zone loading fails or if the validation fails.
+//
+// # Notes
+//
+//   - This method first validates the OptionQuotesResponse to ensure consistency before attempting to unpack it.
 func (oqr *OptionQuotesResponse) Unpack() ([]OptionQuote, error) {
 	// Validate the OptionQuotesResponse before unpacking.
 	if err := oqr.Validate(); err != nil {
@@ -240,13 +307,19 @@ func (oqr *OptionQuotesResponse) Unpack() ([]OptionQuote, error) {
 	return optionQuotes, nil
 }
 
-// String returns a formatted string representation of all OptionQuotes contained in the OptionQuotesResponse.
+// String generates a formatted string representation of all OptionQuotes contained within the OptionQuotesResponse. This method is primarily used for producing a human-readable summary of the OptionQuotes, which can be useful for logging, debugging, or displaying the data in a more accessible format.
 //
-// Parameters:
-//   - oqr: A pointer to the OptionQuotesResponse instance.
+// # Parameters
 //
-// Returns:
-//   - A string that represents all OptionQuotes in a human-readable format.
+//   - oqr *OptionQuotesResponse: A pointer to the OptionQuotesResponse instance.
+//
+// # Returns
+//
+//   - string: A string that represents all OptionQuotes in a human-readable format.
+//
+// # Notes
+//
+//   - This method simplifies the visualization of complex OptionQuotes data by converting it into a string format.
 func (oqr *OptionQuotesResponse) String() string {
 	// Convert slices of pointers to strings using the helper function.
 	ivStr := formatFloat64Slice(oqr.IV)
