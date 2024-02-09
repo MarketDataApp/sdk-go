@@ -11,11 +11,11 @@ import (
 // It encapsulates parameters for resolution, symbol, and date to be used in the request.
 // This struct provides methods such as Resolution(), Symbol(), Date(), and From() to set these parameters respectively.
 //
-// Public Methods:
-//   - Resolution(q string) *IndicesCandlesRequest: Sets the resolution parameter for the request.
-//   - Symbol(q string) *IndicesCandlesRequest: Sets the symbol parameter for the request.
-//   - Date(q interface{}) *IndicesCandlesRequest: Sets the date parameter for the request.
-//   - From(q interface{}) *IndicesCandlesRequest: Sets the 'from' date parameter for the request.
+// #### Public Methods:
+//   - `Resolution(q string) *IndicesCandlesRequest`: Sets the resolution parameter for the request.
+//   - `Symbol(q string) *IndicesCandlesRequest`: Sets the symbol parameter for the request.
+//   - `Date(q interface{}) *IndicesCandlesRequest`: Sets the date parameter for the request.
+//   - `From(q interface{}) *IndicesCandlesRequest`: Sets the 'from' date parameter for the request.
 type IndicesCandlesRequest struct {
 	*baseRequest
 	resolutionParams *parameters.ResolutionParams // Holds the resolution parameter of the request.
