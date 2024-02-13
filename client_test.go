@@ -115,7 +115,7 @@ func TestEnvironmentMethod(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new MarketDataClient instance
-			client := NewClient()
+			client := New()
 
 			// Set the environment using the Environment method
 			client = client.Environment(tc.environment)

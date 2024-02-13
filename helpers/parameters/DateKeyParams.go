@@ -16,10 +16,12 @@ type DateKeyParam struct {
 // SetDateKey sets the date key parameter for a request.
 // This method validates the date key to ensure it adheres to the expected format as defined in the dates package.
 //
-// Parameters:
+// # Parameters
+//
 //   - q: A string representing the date key to be set.
 //
-// Returns:
+// # Returns
+//
 //   - An error if the date key is in an invalid format, otherwise nil.
 func (dk *DateKeyParam) SetDateKey(q string) error {
 	if !dates.IsValidDateKey(q) {
@@ -32,10 +34,12 @@ func (dk *DateKeyParam) SetDateKey(q string) error {
 // SetParams sets the parameters for the DateKeyParam within a given request.
 // It leverages the ParseAndSetParams function to parse the DateKeyParam and apply it to the request.
 //
-// Parameters:
+// # Parameters
+//
 //   - request: A pointer to a resty.Request object where the date key parameter will be set.
 //
-// Returns:
+// # Returns
+//
 //   - An error if parsing and setting the parameters fail, otherwise nil.
 func (dk *DateKeyParam) SetParams(request *resty.Request) error {
 	return ParseAndSetParams(dk, request)

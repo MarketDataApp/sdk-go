@@ -209,11 +209,13 @@ func (br *baseRequest) getError() error {
 // Raw executes the request and returns the raw resty.Response. This method allows for an optional MarketDataClient
 // to be passed which, if provided, replaces the client used in the request.
 //
-// Parameters:
-//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If provided,
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If provided,
 //     the first MarketDataClient in the slice replaces the current client for this request.
 //
-// Returns:
+// # Returns
+//
 //   - *resty.Response: The raw response from the executed request.
 //   - error: An error object if the baseRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
 func (request *baseRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {

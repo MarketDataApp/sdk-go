@@ -70,7 +70,8 @@ type HttpRequestLog struct {
 
 // WriteToLog writes the log entry to the appropriate logger based on the HTTP response status.
 //
-// Parameters:
+// # Parameters
+//
 //   - debug: A boolean indicating whether to log as a debug message.
 func (h HttpRequestLog) WriteToLog(debug bool) {
 	var logger *zap.Logger
@@ -118,7 +119,8 @@ func (h HttpRequestLog) WriteToLog(debug bool) {
 
 // String returns a string representation of the HTTP request log entry.
 //
-// Returns:
+// # Returns
+//
 //   - A string representing the log entry.
 func (h HttpRequestLog) String() string {
 	return fmt.Sprintf("Timestamp: %v, Status: %d, Request: %s, Request Headers: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s",
@@ -141,7 +143,9 @@ func (h HttpRequestLog) PrettyPrint() {
 }
 
 // printHeaders prints the HTTP headers in a formatted manner. Headers starting with "X-Api-Ratelimit" are highlighted.
-// Parameters:
+//
+// # Parameters
+//
 //   - headers: The HTTP headers to be printed.
 func (h HttpRequestLog) printHeaders(headers http.Header) {
 	keys := make([]string, 0, len(headers))
@@ -162,7 +166,8 @@ func (h HttpRequestLog) printHeaders(headers http.Header) {
 
 // memoryUsage calculates the memory usage of the log entry.
 //
-// Returns:
+// # Returns
+//
 //   - An integer representing the memory usage of the log entry in bytes.
 func (h HttpRequestLog) memoryUsage() int {
 	// Size of time.Time (24 bytes)
@@ -192,10 +197,12 @@ func (h HttpRequestLog) memoryUsage() int {
 
 // headerSize calculates the memory usage of HTTP headers.
 //
-// Parameters:
+// # Parameters
+//
 //   - header: The HTTP headers for which the memory usage is calculated.
 //
-// Returns:
+// # Returns
+//
 //   - An integer representing the memory usage of the headers in bytes.
 func (h HttpRequestLog) headerSize(header http.Header) int {
 	size := 0
@@ -214,7 +221,8 @@ func (h HttpRequestLog) headerSize(header http.Header) int {
 // This function initializes the log entry with details of the HTTP request and response,
 // including timestamps, request and response headers, and other relevant information.
 //
-// Parameters:
+// # Parameters
+//
 //   - timestamp: The time at which the HTTP request was made.
 //   - rayID: A unique identifier for the request, typically used for tracing requests.
 //   - request: The raw HTTP request data as a string.
@@ -225,7 +233,8 @@ func (h HttpRequestLog) headerSize(header http.Header) int {
 //   - reqHeaders: The HTTP headers of the request.
 //   - resHeaders: The HTTP headers of the response.
 //
-// Returns:
+// # Returns
+//
 //   - HttpRequestLog: An instance of HttpRequestLog populated with the provided parameters and calculated memory usage.
 func NewHttpRequestLog(timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) HttpRequestLog {
 	log := HttpRequestLog{
@@ -247,7 +256,8 @@ func NewHttpRequestLog(timestamp time.Time, rayID string, request string, rateLi
 
 // totalMemoryUsage calculates the total memory usage of all log entries.
 //
-// Returns:
+// # Returns
+//
 //   - An int64 representing the total memory usage of all log entries in bytes.
 func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 	total := int64(0)
@@ -259,7 +269,8 @@ func (h *HttpRequestLogs) totalMemoryUsage() int64 {
 
 // String returns a string representation of all HTTP request logs.
 //
-// Returns:
+// # Returns
+//
 //   - A string representing all log entries.
 func (h *HttpRequestLogs) String() string {
 	var sb strings.Builder
@@ -275,7 +286,8 @@ func (h *HttpRequestLogs) String() string {
 // This method checks if there are any logs present. If there are no logs, it returns a message indicating that no logs are available.
 // If logs are present, it calculates the index of the last log entry, accesses it, and returns its response.
 //
-// Returns:
+// # Returns
+//
 //   - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
 func (h *HttpRequestLogs) GetLastLogResponse() string {
 	// Step 2: Check if there are no logs
@@ -307,7 +319,8 @@ func (h *HttpRequestLogs) PrintLatest() {
 // This method creates a new HttpRequestLog entry based on the provided parameters and appends it to the HttpRequestLogs.
 // After adding a new log entry, it trims the log to ensure the total memory usage and the number of log entries are below their limits.
 //
-// Parameters:
+// # Parameters
+//
 //   - h *HttpRequestLogs: A pointer to the HttpRequestLogs to which the new log entry will be added.
 //   - timestamp time.Time: The timestamp of the HTTP request.
 //   - rayID string: The unique identifier for the request.
@@ -319,7 +332,8 @@ func (h *HttpRequestLogs) PrintLatest() {
 //   - reqHeaders http.Header: The HTTP headers of the request.
 //   - resHeaders http.Header: The HTTP headers of the response.
 //
-// Returns:
+// # Returns
+//
 //   - *HttpRequestLog: A pointer to the newly added HttpRequestLog entry. Returns nil if the log entry is not added.
 func AddToLog(h *HttpRequestLogs, timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) *HttpRequestLog {
 	if request == "https://api.marketdata.app/user/" {

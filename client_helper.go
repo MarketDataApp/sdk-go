@@ -12,10 +12,12 @@ import (
 // getRateLimitConsumed extracts the rate limit consumed value from the response headers.
 // It specifically looks for the "X-Api-RateLimit-Consumed" header and attempts to convert its value to an integer.
 //
-// Parameters:
+// # Parameters
+//
 //   - resp: A pointer to a resty.Response from which the header will be extracted.
 //
-// Returns:
+// # Returns
+//
 //   - int: The integer value of the "X-Api-RateLimit-Consumed" header if present and successfully converted.
 //   - error: An error if the header is missing or if the conversion to an integer fails.
 func getRateLimitConsumed(resp *resty.Response) (int, error) {
@@ -32,10 +34,12 @@ func getRateLimitConsumed(resp *resty.Response) (int, error) {
 
 // getRayIDFromResponse extracts the "Cf-Ray" header value from the response.
 //
-// Parameters:
+// # Parameters
+//
 //   - resp: A pointer to a resty.Response from which the header will be extracted.
 //
-// Returns:
+// # Returns
+//
 //   - string: The value of the "Cf-Ray" header if present.
 //   - error: An error if the "Cf-Ray" header is missing.
 func getRayIDFromResponse(resp *resty.Response) (string, error) {
@@ -48,10 +52,12 @@ func getRayIDFromResponse(resp *resty.Response) (string, error) {
 
 // getLatencyFromRequest calculates the server processing time for a request.
 //
-// Parameters:
+// # Parameters
+//
 //   - req: A pointer to a resty.Request which has been executed and contains trace information.
 //
-// Returns:
+// # Returns
+//
 //   - int64: The server processing time in milliseconds.
 func getLatencyFromRequest(req *resty.Request) int64 {
 	trace := req.TraceInfo()
@@ -61,10 +67,12 @@ func getLatencyFromRequest(req *resty.Request) int64 {
 // redactAuthorizationHeader takes an http.Header object and returns a new http.Header object with the "Authorization" header value redacted.
 // The redaction replaces the token with a string that has the same length but with the characters replaced by asterisks, except for the last four characters.
 //
-// Parameters:
+// # Parameters
+//
 //   - headers: The original http.Header object containing the headers.
 //
-// Returns:
+// # Returns
+//
 //   - http.Header: A new http.Header object with the "Authorization" header value redacted if present.
 func redactAuthorizationHeader(headers http.Header) http.Header {
 	// Copy the headers so we don't modify the original

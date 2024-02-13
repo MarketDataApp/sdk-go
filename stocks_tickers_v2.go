@@ -22,10 +22,12 @@ type StockTickersRequestV2 struct {
 // DateKey sets the date parameter for the StockTickersRequestV2.
 // This method is used to specify the date for which the stock tickers data is requested.
 //
-// Parameters:
+// # Parameters
+//
 //   - q: A string representing the date to be set.
 //
-// Returns:
+// # Returns
+//
 //   - *StockTickersRequestV2: This method returns a pointer to the StockTickersRequestV2 instance it was called on. This allows for method chaining.
 func (str *StockTickersRequestV2) DateKey(q string) *StockTickersRequestV2 {
 	if str == nil {
@@ -51,7 +53,8 @@ func (str *StockTickersRequestV2) getParams() ([]parameters.MarketDataParam, err
 // This method checks if the StockTickersRequestV2 receiver is nil, returning an error if strue.
 // Otherwise, it proceeds to send the request and returns the TickersResponse along with any error encountered during the request.
 //
-// Returns:
+// # Returns
+//
 //   - *models.TickersResponse: A pointer to the TickersResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
 func (str *StockTickersRequestV2) Packed() (*models.TickersResponse, error) {
@@ -73,7 +76,8 @@ func (str *StockTickersRequestV2) Packed() (*models.TickersResponse, error) {
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of Ticker using the Unpack method from the response.
 //
-// Returns:
+// # Returns
+//
 //   - []models.Ticker: A slice of Ticker containing the unpacked tickers data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (str *StockTickersRequestV2) Get() ([]models.Ticker, error) {
@@ -101,11 +105,13 @@ func (str *StockTickersRequestV2) Get() ([]models.Ticker, error) {
 // with the default date parameter and sets the request path based on
 // the predefined endpoints for stock tickers.
 //
-// Parameters:
+// # Parameters
+//
 //   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
 //     the default client is used.
 //
-// Returns:
+// # Returns
+//
 //   - *StockTickersRequestV2: A pointer to the newly created StockTickersRequestV2 with default parameters and associated client.
 func StockTickers(client ...*MarketDataClient) *StockTickersRequestV2 {
 	baseReq := newBaseRequest(client...)

@@ -16,10 +16,13 @@ type DateParams struct {
 
 // SetDate sets the date parameter of the DateParams.
 // It validates the date using the ToDayString function from the dates package.
-// Parameters:
+//
+// # Parameters
+//
 //   - q: The date to be set, can be of any type that ToDayString can process.
 //
-// Returns:
+// # Returns
+//
 //   - error: An error if the date validation fails.
 func (dp *DateParams) SetDate(q interface{}) error {
 	date, err := dates.ToDayString(q)
@@ -39,10 +42,13 @@ func (dp *DateParams) SetDate(q interface{}) error {
 
 // SetFrom sets the from parameter of the DateParams.
 // It validates the from date using the ToDayString function from the dates package.
-// Parameters:
+//
+// # Parameters
+//
 //   - q: The from date to be set, can be of any type that ToDayString can process.
 //
-// Returns:
+// # Returns
+//
 //   - error: An error if the from date validation fails.
 func (dp *DateParams) SetFrom(q interface{}) error {
 	date, err := dates.ToDayString(q)
@@ -63,10 +69,13 @@ func (dp *DateParams) SetFrom(q interface{}) error {
 
 // SetTo sets the to parameter of the DateParams.
 // It validates the to date using the ToDayString function from the dates package.
-// Parameters:
+//
+// # Parameters
+//
 //   - q: The to date to be set, can be of any type that ToDayString can process.
 //
-// Returns:
+// # Returns
+//
 //   - error: An error if the to date validation fails.
 func (dp *DateParams) SetTo(q interface{}) error {
 	date, err := dates.ToDayString(q)
@@ -86,10 +95,13 @@ func (dp *DateParams) SetTo(q interface{}) error {
 }
 
 // SetCountback sets the countback parameter of the DateParams.
-// Parameters:
+//
+// # Parameters
+//
 //   - q: The countback value to be set, must be an integer.
 //
-// Returns:
+// # Returns
+//
 //   - error: Always returns nil. Future implementations might return an error if needed.
 func (dp *DateParams) SetCountback(q int) error {
 	dp.Countback = &q
@@ -106,10 +118,13 @@ func (dp *DateParams) SetCountback(q int) error {
 
 // SetParams sets the parameters for the DateParams.
 // It uses the ParseAndSetParams function to parse and set the parameters.
-// Parameters:
+//
+// # Parameters
+//
 //   - request: A pointer to a resty.Request to which the parameters will be applied.
 //
-// Returns:
+// # Returns
+//
 //   - error: An error if parsing and setting the parameters fail.
 func (dp *DateParams) SetParams(request *resty.Request) error {
 	return ParseAndSetParams(dp, request)

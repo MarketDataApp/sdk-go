@@ -22,10 +22,12 @@ import (
 //   - time.Time structs representing the zero time
 //   - structs where all fields are "zero" values
 //
-// Parameters:
+// # Parameters
+//
 //   - i: The interface{} to check for a "zero" or "empty" value.
 //
-// Returns:
+// # Returns
+//
 //   - A bool indicating if 'i' is a "zero" or "empty" value.
 func IsZeroValue(i interface{}) bool {
 	// Check if the interface is nil, which is considered a zero value.
@@ -111,10 +113,12 @@ func IsZeroValue(i interface{}) bool {
 
 // IsAlpha checks if the input string consists only of alphabetic characters.
 //
-// Parameters:
+// # Parameters
+//
 //   - s: The string to be checked.
 //
-// Returns:
+// # Returns
+//
 //   - A boolean value indicating whether the string is alphabetic (true) or not (false).
 func IsAlpha(s string) bool {
 	for _, r := range s {

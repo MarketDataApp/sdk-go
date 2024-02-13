@@ -2,17 +2,65 @@
 import sys
 import re
 
+# Central mapping of URLs to their corresponding title and sidebar position
+URL_TO_INFO = {
+    "https://www.marketdata.app/docs/api/indices/candles": {"title": "Candles", "sidebar_position": 1},
+    # Add more mappings as needed
+}
+
+def move_all_struct_definitions(content):
+    """Move all struct definition blocks right after their type documentation."""
+    import re
+
+    # Pattern to find struct type documentation
+    struct_doc_pattern = re.compile(r"## type (\w+)")
+    # Pattern to find struct definition blocks
+    struct_def_pattern_template = r"(```go\s+type {}\s.*?```)"
+    
+    # Find all struct names from the documentation
+    struct_names = struct_doc_pattern.findall(content)
+
+    for struct_name in struct_names:
+        # Create a pattern for the current struct definition
+        struct_def_pattern = re.compile(struct_def_pattern_template.format(struct_name), re.DOTALL)
+        
+        # Find the struct definition block
+        struct_def_match = struct_def_pattern.search(content)
+        if not struct_def_match:
+            continue  # Skip if struct definition block not found
+
+        struct_def_block = struct_def_match.group(1)
+
+        # Remove the original struct definition block from the content
+        content = struct_def_pattern.sub('', content, count=1)
+
+        # Insert the struct definition block right after the struct type documentation
+        content = re.sub(
+            rf"(## type {struct_name}\s*\n)",
+            r'\1' + struct_def_block + '\n\n',
+            content,
+            count=1
+        )
+
+    return content
+
 def correct_escaping_in_links(content):
-    """Correct escaping in markdown links that start with [/v1."""
+    """Correct escaping in markdown links that start with [/v1 and enclose URL text in backticks if it contains { or }."""
     # Regular expression to match the pattern
     pattern = re.compile(r'(\[/v1[^\]]+\])')
     
-    def remove_escapes(match):
+    def remove_escapes_and_check_braces(match):
         # Remove backslashes from the matched string
-        return match.group(0).replace('\\', '')
+        cleaned_match = match.group(0).replace('\\', '')
+        # Check if the URL text contains { or }
+        if '{' in cleaned_match or '}' in cleaned_match:
+            # Enclose the URL text in backticks
+            return cleaned_match[0] + '`' + cleaned_match[1:-1] + '`' + cleaned_match[-1]
+        return cleaned_match
     
     # Replace all occurrences of the pattern with their escaped characters removed
-    corrected_content = re.sub(pattern, remove_escapes, content)
+    # and check for { or } to enclose in backticks
+    corrected_content = re.sub(pattern, remove_escapes_and_check_braces, content)
     return corrected_content
 
 def remove_index_block(content):
@@ -172,19 +220,44 @@ def process_file(file_path, patterns, replacements):
         content = process_header_blocks(content)  # Process header blocks
         content = remove_index_block(content)  # Remove index block
         content = correct_escaping_in_links(content)  # Correct escaping in links
+        content = move_all_struct_definitions(content) # Move all struct definitions
 
         write_file_content(file_path, content)
         print(f"File {file_path} has been processed.")
 
 def combine_files_into_mdx(file_paths, output_mdx_path):
-    """Combine the content of multiple files into a single .mdx file."""
+    """Combine the content of multiple files into a single .mdx file and add specific text at the beginning based on a URL found in the content. Also, conditionally add import statements for Tabs and TabItem."""
     combined_content = ""
+    output_filename = "combined_output.mdx"  # Default fallback filename
     for file_path in file_paths:
         with open(file_path, 'r') as file:
             combined_content += file.read() + "\n\n"  # Add some space between files
-    with open(output_mdx_path, 'w') as output_file:
+
+    # Use the global mapping
+    global URL_TO_INFO
+
+    # Search for a URL in the combined content
+    for url, info in URL_TO_INFO.items():
+        if url in combined_content:
+            # If URL is found, prepare the text to be inserted
+            header_text = f"---\ntitle: {info['title']}\nsidebar_position: {info['sidebar_position']}\n---\n\n"
+            # Insert the text at the beginning of the combined content
+            combined_content = header_text + combined_content
+            # Update the output filename based on the title
+            output_filename = f"{info['title'].lower().replace(' ', '_')}.mdx"
+            break  # Assuming only one URL match is needed, break after the first match
+
+    # Check for <Tabs> tag in the combined content
+    if "<Tabs>" in combined_content:
+        # Prepare the import statements
+        import_statements = "import Tabs from \"@theme/Tabs\";\nimport TabItem from \"@theme/TabItem\";\n\n"
+        # Insert the import statements after the header text
+        combined_content = combined_content.replace("---\n\n", "---\n\n" + import_statements, 1)
+
+    # Write the modified content to the dynamically determined output MDX file
+    with open(output_filename, 'w') as output_file:
         output_file.write(combined_content)
-    print(f"Combined MDX file created at {output_mdx_path}")
+    print(f"Combined MDX file created at {output_filename}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -205,6 +278,5 @@ if __name__ == "__main__":
     for file_path in sys.argv[1:]:
         process_file(file_path, patterns, replacements)    
     # Combine all processed files into a single .mdx file
-    output_mdx_path = "combined_output.mdx"  # Specify your output .mdx file path here
     process_file_paths = sys.argv[1:]  # Assuming these are the paths of processed files
-    combine_files_into_mdx(process_file_paths, output_mdx_path)
+    combine_files_into_mdx(process_file_paths, "")  # No longer need to specify output_mdx_path here

@@ -63,11 +63,13 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 // Packed sends the StockCandlesRequestV2 and returns the StockCandlesResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 //
-// Parameters:
-//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //     it replaces the current client for this request.
 //
-// Returns:
+// # Returns
+//
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
 func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient) (*models.StockCandlesResponse, error) {
@@ -93,11 +95,13 @@ func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient)
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
 //
-// Parameters:
-//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
 //     it replaces the current client for this request.
 //
-// Returns:
+// # Returns
+//
 //   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {

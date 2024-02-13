@@ -197,7 +197,8 @@ type MarketStatusReport struct {
 
 // String returns a string representation of the MarketStatusReport.
 //
-// Returns:
+// # Returns
+//
 //   - string: A string representation of the MarketStatusReport.
 func (ms MarketStatusReport) String() string {
 	return fmt.Sprintf("MarketStatusReport{Date: %v, Open: %v, Closed: %v}", dates.TimeString(ms.Date), ms.Open, ms.Closed)

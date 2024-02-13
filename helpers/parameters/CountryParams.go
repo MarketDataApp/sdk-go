@@ -16,10 +16,12 @@ type CountryParams struct {
 // SetCountry sets the country code in CountryParams after validating it.
 // The country code must be exactly 2 characters long and consist only of alphabetic characters.
 //
-// Parameters:
+// # Parameters
+//
 //   - q: A string representing the country code to be set.
 //
-// Returns:
+// # Returns
+//
 //   - An error if the country code is invalid (either not 2 characters long or contains non-alphabetic characters).
 func (cp *CountryParams) SetCountry(q string) error {
 	if len(q) != 2 || !types.IsAlpha(q) {
@@ -32,10 +34,12 @@ func (cp *CountryParams) SetCountry(q string) error {
 // SetParams sets the country parameter for a given request.
 // It utilizes the ParseAndSetParams function to apply the parameters to the request.
 //
-// Parameters:
+// # Parameters
+//
 //   - request: A pointer to a resty.Request object where the country parameter will be set.
 //
-// Returns:
+// # Returns
+//
 //   - An error if parsing and setting the parameters fail.
 func (cp *CountryParams) SetParams(request *resty.Request) error {
 	return ParseAndSetParams(cp, request)

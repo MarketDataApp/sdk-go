@@ -3,33 +3,38 @@
 // managing rate limits, and logging. The SDK supports various data types
 // including stocks, options, and market status information.
 //
-// Usage:
+// # Usage
+//
 // To use the SDK, you first need to create an instance of MarketDataClient
 // using the NewClient function. This client will then be used to make
 // API requests to the Market Data API.
 //
-// Example:
+// # Example
 //
 //	client := NewClient()
 //	client.Debug(true) // Enable debug mode to log detailed request and response information
 //	quote, err := client.StockQuotes().Symbol("AAPL").Get()
 //
-// Authentication:
+// # Authentication
+//
 // The SDK uses an API token for authentication. The token can be set as an
 // environment variable (MARKETDATA_TOKEN) or directly in your code. However,
 // storing tokens in your code is not recommended for security reasons.
 //
-// Rate Limiting:
+// # Rate Limiting
+//
 // The MarketDataClient automatically tracks and manages the API's rate limits.
 // You can check if the rate limit has been exceeded with the RateLimitExceeded method.
 //
-// Logging:
+// # Logging
+//
 // The SDK logs all unsuccessful (400-499 and 500-599) responses to specific log files
 // based on the response status code. Successful responses (200-299) are logged when
 // debug mode is enabled. Logs include detailed information such as request and response
 // headers, response status code, and the response body.
 //
-// Debug Mode:
+// # Debug Mode
+//
 // Debug mode can be enabled by calling the Debug method on the MarketDataClient instance.
 // When enabled, the SDK will log detailed information about each request and response,
 // which is useful for troubleshooting.
@@ -55,7 +60,7 @@ import (
 var marketDataClient *MarketDataClient
 
 const (
-	Version = "0.1.0" // Version specifies the current version of the SDK.
+	Version = "1.1.0" // Version specifies the current version of the SDK.
 
 	prodEnv = "prod" // prodEnv is the environment name for production.
 	testEnv = "test" // testEnv is the environment name for testing.
@@ -76,8 +81,9 @@ const (
 // as well as an error field for capturing any errors that occur during API calls.
 // The debug field is used to control logging verbosity.
 //
-// Public Methods:
-//   - Debug(enable bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
+// # Setter Methods
+//
+//   - Debug(bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
 //   - RateLimitExceeded() bool: Checks if the rate limit for API requests has been exceeded.
 type MarketDataClient struct {
 	*resty.Client                 // Embedding resty.Client to utilize its HTTP client functionalities.
@@ -178,8 +184,11 @@ func (c *MarketDataClient) getEnvironment() string {
 	}
 }
 
-// String returns a formatted string representation of the MarketDataClient instance.
-// It includes the client type (environment), rate limit information, and the rate limit reset time.
+// String generates a formatted string that represents the MarketDataClient instance, including its environment, rate limit information, and the rate limit reset time. This method is useful for quickly obtaining a textual summary of the client's current state, particularly for logging or debugging purposes.
+//
+// # Returns
+//
+//   - string: A formatted string containing the client's environment, rate limit information, and rate limit reset time.
 func (c *MarketDataClient) String() string {
 	clientType := c.getEnvironment() // Determine the client's environment.
 	// Format and return the string representation.
@@ -208,10 +217,12 @@ func (c *MarketDataClient) setDefaultResetTime() {
 	c.RateLimitReset = defaultReset
 }
 
-// NewClient initializes and returns a new instance of MarketDataClient with default settings.
-// It sets the default rate limit reset time, environment to production, and configures
-// common headers and hooks for the HTTP client.
-func NewClient() *MarketDataClient {
+// New creates and configures a new MarketDataClient instance with default settings. This method is primarily used to initialize a client with predefined configurations such as the default rate limit reset time, production environment setup, and common HTTP headers and hooks. It's the starting point for interacting with the MarketDataClient functionalities.
+//
+// # Returns
+//   
+//   - *MarketDataClient: A pointer to the newly created MarketDataClient instance with default configurations applied.
+func New() *MarketDataClient {
 	// Initialize a new MarketDataClient with default resty client and debug mode disabled.
 	client := &MarketDataClient{
 		Client: resty.New(),
@@ -374,11 +385,13 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 // It handles any errors that occur during the request execution and checks for errors in the response.
 // If an error is found in the response, it is returned as part of the response object.
 //
-// Parameters:
+// # Parameters
+//
 //   - br: A pointer to a baseRequest object containing the request details.
 //   - result: An interface where the result of the request will be stored if successful.
 //
-// Returns:
+// # Returns
+//
 //   - A pointer to a resty.Response object containing the response from the server.
 //   - An error object if an error occurred during the request execution or if the response contains an error.
 func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
@@ -402,10 +415,12 @@ func (c *MarketDataClient) GetFromRequest(br *baseRequest, result interface{}) (
 // GetRawResponse executes a prepared request without processing the response.
 // This function is useful when the caller needs the raw response for custom processing.
 //
-// Parameters:
+// # Parameters
+//
 //   - br: A pointer to a baseRequest object containing the request details.
 //
-// Returns:
+// # Returns
+//
 //   - A pointer to a resty.Response object containing the raw response from the server.
 //   - An error object if an error occurred during the request execution.
 func (c *MarketDataClient) GetRawResponse(br *baseRequest) (*resty.Response, error) {
@@ -428,7 +443,7 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 	}
 
 	// Always create a new client when a token is provided
-	client := NewClient()
+	client := New()
 	if client.Error != nil {
 		return nil, client.Error
 	}
@@ -447,10 +462,12 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 // Environment configures the base URL of the MarketDataClient based on the provided environment string.
 // This method allows the client to switch between different environments such as production, testing, and development.
 //
-// Parameters:
+// # Parameters
+//
 //   - env: A string representing the environment to configure. Accepted values are "prodEnv", "testEnv", and "devEnv".
 //
-// Returns:
+// # Returns
+//
 //   - A pointer to the MarketDataClient instance with the configured environment.
 //
 // If an invalid environment is provided, the client's Error field is set, and the same instance is returned.
@@ -484,7 +501,7 @@ func init() {
 	// Check if both token and environment variables are not empty
 	if token != "" && env != "" {
 		// Create and configure a new MarketDataClient instance with the environment and token
-		marketDataClient = NewClient().Environment(env).Token(token)
+		marketDataClient = New().Environment(env).Token(token)
 	}
 }
 
@@ -492,11 +509,13 @@ func init() {
 // This method sets the authentication scheme to "Bearer" and assigns the provided bearerToken for subsequent requests.
 // It also makes an initial request to the MarketData API to authorize the token and fetch rate limit information.
 //
-// Parameters:
-//   - bearerToken: A string representing the authentication token to be used for API requests.
+// # Parameters
 //
-// Returns:
-//   - A pointer to the MarketDataClient instance with the configured authentication token.
+//   - string: A string representing the bearer token to be used for API requests.
+//
+// # Returns
+//
+//   - *MarketDataClient: A pointer to the MarketDataClient instance with the configured authentication token, which allows for method chaining.
 //
 // If an error occurs during the initial request or if the response indicates a failure, the client's Error field is set,
 // and the same instance is returned.
@@ -522,8 +541,12 @@ func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
 	return c
 }
 
-// GetLogs returns a pointer to the HttpRequestLogs instance.
-// This function is useful for accessing the logs that have been collected during HTTP requests.
+// GetLogs retrieves a pointer to the HttpRequestLogs instance, allowing access to the logs collected during HTTP requests.
+// This method is primarily used for debugging and monitoring purposes, providing insights into the HTTP request lifecycle and any issues that may have occurred.
+//
+// # Returns
+//
+//   - *logging.HttpRequestLogs: A pointer to the HttpRequestLogs instance containing logs of HTTP requests.
 func GetLogs() *logging.HttpRequestLogs {
 	return logging.Logs
 }

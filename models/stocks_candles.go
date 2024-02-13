@@ -116,7 +116,8 @@ func (s *StockCandlesResponse) String() string {
 
 // checkTimeInAscendingOrder checks if the times in a StockCandlesResponse are in ascending order.
 //
-// Returns:
+// # Returns
+//
 //   - An error if the times are not in ascending order.
 func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
 	for i := 1; i < len(s.Date); i++ {
@@ -130,11 +131,11 @@ func (s *StockCandlesResponse) checkTimeInAscendingOrder() error {
 // IsValid determines the validity of a StockCandlesResponse. It is primarily used to ensure that the data within the response adheres to expected formats and logical constraints before further processing or analysis.
 //
 // # Returns
-//   
+//
 //   - bool: Indicates whether the StockCandlesResponse is valid.
 //
 // # Notes
-//   
+//
 //   - This method should be used to prevent the propagation of invalid or corrupt data within applications that rely on stock candle information.
 func (s *StockCandlesResponse) IsValid() bool {
 	if err := s.Validate(); err != nil {
@@ -174,7 +175,8 @@ func (s *StockCandlesResponse) Validate() error {
 
 // checkForEqualSlices checks if all slices in a StockCandlesResponse have the same length.
 //
-// Returns:
+// # Returns
+//
 //   - An error if the slices have different lengths.
 func (s *StockCandlesResponse) checkForEqualSlices() error {
 	// Create a slice of the lengths of the Time, Open, High, Low, Close, and Volume slices
@@ -210,7 +212,8 @@ func (s *StockCandlesResponse) checkForEqualSlices() error {
 
 // checkForEmptySlices checks if any of the slices in a StockCandlesResponse are empty.
 //
-// Returns:
+// # Returns
+//
 //   - An error if any of the slices are empty.
 func (s *StockCandlesResponse) checkForEmptySlices() error {
 	// Check if any of the slices are empty
@@ -238,7 +241,8 @@ func (s *StockCandlesResponse) checkForEmptySlices() error {
 
 // getVersion returns the version of the StockCandlesResponse.
 //
-// Returns:
+// # Returns
+//
 //   - An integer representing the version.
 //   - An error if the version is invalid.
 func (s *StockCandlesResponse) getVersion() (int, error) {
@@ -251,12 +255,12 @@ func (s *StockCandlesResponse) getVersion() (int, error) {
 	}
 }
 
-// MarshalJSON converts a StockCandlesResponse instance into its JSON representation. 
-// This method is primarily used for encoding the StockCandlesResponse into a JSON format that can be easily transmitted or stored. 
+// MarshalJSON converts a StockCandlesResponse instance into its JSON representation.
+// This method is primarily used for encoding the StockCandlesResponse into a JSON format that can be easily transmitted or stored.
 // It organizes the stock candle data into a structured JSON format, ensuring compatibility with systems that consume JSON.
 //
 // # Returns
-//   
+//
 //   - []byte: The JSON-encoded representation of the StockCandlesResponse.
 //   - error: An error object that will be non-nil if the marshaling process encounters any issues.
 func (s *StockCandlesResponse) MarshalJSON() ([]byte, error) {
@@ -355,7 +359,8 @@ func (s *StockCandlesResponse) GetDateRange() (dates.DateRange, error) {
 
 // pruneIndices removes data points at specified indices from a StockCandlesResponse.
 //
-// Parameters:
+// # Parameters
+//
 //   - indices: A variadic list of integers specifying the indices of data points to remove.
 func (s *StockCandlesResponse) pruneIndices(indices ...int) {
 	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
@@ -382,7 +387,8 @@ func (s *StockCandlesResponse) pruneIndices(indices ...int) {
 
 // pruneBeforeIndex removes data points before a specified index from a StockCandlesResponse.
 //
-// Parameters:
+// # Parameters
+//
 //   - index: The index before which all data points will be removed.
 func (s *StockCandlesResponse) pruneBeforeIndex(index int) {
 	if index+1 < len(s.Date) {
@@ -405,10 +411,12 @@ func (s *StockCandlesResponse) pruneBeforeIndex(index int) {
 
 // pruneAfterIndex removes data points after a specified index from a StockCandlesResponse.
 //
-// Parameters:
+// # Parameters
+//
 //   - index: The index after which all data points will be removed.
 //
-// Returns:
+// # Returns
+//
 //   - An error if the index is out of range.
 func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
 	// Check if the index is within the range of the slices
@@ -437,8 +445,8 @@ func (s *StockCandlesResponse) pruneAfterIndex(index int) error {
 	return nil
 }
 
-// PruneOutsideDateRange method is used to filter out data points from a StockCandlesResponse that fall outside a specified date range. 
-// This method is essential when the user needs to focus on analyzing stock candle data within a specific period, 
+// PruneOutsideDateRange method is used to filter out data points from a StockCandlesResponse that fall outside a specified date range.
+// This method is essential when the user needs to focus on analyzing stock candle data within a specific period,
 // thereby excluding irrelevant data points that do not fall within the desired date range.
 //
 // # Parameters
@@ -474,10 +482,12 @@ func (s *StockCandlesResponse) PruneOutsideDateRange(dr dates.DateRange) error {
 
 // getIndex is a method on the StockCandlesResponse struct that searches for a given timestamp within the Time slice.
 //
-// Parameters:
+// # Parameters
+//
 //   - t int64: The timestamp to search for within the Time slice.
 //
-// Returns:
+// # Returns
+//
 //   - int: The index of the first occurrence of the provided timestamp within the Time slice.
 //     If the timestamp is not found, it returns the length of the Time slice.
 func (s *StockCandlesResponse) getIndex(t int64) int {
@@ -491,10 +501,12 @@ func (s *StockCandlesResponse) getIndex(t int64) int {
 
 // pruneIndex removes the element at the specified index from all slices within the StockCandlesResponse struct.
 //
-// Parameters:
+// # Parameters
+//
 //   - index int: The index of the element to remove from each slice.
 //
-// Returns:
+// # Returns
+//
 //   - error: An error if the index is out of range. Otherwise, returns nil.
 func (s *StockCandlesResponse) pruneIndex(index int) error {
 	if index < 0 || index >= len(s.Date) {

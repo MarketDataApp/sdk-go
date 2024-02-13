@@ -11,9 +11,19 @@ import (
 // It encapsulates parameters for symbol and fifty-two-week data to be used in the request.
 // This struct provides methods such as Symbol() and FiftyTwoWeek() to set these parameters respectively.
 //
-// Public Methods:
-//   - Symbol(q string) *StockQuoteRequest: Sets the symbol parameter for the request.
-//   - FiftyTwoWeek(q bool) *StockQuoteRequest: Sets the fifty-two-week data parameter for the request.
+// # Setter Methods
+//
+//   - Symbol(string) *StockQuoteRequest: Sets the symbol parameter for the request.
+//   - FiftyTwoWeek(bool) *StockQuoteRequest: Sets the fifty-two-week data parameter for the request.
+//
+// # Execution Methods
+//
+// These methods are used to send the request in different formats or retrieve the data.
+// They handle the actual communication with the API endpoint.
+//
+//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 type StockQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams
@@ -23,11 +33,13 @@ type StockQuoteRequest struct {
 // Symbol sets the symbol parameter for the StockQuoteRequest.
 // This method is used to specify the stock symbol for which quote data is requested.
 //
-// Parameters:
-//   - q: A string representing the stock symbol to be set.
+// # Parameters
 //
-// Returns:
-//   - *StockQuoteRequest: This method returns a pointer to the StockQuoteRequest instance it was called on. This allows for method chaining.
+//   - string: A string representing the stock symbol to be set.
+//
+// # Returns
+//
+//   - *StockQuoteRequest: This method returns a pointer to the *StockQuoteRequest instance it was called on. This allows for method chaining.
 func (sqr *StockQuoteRequest) Symbol(q string) *StockQuoteRequest {
 	if sqr == nil {
 		return nil
@@ -42,11 +54,13 @@ func (sqr *StockQuoteRequest) Symbol(q string) *StockQuoteRequest {
 // FiftyTwoWeek sets the fifty-two-week data parameter for the StockQuoteRequest.
 // This method indicates whether to include fifty-two-week high and low data in the quote.
 //
-// Parameters:
-//   - q: A bool indicating whether to include fifty-two-week data.
+// # Parameters
 //
-// Returns:
-//   - *StockQuoteRequest: This method returns a pointer to the StockQuoteRequest instance it was called on. This allows for method chaining.
+//   - bool: A bool indicating whether to include fifty-two-week data.
+//
+// # Returns
+//
+//   - *StockQuoteRequest: This method returns a pointer to the *StockQuoteRequest instance it was called on. This allows for method chaining.
 func (sqr *StockQuoteRequest) FiftyTwoWeek(q bool) *StockQuoteRequest {
 	if sqr == nil {
 		return nil
@@ -66,11 +80,13 @@ func (sqr *StockQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 
 // Packed sends the StockQuoteRequest and returns the StockQuotesResponse.
 // An optional MarketDataClient can be passed to replace the client used in the request.
-// Parameters:
-//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//     it replaces the current client for this request.
 //
-// Returns:
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
+//
+// # Returns
+//
 //   - *models.StockQuotesResponse: A pointer to the StockQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
 func (sqr *StockQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockQuotesResponse, error) {
@@ -95,11 +111,13 @@ func (sqr *StockQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // Get sends the StockQuoteRequest, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
 // It returns an error if the request or unpacking fails.
 // An optional MarketDataClient can be passed to replace the client used in the request.
-// Parameters:
-//   - optionalClients: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//     it replaces the current client for this request.
 //
-// Returns:
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
+//
+// # Returns
+//
 //   - []models.StockQuote: A slice of StockQuote containing the unpacked quote data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (sqr *StockQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockQuote, error) {
@@ -127,11 +145,12 @@ func (sqr *StockQuoteRequest) Get(optionalClients ...*MarketDataClient) ([]model
 // with default parameters for symbol and fifty-two-week data, and sets the request path based on
 // the predefined endpoints for stock quotes.
 //
-// Parameters:
-//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//     the default client is used.
+// # Parameters
 //
-// Returns:
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
+//
+// # Returns
+//
 //   - *StockQuoteRequest: A pointer to the newly created StockQuoteRequest with default parameters and associated client.
 func StockQuote(client ...*MarketDataClient) *StockQuoteRequest {
 	baseReq := newBaseRequest(client...)

@@ -32,7 +32,7 @@ import (
 //   - Packed() (*IndexQuotesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]IndexQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //
-// [/v1/indices/quotes/]: https://www.marketdata.app/docs/api/indices/quotes
+// [/v1/indices/quotes/{symbol}/]: https://www.marketdata.app/docs/api/indices/quotes
 type IndexQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams

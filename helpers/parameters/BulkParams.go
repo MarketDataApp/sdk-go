@@ -26,16 +26,15 @@ func (bsp *BulkStockParams) SetSymbols(symbols []string) error {
 // SetSnapshot sets the snapshot parameter for the BulkStockParams.
 // It allows enabling or disabling the snapshot feature in the request.
 //
-// Parameters:
+// # Parameters
+//
 //   - snapshot: A boolean value to enable or disable the snapshot feature.
 func (bsp *BulkStockParams) SetSnapshot(snapshot bool) {
 	bsp.Snapshot = snapshot
 }
-
 
 // SetParams sets the parameters for the BulkStockParams.
 // It uses the parseAndSetParams function to parse and set the parameters.
 func (bsp *BulkStockParams) SetParams(request *resty.Request) error {
 	return ParseAndSetParams(bsp, request)
 }
-
