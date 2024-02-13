@@ -7,7 +7,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockEarningsRequest represents a request to the /stocks/earnings endpoint.
+// StockEarningsRequest represents a request to the [v1/stocks/earnings/] endpoint.
 // It encapsulates parameters for symbol, report type, and date to be used in the request.
 // This struct provides methods such as Report(), Symbol(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
@@ -32,6 +32,7 @@ import (
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//[v1/stocks/earnings/]: https://www.marketdata.app/docs/api/stocks/earnings
 type StockEarningsRequest struct {
 	*baseRequest
 	symbolParams        *parameters.SymbolParams

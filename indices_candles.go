@@ -33,7 +33,7 @@ import (
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //
-// [/v1/indices/candles/{resolution}/{symbol}/]: https://www.marketdata.app/docs/api/indices/candles
+// [/v1/indices/candles/]: https://www.marketdata.app/docs/api/indices/candles
 type IndicesCandlesRequest struct {
 	*baseRequest
 	resolutionParams *parameters.ResolutionParams // Holds the resolution parameter of the request.

@@ -7,7 +7,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// BulkStockCandlesRequest represents a request to the [/v1/stocks/bulkcandles] endpoint.
+// BulkStockCandlesRequest represents a request to the [/v1/stocks/bulkcandles/] endpoint.
 // It encapsulates parameters for resolution, symbol, date, and additional stock-specific parameters to be used in the request.
 // This struct provides methods such as Resolution(), Symbol(), Date(), From(), To(), Countback(), AdjustSplits(), AdjustDividends(), Extended(), and Exchange() to set these parameters respectively.
 //

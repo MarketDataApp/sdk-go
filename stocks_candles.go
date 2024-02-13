@@ -7,7 +7,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockCandlesRequest represents a request to the /v1/stocks/candles endpoint.
+// StockCandlesRequest represents a request to the [/v1/stocks/candles] endpoint.
 // It encapsulates parameters for resolution, symbol, date, and additional stock-specific parameters to be used in the request.
 // This struct provides methods such as Resolution(), Symbol(), Date(), From(), To(), Countback(), AdjustSplits(), AdjustDividends(), Extended(), and Exchange() to set these parameters respectively.
 //
@@ -36,6 +36,7 @@ import (
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//[/v1/stocks/candles]: https://www.marketdata.app/docs/api/stocks/candles
 type StockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *parameters.StockCandleParams

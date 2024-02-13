@@ -8,11 +8,12 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockTickersRequestV2 represents a request to the /stocks/tickers endpoint.
+// StockTickersRequestV2 represents a request to the /v2/stocks/tickers/ endpoint.
 // It encapsulates the date parameter to be used in the request.
 // This struct provides the method DateKey() to set this parameter.
 //
-// Public Methods:
+// # Setter Methods
+//
 //   - DateKey(q string) *StockTickersRequestV2: Sets the date parameter for the StockTickersRequestV2.
 type StockTickersRequestV2 struct {
 	*baseRequest
@@ -24,7 +25,7 @@ type StockTickersRequestV2 struct {
 //
 // # Parameters
 //
-//   - q: A string representing the date to be set.
+//   - string: A string representing the date to be set.
 //
 // # Returns
 //
@@ -107,8 +108,7 @@ func (str *StockTickersRequestV2) Get() ([]models.Ticker, error) {
 //
 // # Parameters
 //
-//   - client: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided,
-//     the default client is used.
+//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
 //
 // # Returns
 //

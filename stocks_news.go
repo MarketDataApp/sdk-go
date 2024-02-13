@@ -7,7 +7,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockNewsRequest represents a request to the /stocks/news endpoint.
+// StockNewsRequest represents a request to the [/v1/stocks/news/] endpoint.
 // It encapsulates parameters for symbol, date, and additional news-specific parameters to be used in the request.
 // This struct provides methods such as Symbol(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
@@ -27,6 +27,7 @@ import (
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//[/v1/stocks/news/]: https://www.marketdata.app/docs/api/stocks/news
 type StockNewsRequest struct {
 	*baseRequest
 	symbolParams *parameters.SymbolParams

@@ -7,7 +7,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// BulkStockQuotesRequest represents a request to the /stocks/quote endpoint.
+// BulkStockQuotesRequest represents a request to the [v1/stocks/bulkquotes/] endpoint.
 // It encapsulates parameters for symbol and fifty-two-week data to be used in the request.
 // This struct provides methods such as Symbol() and FiftyTwoWeek() to set these parameters respectively.
 //
@@ -28,6 +28,7 @@ import (
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//[v1/stocks/bulkquotes/]: https://www.marketdata.app/docs/api/stocks/bulkquotes
 type BulkStockQuotesRequest struct {
 	*baseRequest
 	bulkStockParams *parameters.BulkStockParams
