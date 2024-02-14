@@ -105,7 +105,8 @@ func (icr *IndicesCandlesResponse) checkForEmptySlices() error {
 //
 // # Returns
 //
-//   - A slice of IndexCandle, error if there's an inconsistency in the data slices.
+//   - []Candle: A slice of [Candle] that holds the OHLC data.
+//   - error: An error object that indicates a failure in unpacking the response.
 func (icr *IndicesCandlesResponse) Unpack() ([]Candle, error) {
 	if err := icr.checkForEqualSlices(); err != nil {
 		return nil, err

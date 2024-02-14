@@ -14,6 +14,9 @@ TEST_FILE="indices_candles_test.go" # Corresponding test file
 MODELS_DIR="models" # Models directory relative to the project root
 MODEL_MAIN_FILE="$MODELS_DIR/indices_candles.go" # Main model file
 MODEL_TEST_FILE="$MODELS_DIR/indices_candles_test.go" # Model test file
+CANDLES_MAIN_FILE="$MODELS_DIR/candle.go" # Main model file
+CANDLES_TEST_FILE="$MODELS_DIR/candle_test.go" # Main model file
+
 
 # Step 1: Documentation for main files
 TMP_DIR=$(create_tmp_dir)
@@ -36,6 +39,9 @@ echo "Using new temporary directory for model files: $TMP_DIR"
 # Copy the model file and its test file to the new temporary directory
 cp "$SRC_DIR/$MODEL_MAIN_FILE" "$TMP_DIR"
 cp "$SRC_DIR/$MODEL_TEST_FILE" "$TMP_DIR"
+cp "$SRC_DIR/$CANDLES_MAIN_FILE" "$TMP_DIR"
+cp "$SRC_DIR/$CANDLES_TEST_FILE" "$TMP_DIR"
+
 
 # Run gomarkdoc on the new temporary directory for model files
 gomarkdoc --output "$OUTPUT_DIR/indices_candles_response.md" "$TMP_DIR"

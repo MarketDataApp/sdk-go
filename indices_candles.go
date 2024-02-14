@@ -1,12 +1,15 @@
-// Package client includes types and methods to access the Index Candles endpoint.
+// Package client includes types and methods to access the Index Candles endpoint. Get historical price candles for any supported stock index.
 // 
-// # Making Index Candle Requests
+// # Making Requests
 //
-// Get historical price candles for an index. Use [IndicesCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
+// Use [IndicesCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//   1. [IndicesCandlesRequest.Get] returns a slice of [models.Candle].
-//   2. [IndicesCandlesRequest.Packed] will generate a [models.IndicesCandlesResponse] which can then be unpacked using the [models.IndicesCandlesResponse.Unpack] method into [models.Candle].
-//   3. [IndicesCandlesRequest.Raw] will give you access to the raw resty.Response and you can access the raw JSON or the [http.Response] using any of the Resty library's methods.
+//  | Method     | Execution     | Return Type                | Description                                                                                               |
+//  |------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//  | **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, making it straightforward to access each candle individually.     |
+//  | **Packed** | Intermediate  | `IndicesCandlesResponse`   | Returns a packed `IndicesCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.        |
+//  | **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
+//
 package client
 
 import (
@@ -38,9 +41,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/indices/candles/]: https://www.marketdata.app/docs/api/indices/candles
 type IndicesCandlesRequest struct {
@@ -238,7 +241,7 @@ func (icr *IndicesCandlesRequest) Packed(optionalClients ...*MarketDataClient) (
 //
 // # Returns
 //
-//   - []models.IndexCandle: A slice of [IndexCandle] containing the unpacked candle data from the response.
+//   - []Candle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if icr == nil {

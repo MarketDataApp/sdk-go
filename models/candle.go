@@ -164,6 +164,7 @@ func (c *Candle) UnmarshalJSON(data []byte) error {
 }
 
 // ByDate implements sort.Interface for []Candle based on the Date field.
+// This allows for sorting a slice of Candle instances by their Date field in ascending order.
 type ByDate []Candle
 
 func (a ByDate) Len() int           { return len(a) }
@@ -252,7 +253,7 @@ func (c Candle) Clone() Candle {
 //
 // # Parameters
 //
-//   - other Candle: The Candle instance to compare with the current Candle instance.
+//   - Candle: The other Candle instance to compare with the current Candle instance.
 //
 // # Returns
 //
@@ -271,7 +272,7 @@ func (c Candle) IsBefore(other Candle) bool {
 //
 // # Parameters
 //
-//   - other Candle: The Candle instance to compare with the current Candle instance.
+//   - Candle: The other Candle instance to compare with the current Candle instance.
 //
 // # Returns
 //
