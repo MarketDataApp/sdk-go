@@ -29,9 +29,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //
 // [/v1/indices/candles/]: https://www.marketdata.app/docs/api/indices/candles
 type IndicesCandlesRequest struct {
@@ -41,7 +41,7 @@ type IndicesCandlesRequest struct {
 	dateParams       *parameters.DateParams       // Holds the date parameters of the request.
 }
 
-// Resolution sets the resolution parameter for the IndicesCandlesRequest.
+// Resolution sets the resolution parameter for the [IndicesCandlesRequest].
 // This method is used to specify the granularity of the candle data to be retrieved.
 // It modifies the resolutionParams field of the IndicesCandlesRequest instance to store the resolution value.
 //
@@ -67,7 +67,7 @@ func (icr *IndicesCandlesRequest) Resolution(q string) *IndicesCandlesRequest {
 	return icr
 }
 
-// Symbol sets the symbol parameter for the IndicesCandlesRequest.
+// Symbol sets the symbol parameter for the [IndicesCandlesRequest].
 // This method is used to specify the index symbol for which the candle data is requested.
 //
 // # Parameters
@@ -215,7 +215,7 @@ func (icr *IndicesCandlesRequest) Packed(optionalClients ...*MarketDataClient) (
 	return &icrResp, nil
 }
 
-// Get sends the IndicesCandlesRequest, unpacks the IndicesCandlesResponse, and returns a slice of IndexCandle.
+// Get sends the [IndicesCandlesRequest], unpacks the [IndicesCandlesResponse], and returns a slice of [IndexCandle].
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual candle data
 // from the indices candles request. The method first checks if the IndicesCandlesRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
@@ -229,7 +229,7 @@ func (icr *IndicesCandlesRequest) Packed(optionalClients ...*MarketDataClient) (
 //
 // # Returns
 //
-//   - []models.IndexCandle: A slice of IndexCandle containing the unpacked candle data from the response.
+//   - []models.IndexCandle: A slice of [IndexCandle] containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if icr == nil {
@@ -251,7 +251,7 @@ func (icr *IndicesCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]m
 	return data, nil
 }
 
-// IndexCandles creates a new IndicesCandlesRequest and associates it with the provided client.
+// IndexCandles creates a new [IndicesCandlesRequest] and associates it with the provided client.
 // If no client is provided, it uses the default client. This function initializes the request
 // with default parameters for date, resolution, and symbol, and sets the request path based on
 // the predefined endpoints for indices candles.
