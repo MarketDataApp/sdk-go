@@ -1,3 +1,12 @@
+// Package client includes types and methods to access the Index Candles endpoint.
+// 
+// # Making Index Candle Requests
+//
+// Get historical price candles for an index. Use [IndicesCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
+//
+//   1. [IndicesCandlesRequest.Get] returns a slice of [models.Candle].
+//   2. [IndicesCandlesRequest.Packed] will generate a [models.IndicesCandlesResponse] which can then be unpacked using the [models.IndicesCandlesResponse.Unpack] method into [models.Candle].
+//   3. [IndicesCandlesRequest.Raw] will give you access to the raw resty.Response and you can access the raw JSON or the [http.Response] using any of the Resty library's methods.
 package client
 
 import (
