@@ -7,6 +7,8 @@ import os
 URL_TO_INFO = {
     "https://www.marketdata.app/docs/api/indices/candles": {"title": "Candles", "sidebar_position": 1},
     "https://www.marketdata.app/docs/api/indices/quotes": {"title": "Quotes", "sidebar_position": 2},
+    "https://www.marketdata.app/docs/api/markets/status": {"title": "Status", "sidebar_position": 1},
+
 
     # Add more mappings as needed
 }
@@ -53,6 +55,65 @@ def colapse_bullet_points(content):
         i += 1
     # Join the modified lines back into a single string
     return '\n'.join(modified_lines)
+
+def move_responses_to_top(file_content):
+    # Find all unique response struct patterns
+    response_struct_patterns = set(re.findall(r'<a name="([^"]*Response)(?=")"></a>', file_content))
+    # Find all <a name= patterns that do not match the "Response" pattern
+    non_response_patterns = set(re.findall(r'<a name="((?!Response).)*">', file_content))
+    
+    modified_content = file_content
+    for pattern in response_struct_patterns:
+        # Construct the exact start pattern for each response struct
+        start_pattern = f'<a name="{pattern}"></a>'
+        # Initialize end_pattern as None
+        end_pattern = None
+        # Find the closest non-response pattern after each response pattern
+        for non_response in non_response_patterns:
+            non_response_index = file_content.find(f'<a name="{non_response}"></a>')
+            response_index = file_content.find(start_pattern)
+            if non_response_index > response_index:
+                end_pattern = f'<a name="{non_response}"></a>'
+                break  # Break after finding the closest non-response pattern
+        
+        if end_pattern:
+            # Call move_to_top for each response struct pattern with the found end_pattern
+            modified_content = move_to_top(modified_content, start_pattern, end_pattern)
+        else:
+            # If no end_pattern is found, it means this response struct is the last section
+            modified_content = move_to_top(modified_content, start_pattern, None)
+    
+    return modified_content
+
+def move_to_top(file_content, start_pattern, end_pattern):
+    lines = file_content.split('\n')
+    
+    sections = []
+    start_index = None
+    
+    for i, line in enumerate(lines):
+        if line.startswith(start_pattern):
+            if start_index is not None:
+                # Save the previous section if a new one starts before the old one ends
+                sections.append((start_index, i))
+            start_index = i  # Mark the start of a new section
+        elif end_pattern is not None and line.startswith(end_pattern) and start_index is not None:
+            # Mark the end of the current section and reset start_index if end_pattern is not None
+            sections.append((start_index, i))
+            start_index = None
+    
+    # If end_pattern is None, capture all the way to the end of the file from the start_pattern
+    if start_index is not None:
+        sections.append((start_index, len(lines)))
+    
+    # Extract sections and the rest of the content
+    section_contents = [lines[start:end] for start, end in sections]
+    rest_of_content = [line for i, line in enumerate(lines) if not any(start <= i < end for start, end in sections)]
+    
+    # Combine the extracted sections with the rest of the content, placing sections at the top
+    modified_content = [line for section in section_contents for line in section] + rest_of_content
+    
+    return '\n'.join(modified_content)
 
 def move_to_bottom(file_content, start_pattern, end_pattern):
     lines = file_content.split('\n')
@@ -499,7 +560,8 @@ def process_file(file_path):
 
         content = remove_code_block_delimiters(content, "## Making Requests")
         content = find_method_blocks_and_relocate(content)
-        content = move_to_bottom(content, '<a name="Candle','<a' )
+        content = move_responses_to_top(content)
+        #content = move_to_bottom(content, '<a name="Candle','<a' )
         content = move_to_bottom(content, '<a name="By','<a' )
         # content = colapse_bullet_points(content)
 

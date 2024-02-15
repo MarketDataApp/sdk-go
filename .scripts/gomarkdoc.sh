@@ -2,6 +2,23 @@
 
 set -e # Exit immediately if a command exits with a non-zero status.
 
+# Flag to determine whether cleanup should be performed
+PERFORM_CLEANUP=true
+
+# Parse command-line arguments
+for arg in "$@"
+do
+    case $arg in
+        --no-cleanup)
+        PERFORM_CLEANUP=false
+        shift # Remove --no-cleanup from processing
+        ;;
+        *)
+        # Unknown option
+        ;;
+    esac
+done
+
 # Function to create a new temporary directory
 create_tmp_dir() {
     echo $(mktemp -d)
@@ -20,16 +37,10 @@ move_and_merge_go_dir() {
     SOURCE_DIR="$OUTPUT_DIR/go" # Assuming the 'go' folder is directly inside the OUTPUT_DIR
 
     # Use rsync to copy files from source to destination. 
-    rsync -av --ignore-existing --remove-source-files "$SOURCE_DIR/" "$DEST_DIR/"
+    rsync -av --remove-source-files "$SOURCE_DIR/" "$DEST_DIR/"
 
     # Find and remove empty directories in the source directory
     find "$SOURCE_DIR" -type d -empty -delete
-
-    # After running rsync and find
-    if [ -z "$(ls -A "$SOURCE_DIR")" ]; then
-        echo "$SOURCE_DIR is empty, removing..."
-        rmdir "$SOURCE_DIR"
-    fi
 
     echo "Moved and merged 'go' directory from $SOURCE_DIR to $DEST_DIR"
 }
@@ -89,8 +100,11 @@ process_group() {
     # Run the Python script on all markdown files
     "$OUTPUT_DIR/process_markdown.py" "$OUTPUT_DIR"/*.md
 
-    # Remove the Markdown files
-    rm "$OUTPUT_DIR"/*.md
+
+    if [ "$PERFORM_CLEANUP" = true ]; then
+        # Remove the Markdown files
+        rm "$OUTPUT_DIR"/*.md
+    fi
 
     echo "Markdown processing and cleanup completed for $GROUP_NAME"
 }
@@ -98,6 +112,7 @@ process_group() {
 # Call process_group for each group name
 process_group "indices_candles"
 process_group "indices_quotes"
+process_group "markets_status"
 
 # Add more calls to process_group with different group names as needed
 

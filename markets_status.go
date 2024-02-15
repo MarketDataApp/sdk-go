@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Market Status endpoint. Retrieve current, future, and historical open / closed status information.
+// 
+// # Making Requests
+//
+// Utilize [MarketStatusRequest] to make requests to the endpoint through one of the three supported execution methods:
+//
+//  | Method     | Execution     | Return Type                | Description                                                                                               |
+//  |------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//  | **Get**    | Direct        | `[]MarketStatusReport`     | Directly returns a slice of `[]MarketStatus`, facilitating individual access to each market status entry. |
+//  | **Packed** | Intermediate  | `MarketStatusResponse`     | Returns a packed `MarketStatusResponse` object. Must be unpacked to access the `[]MarketStatus` slice.    |
+//  | **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
+//
 package client
 
 import (
@@ -31,7 +43,7 @@ import (
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-// [/v1/markets/status/]: https://www.marketdata.app/docs/api/markets/status
+//[/v1/markets/status/]: https://www.marketdata.app/docs/api/markets/status
 type MarketStatusRequest struct {
 	*baseRequest
 	countryParams   *parameters.CountryParams
