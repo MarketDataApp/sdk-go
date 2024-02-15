@@ -1,12 +1,162 @@
 #!/usr/bin/env python3
 import sys
 import re
+import os
 
 # Central mapping of URLs to their corresponding title and sidebar position
 URL_TO_INFO = {
     "https://www.marketdata.app/docs/api/indices/candles": {"title": "Candles", "sidebar_position": 1},
+    "https://www.marketdata.app/docs/api/indices/quotes": {"title": "Quotes", "sidebar_position": 2},
+
     # Add more mappings as needed
 }
+
+def clean_headings(content, pattern):
+    # Split the content into lines for processing
+    lines = content.split('\n')
+    modified_lines = []
+    
+    for line in lines:
+        # Check if the line matches the pattern
+        if line.strip().startswith('#') and pattern in line:
+            # Count the number of '#' characters at the start of the line
+            hash_count = line.count('#', 0, line.find(' '))
+            # Extract the last word from the line
+            last_word = line.split()[-1]
+            # Replace the original line with the modified version
+            modified_line = '#' * hash_count + ' ' + last_word
+            modified_lines.append(modified_line)
+        else:
+            # If the line does not match the pattern, keep it as is
+            modified_lines.append(line)
+    
+    # Join the modified lines back into a single string
+    modified_content = '\n'.join(modified_lines)
+    return modified_content
+
+def colapse_bullet_points(content):
+    lines = content.split('\n')
+    modified_lines = []
+    i = 0
+    while i < len(lines):
+        # Check if the current line meets the criteria
+        if lines[i].startswith('- ') and lines[i].count('`') == 2:
+            # Check if the next line is blank and the one after starts with two spaces
+            if i + 1 < len(lines) and lines[i + 1] == '' and i + 2 < len(lines) and lines[i + 2].startswith('  '):
+                # Concatenate the current line with the description (third line), then append
+                combined_line = lines[i] + ' ' + lines[i + 2].strip()
+                modified_lines.append(combined_line)
+                i += 3
+                continue
+        # Append the current line if it doesn't meet the criteria
+        modified_lines.append(lines[i])
+        i += 1
+    # Join the modified lines back into a single string
+    return '\n'.join(modified_lines)
+
+def move_to_bottom(file_content, start_pattern, end_pattern):
+    lines = file_content.split('\n')
+    
+    sections = []
+    start_index = None
+    
+    for i, line in enumerate(lines):
+        if line.startswith(start_pattern):
+            if start_index is not None:
+                # Save the previous section if a new one starts before the old one ends
+                sections.append((start_index, i))
+            start_index = i  # Mark the start of a new section
+        elif line.startswith(end_pattern) and start_index is not None:
+            # Mark the end of the current section and reset start_index
+            sections.append((start_index, i))
+            start_index = None
+    
+    # Check if the last section goes until the end of the file
+    if start_index is not None:
+        sections.append((start_index, len(lines)))
+    
+    # Extract sections and the rest of the content
+    section_contents = [lines[start:end] for start, end in sections]
+    rest_of_content = [line for i, line in enumerate(lines) if not any(start <= i < end for start, end in sections)]
+    
+    # Combine the rest of the content with the extracted sections
+    modified_content = rest_of_content + [line for section in section_contents for line in section]
+    
+    return '\n'.join(modified_content)
+
+
+def find_method_blocks_and_relocate(content):
+    lines = content.split('\n')
+    method_suffixes = [".Get", ".Raw", ".Packed"]
+    method_blocks = {}
+    type_definition_found = False
+    type_end_loop = False
+    type_name = ""
+    type_end_line = 0
+    first_method_line_number = None  # Initialize variable to track the first method line number
+
+    for i, line in enumerate(lines):
+        stripped_line = line.strip()
+
+        if not type_definition_found and stripped_line.startswith('<a') and "Request" in stripped_line:
+            type_definition_found = True
+            type_name = stripped_line.split('"')[1]
+            continue
+
+        if type_definition_found and not type_end_loop:
+            for j in range(i+1, len(lines)):
+                if "## type" in lines[j]:
+                    type_end_line = j
+                    break
+            else:
+                type_end_line = len(lines) - 1
+            type_end_loop = True
+
+        # Check if the line is a method of the current type_name
+        if type_definition_found and stripped_line.startswith(f'<a name="{type_name}.'):
+            start_line_number = i
+            for j in range(i+1, len(lines)):
+                if lines[j].strip().startswith('<a'):
+                    end_line_number = j - 1
+                    break
+            # Update first_method_line_number if this is the first method found
+            if first_method_line_number is None or start_line_number < first_method_line_number:
+                first_method_line_number = start_line_number
+
+            # Check if the method matches one of the specific suffixes for relocation
+            for method_suffix in method_suffixes:
+                if f'<a name="{type_name}{method_suffix}"></a>' in stripped_line:
+                    method_blocks[method_suffix] = {
+                        'type_name': type_name,
+                        'start_line_number': start_line_number,
+                        'end_line_number': end_line_number,
+                        'content': '\n'.join(lines[start_line_number:end_line_number+1])
+                    }
+                    break
+
+    # Sort the method blocks in the specified order
+    sorted_methods = sorted(method_blocks.items(), key=lambda x: [".Get", ".Packed", ".Raw"].index(x[0]))
+
+    if type_definition_found:
+        # Build the header for execution methods
+        header_to_insert = f"## {type_name} Execution Methods"
+        lines.insert(type_end_line, header_to_insert)
+
+    # Copy and paste the method blocks after the type definition
+    for _, method_info in sorted_methods:
+        lines.insert(type_end_line + 1, method_info['content'])
+        type_end_line += len(method_info['content'].split('\n'))
+
+    # Delete the original method blocks in reverse order to maintain correct line numbers
+    for _, method_info in sorted(method_blocks.items(), reverse=True):
+        del lines[method_info['start_line_number']:method_info['end_line_number']+1]
+
+    # Insert the header for setter methods before the first method
+    if type_definition_found and first_method_line_number is not None:
+        setter_methods_header = f"## {type_name} Setter Methods"
+        lines.insert(first_method_line_number - 1, setter_methods_header)
+
+    return '\n'.join(lines)
 
 def remove_code_block_delimiters(content, section_title):
     """
@@ -54,7 +204,7 @@ def remove_first_sentence(content):
 
     return '\n'.join(new_lines)
 
-def add_anchor_tags(content):
+def add_anchor_tags(content, sections_to_process):
     """Process the parameters block of text as specified, including 'Setter Methods' and 'Execution Methods'. 
     Insert <a href="#"> before and </a> after lines that start with a dash (-)."""
     lines = content.split('\n')
@@ -63,7 +213,7 @@ def add_anchor_tags(content):
     found_first_dash = False  # Variable to track the first dash
 
     for line in lines:
-        if (match := line.strip()) in ['#### Setter Methods', '#### Execution Methods', '#### Methods', '#### Generated By']:
+        if (match := line.strip()) in sections_to_process:
             processing = True
             matched_string = match  # Keep track of which string matched
             found_first_dash = False  # Reset for each new section
@@ -185,7 +335,7 @@ def remove_index_block(content):
 
     return '\n'.join(new_lines)
 
-def process_header_blocks(content):
+def process_header_blocks(content, blocks_to_process):
     """Process the parameters block of text as specified, including 'Setter Methods' and 'Execution Methods'."""
     lines = content.split('\n')
     processed_lines = []
@@ -193,7 +343,7 @@ def process_header_blocks(content):
     found_first_dash = False  # New variable to track the first dash
 
     for line in lines:
-        if line.strip() in ['#### Parameters','#### Returns', '#### Setter Methods', '#### Execution Methods', '#### Methods', '#### Generated By']:
+        if line.strip() in blocks_to_process:
             processing = True
             found_first_dash = False  # Reset for each new section
             processed_lines.append(line)
@@ -297,92 +447,138 @@ def remove_pattern(content, patterns):
         content = re.sub(pattern_re, '', content, 1)
     return content
 
-def replace_content(content, replacements):
+def replace_pattern(content, replacements):
     """Replace occurrences based on a dictionary of find-and-replace pairs."""
     for find, replace in replacements.items():
         content = content.replace(find, replace)
     return content
 
-def process_file(file_path, patterns, replacements):
+def process_file(file_path):
     """Process the file to remove specified patterns, replace specified strings, and convert <details> to <TabItem>, including removing the trailing <p>."""
     content = read_file_content(file_path)
     if content is not None:
-        if patterns:
-            content = remove_pattern(content, patterns)
-        if replacements:
-            content = replace_content(content, replacements)
-        content = remove_first_sentence(content)
-        content = convert_details_to_tabitem(content)  # Convert <details> to <TabItem> and remove trailing <p>
-        content = add_tabs_tags(content)  # Add <Tabs> and </Tabs> tags
-        content = remove_output_blocks(content)  # Remove output blocks
-        content = process_header_blocks(content)  # Process header blocks
-        content = remove_index_block(content)  # Remove index block
-        content = correct_escaping_in_links(content)  # Correct escaping in links
-        content = move_all_struct_definitions(content) # Move all struct definitions
-        content = add_anchor_tags(content)
-        content = remove_code_block_delimiters(content, "## Making Requests")
+        patterns_to_delete = [
+            ['', '```go', 'import "."', '```', ''],
+            ['# client'],
+            ['# models'],
+            ['# dates'],
+            ['Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)'],
+            ['<!-- Code generated by gomarkdoc. DO NOT EDIT -->']
+        ]
+        content = remove_pattern(content, patterns_to_delete)
 
-        # content = add_anchor_tags_to_generated_by(content)  # Add anchor tags to 'Generated By' sections
-
-        write_file_content(file_path, content)
-        print(f"File {file_path} has been processed.")
-
-def combine_files_into_mdx(file_paths, output_mdx_path):
-    """Combine the content of multiple files into a single .mdx file and add specific text at the beginning based on a URL found in the content. Also, conditionally add import statements for Tabs and TabItem."""
-    combined_content = ""
-    output_filename = "combined_output.mdx"  # Default fallback filename
-    for file_path in file_paths:
-        with open(file_path, 'r') as file:
-            combined_content += file.read() + "\n\n"  # Add some space between files
-
-    # Use the global mapping
-    global URL_TO_INFO
-
-    # Search for a URL in the combined content
-    for url, info in URL_TO_INFO.items():
-        if url in combined_content:
-            # If URL is found, prepare the text to be inserted
-            header_text = f"---\ntitle: {info['title']}\nsidebar_position: {info['sidebar_position']}\n---\n\n"
-            # Insert the text at the beginning of the combined content
-            combined_content = header_text + combined_content
-            # Update the output filename based on the title
-            output_filename = f"{info['title'].lower().replace(' ', '_')}.mdx"
-            break  # Assuming only one URL match is needed, break after the first match
-
-    # Check for <Tabs> tag in the combined content
-    if "<Tabs>" in combined_content:
-        # Prepare the import statements
-        import_statements = "import Tabs from \"@theme/Tabs\";\nimport TabItem from \"@theme/TabItem\";\n\n"
-        # Insert the import statements after the header text
-        combined_content = combined_content.replace("---\n\n", "---\n\n" + import_statements, 1)
-
-    # Write the modified content to the dynamically determined output MDX file
-    with open(output_filename, 'w') as output_file:
-        output_file.write(combined_content)
-    print(f"Combined MDX file created at {output_filename}")
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: ./process_markdown.py <file_path> [<file_path> ...]")
-        sys.exit(1)
-    
-    patterns = [
-        ['', '```go', 'import "."', '```', ''],
-        ['# client'],
-        ['# models'],
-        ['Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)'],
-        ['<!-- Code generated by gomarkdoc. DO NOT EDIT -->']
-    ]
-    replacements = {
+        replacements = {
+        '\n### Notes': '\n#### Notes',
+        '\n#### Notes': '\n#### Notes',
+        '#### Output': '#### Output',
+        '#### Parameters': '#### Parameters',
+        '#### Returns': '#### Returns',
         '### Making Requests': '## Making Requests',
         '### Setter Methods': '#### Setter Methods',
         '### Execution Methods': '#### Execution Methods',
         '### Methods': '#### Methods',
         '### Generated By': '#### Generated By',
         '</p>\n</details>': '</TabItem>'  # Generate closing MDX tabs
-    }
+        }
+        content = replace_pattern(content, replacements)
+
+        content = remove_first_sentence(content)
+        content = convert_details_to_tabitem(content)  # Convert <details> to <TabItem> and remove trailing <p>
+        content = add_tabs_tags(content)  # Add <Tabs> and </Tabs> tags
+        content = remove_output_blocks(content)  # Remove output blocks
+
+        blocks_to_process = ['#### Parameters','#### Returns', '#### Setter Methods', '#### Execution Methods', '#### Methods', '#### Generated By']    
+        content = process_header_blocks(content, blocks_to_process)  # Process header blocks
+
+        content = remove_index_block(content)  # Remove index block
+        content = correct_escaping_in_links(content)  # Correct escaping in links
+        content = move_all_struct_definitions(content) # Move all struct definitions
+
+        sections_to_process = ['#### Setter Methods', '#### Execution Methods', '#### Methods', '#### Generated By']
+        content = add_anchor_tags(content, sections_to_process)
+
+        content = remove_code_block_delimiters(content, "## Making Requests")
+        content = find_method_blocks_and_relocate(content)
+        content = move_to_bottom(content, '<a name="Candle','<a' )
+        content = move_to_bottom(content, '<a name="By','<a' )
+        # content = colapse_bullet_points(content)
+
+        replacements = {
+        '## type': '##',
+        }
+        content = replace_pattern(content, replacements)
+
+        content = clean_headings(content, 'func')
+
+        # content = add_anchor_tags_to_generated_by(content)  # Add anchor tags to 'Generated By' sections
+
+        write_file_content(file_path, content)
+        print(f"File {file_path} has been processed.")
+
+def combine_files_into_mdx(file_paths):
+    """Prepare the combined content of multiple files."""
+    combined_content = ""
+    for file_path in file_paths:
+        try:
+            with open(file_path, 'r') as file:
+                combined_content += file.read() + "\n\n"
+        except Exception as e:
+            print(f"Error reading file {file_path}: {e}")
+            return None, None
+
+    global URL_TO_INFO
+    urls_found = re.findall(r'https?://[^\s)>]+', combined_content)
+    urls_to_process = [url for url in urls_found if url in URL_TO_INFO]
+
+    if not urls_to_process:
+        print(f"Error: No URLs matching URL_TO_INFO found in the combined content.\nURLs found: {urls_found}\nURLs expected but not found: {[url for url in URL_TO_INFO.keys() if url not in urls_found]}")
+        sys.exit(1)  # Exit the script if no matching URLs are found
+
+    for url in urls_to_process:
+        info = URL_TO_INFO.get(url)
+        if info:
+            header_text = f"---\ntitle: {info['title']}\nsidebar_position: {info['sidebar_position']}\n---\n\n"
+            combined_content = header_text + combined_content
+            path_after_api = url.split("/api")[-1]
+            output_filename = f"go{path_after_api}.mdx"
+            break  # Exit the loop after processing the first matching URL
+
+    if "<Tabs>" in combined_content:
+        import_statements = "import Tabs from \"@theme/Tabs\";\nimport TabItem from \"@theme/TabItem\";\n\n"
+        combined_content = combined_content.replace("---\n\n", "---\n\n" + import_statements, 1)
+
+    return combined_content, output_filename
+
+def save_combined_content(combined_content, output_filename):
+    """Save the combined content to a file, creating necessary directories."""
+    if not combined_content or not output_filename:
+        print("Error: Missing combined content or output filename.")
+        return
+
+    output_directory = os.path.dirname(output_filename)
+    if output_directory and not os.path.exists(output_directory):
+        try:
+            os.makedirs(output_directory)
+        except Exception as e:
+            print(f"Error creating directory {output_directory}: {e}")
+            return
+
+    try:
+        with open(output_filename, 'w') as output_file:
+            output_file.write(combined_content)
+        print(f"Combined MDX file created at {output_filename}")
+    except Exception as e:
+        print(f"Error writing to file {output_filename}: {e}")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: ./process_markdown.py <file_path> [<file_path> ...]")
+        sys.exit(1)
+    
     for file_path in sys.argv[1:]:
-        process_file(file_path, patterns, replacements)    
+        process_file(file_path)    
     # Combine all processed files into a single .mdx file
     process_file_paths = sys.argv[1:]  # Assuming these are the paths of processed files
-    combine_files_into_mdx(process_file_paths, "")  # No longer need to specify output_mdx_path here
+    combined_content, output_filename = combine_files_into_mdx(process_file_paths)
+    if combined_content is not None and output_filename is not None:
+        save_combined_content(combined_content, output_filename)

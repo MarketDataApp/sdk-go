@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Index Quotes endpoint. Retrieve real-time quotes for any supported index.
+// 
+// # Making Requests
+//
+// Utilize [IndexQuoteRequest] to make requests to the endpoint through one of the three supported execution methods:
+//
+//  | Method     | Execution     | Return Type                | Description                                                                                               |
+//  |------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//  | **Get**    | Direct        | `[]IndexQuote`             | Directly returns a slice of `[]IndexQuote`, facilitating individual access to each quote.                 |
+//  | **Packed** | Intermediate  | `IndexQuotesResponse`      | Returns a packed `IndexQuotesResponse` object. Must be unpacked to access the `[]IndexQuote` slice.       |
+//  | **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
+//
 package client
 
 import (
@@ -32,7 +44,7 @@ import (
 //   - Packed() (*IndexQuotesResponse, error): Packs the request parameters and sends the request, returning a structured response.
 //   - Get() ([]IndexQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //
-// [/v1/indices/quotes/{symbol}/]: https://www.marketdata.app/docs/api/indices/quotes
+//[/v1/indices/quotes/]: https://www.marketdata.app/docs/api/indices/quotes
 type IndexQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams
