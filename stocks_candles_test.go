@@ -2,6 +2,17 @@ package client
 
 import "fmt"
 
+func ExampleStockCandlesRequest_raw() {
+	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Raw()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	fmt.Println(scr)
+
+	// Output: {"s":"ok","t":[1672756200,1672770600,1672842600,1672857000],"o":[130.28,124.6699,126.89,127.265],"h":[130.9,125.42,128.6557,127.87],"l":[124.19,124.17,125.08,125.28],"c":[124.6499,125.05,127.2601,126.38],"v":[64411753,30727802,49976607,28870878]}
+}
+
 func ExampleStockCandlesRequest_packed() {
 	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Packed()
 	if err != nil {

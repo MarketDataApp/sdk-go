@@ -35,14 +35,14 @@ import (
 //   - The optional fields VWAP and N are only available for version 2 candles.
 //   - The Date field uses UNIX timestamps to represent the date and time of each candle.
 type StockCandlesResponse struct {
-	Date   []int64    `json:"t" human:"Date"`                              // Date holds UNIX timestamps for each candle.
-	Open   []float64  `json:"o" human:"Open"`                              // Open holds the opening prices for each candle.
-	High   []float64  `json:"h" human:"High"`                              // High holds the highest prices reached in each candle.
-	Low    []float64  `json:"l" human:"Low"`                               // Low holds the lowest prices reached in each candle.
-	Close  []float64  `json:"c" human:"Close"`                             // Close holds the closing prices for each candle.
-	Volume []int64    `json:"v" human:"Volume"`                            // Volume represents the trading volume in each candle.
-	VWAP   *[]float64 `json:"vwap,omitempty" human:"VWAP,omitempty"`       // VWAP holds the Volume Weighted Average Price for each candle, optional.
-	N      *[]int64   `json:"n,omitempty" human:"No. of Trades,omitempty"` // N holds the number of trades for each candle, optional.
+	Date   []int64    `json:"t"`              // Date holds UNIX timestamps for each candle.
+	Open   []float64  `json:"o"`              // Open holds the opening prices for each candle.
+	High   []float64  `json:"h"`              // High holds the highest prices reached in each candle.
+	Low    []float64  `json:"l"`              // Low holds the lowest prices reached in each candle.
+	Close  []float64  `json:"c"`              // Close holds the closing prices for each candle.
+	Volume []int64    `json:"v"`              // Volume represents the trading volume in each candle.
+	VWAP   *[]float64 `json:"vwap,omitempty"` // VWAP holds the Volume Weighted Average Price for each candle, optional.
+	N      *[]int64   `json:"n,omitempty"`    // N holds the number of trades for each candle, optional.
 }
 
 // Unpack converts a StockCandlesResponse into a slice of StockCandle. This method is primarily used to transform the aggregated
