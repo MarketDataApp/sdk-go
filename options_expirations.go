@@ -38,9 +38,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Get() ([]time.Time, error): Sends the request, unpacks the response, and returns []time.Time allowing direct-access to the data.
-//   - Packed() (*OptionsExpirationsResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Get(...*MarketDataClient) ([]time.Time, error): Sends the request, unpacks the response, and returns []time.Time allowing direct-access to the data.
+//   - Packed(...*MarketDataClient) (*OptionsExpirationsResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/options/expirations/]: https://www.marketdata.app/docs/api/options/expirations
 type OptionsExpirationsRequest struct {

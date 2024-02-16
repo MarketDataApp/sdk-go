@@ -5,11 +5,11 @@
 //
 // Use [StockNewsRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                               |
-//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]StockNews  `            | Directly returns a slice of `[]StockNews`, facilitating individual access to each news article.           |
-//	| **Packed** | Intermediate  | `StockNewsResponse`        | Returns a packed `StockNewsResponse` object. Must be unpacked to access the `[]StockNews` slice.          |
-//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                |
+//	|------------|---------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockNews  `             | Directly returns a slice of `[]StockNews`, facilitating individual access to each news article.            |
+//	| **Packed** | Intermediate  | `*StockNewsResponse`        | Returns a packed `*StockNewsResponse` object. Must be unpacked to access the `[]StockNews` slice.          |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Provides the raw `*resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -36,9 +36,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]StockNews, error): Initiates the request, processes the response, and provides an slice of `StockNews` objects for straightforward access to news articles.
+//   - Packed(...*MarketDataClient) (*StockNewsResponse, error): Delivers a packed `StockNewsResponse` object containing slices of data that directly correspond to the JSON structure returned by the Market Data API.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Executes the request in its raw form and retrieves the raw HTTP response for maximum flexibility.
 //
 // [/v1/stocks/news/]: https://www.marketdata.app/docs/api/stocks/news
 type StockNewsRequest struct {

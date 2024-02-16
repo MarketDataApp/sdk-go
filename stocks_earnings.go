@@ -5,11 +5,11 @@
 //
 // Use [StockEarningsRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                                    |
-//	|------------|---------------|----------------------------|----------------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]StockEarningsReport`    | Directly returns a slice of `[]StockEarningsReport`, facilitating individual access to each earnings report.   |
-//	| **Packed** | Intermediate  | `StockEarningsResponse`    | Returns a packed `StockEarningsResponse` object. Must be unpacked to access the `[]StockEarningsReport` slice. |
-//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`.      |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                     |
+//	|------------|---------------|-----------------------------|-----------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockEarningsReport`     | Directly returns a slice of `[]StockEarningsReport`, facilitating individual access to each earnings report.    |
+//	| **Packed** | Intermediate  | `*StockEarningsResponse`    | Returns a packed `*StockEarningsResponse` object. Must be unpacked to access the `[]StockEarningsReport` slice. |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Provides the raw `*resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`.      |
 package client
 
 import (
@@ -19,7 +19,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockEarningsRequest represents a request to the [v1/stocks/earnings/] endpoint.
+// StockEarningsRequest represents a request to the [/v1/stocks/earnings/] endpoint.
 // It encapsulates parameters for symbol, report type, and date to be used in the request.
 // This struct provides methods such as Report(), Symbol(), Date(), From(), To(), and Countback() to set these parameters respectively.
 //
@@ -41,11 +41,11 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]StockEarningsReport, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]StockEarningsReport, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*StockEarningsResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
-// [v1/stocks/earnings/]: https://www.marketdata.app/docs/api/stocks/earnings
+// [/v1/stocks/earnings/]: https://www.marketdata.app/docs/api/stocks/earnings
 type StockEarningsRequest struct {
 	*baseRequest
 	symbolParams        *parameters.SymbolParams

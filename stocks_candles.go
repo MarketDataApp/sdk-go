@@ -4,11 +4,11 @@
 //
 // Use [StockCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                               |
-//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, facilitating individual access to each candle.                    |
-//	| **Packed** | Intermediate  | `StockCandlesResponse`     | Returns a packed `StockCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.          |
-//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                |
+//	|------------|---------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]Candle`                  | Directly returns a slice of `[]Candle`, facilitating individual access to each candle.                     |
+//	| **Packed** | Intermediate  | `*StockCandlesResponse`     | Returns a packed `*StockCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.          |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Provides the raw `*resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -18,7 +18,7 @@ import (
 	"github.com/MarketDataApp/sdk-go/models"
 )
 
-// StockCandlesRequest represents a request to the [/v1/stocks/candles] endpoint.
+// StockCandlesRequest represents a request to the [/v1/stocks/candles/] endpoint.
 // It encapsulates parameters for resolution, symbol, date, and additional stock-specific parameters to be used in the request.
 // This struct provides methods such as Resolution(), Symbol(), Date(), From(), To(), Countback(), AdjustSplits(), AdjustDividends(), Extended(), and Exchange() to set these parameters respectively.
 //
@@ -44,11 +44,11 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*StockCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
-// [/v1/stocks/candles]: https://www.marketdata.app/docs/api/stocks/candles
+// [/v1/stocks/candles/]: https://www.marketdata.app/docs/api/stocks/candles
 type StockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *parameters.StockCandleParams

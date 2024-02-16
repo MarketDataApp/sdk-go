@@ -33,9 +33,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/stocks/quotes/]: https://www.marketdata.app/docs/api/stocks/quotes
 type StockQuoteRequest struct {

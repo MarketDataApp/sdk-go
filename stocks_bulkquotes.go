@@ -5,11 +5,11 @@
 //
 // Utilize [BulkStockQuotesRequest] to make requests to the endpoint through one of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                               |
-//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]StockQuote`             | Directly returns a slice of `[]StockQuote`, facilitating individual access to each stock quote.           |
-//	| **Packed** | Intermediate  | `StockQuotesResponse`      | Returns a packed `StockQuotesResponse` object. Must be unpacked to access the `[]StockQuote` slice.       |
-//	| **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                |
+//	|------------|---------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockQuote`              | Directly returns a slice of `[]StockQuote`, facilitating individual access to each stock quote.            |
+//	| **Packed** | Intermediate  | `*StockQuotesResponse`      | Returns a packed `*StockQuotesResponse` object. Must be unpacked to access the `[]StockQuote` slice.       |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Offers the raw `*resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -37,9 +37,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*StockQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*StockQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [v1/stocks/bulkquotes/]: https://www.marketdata.app/docs/api/stocks/bulkquotes
 type BulkStockQuotesRequest struct {

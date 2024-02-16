@@ -4,11 +4,11 @@
 //
 // Use [IndicesCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                               |
-//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, making it straightforward to access each candle individually.     |
-//	| **Packed** | Intermediate  | `IndicesCandlesResponse`   | Returns a packed `IndicesCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.        |
-//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                |
+//	|------------|---------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]Candle`                  | Directly returns a slice of `[]Candle`, making it straightforward to access each candle individually.      |
+//	| **Packed** | Intermediate  | `*IndicesCandlesResponse`   | Returns a packed `*IndicesCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.        |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Provides the raw `*resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (

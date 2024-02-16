@@ -35,9 +35,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Get() (string, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//   - Packed() (*OptionLookupResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Get(...*MarketDataClient) (string, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*OptionLookupResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/options/lookup/]: https://www.marketdata.app/docs/api/options/lookup
 type OptionLookupRequest struct {

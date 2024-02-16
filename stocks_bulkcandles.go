@@ -5,11 +5,11 @@
 //
 // Utilize the [BulkStockCandlesRequest] for querying the endpoint through one of the three available methods:
 //
-//	| Method     | Execution Level | Return Type                | Description                                                                                                            |
-//	|------------|-----------------|----------------------------|------------------------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct          | `[]Candle`                 | Immediately fetches and returns a slice of `[]Candle`, allowing direct access to each candle's data.                   |
-//	| **Packed** | Intermediate    | `BulkStockCandlesResponse` | Delivers a `StockCandlesResponse` object containing the data, which requires unpacking to access the `[]Candle` slice. |
-//	| **Raw**    | Low-level       | `resty.Response`           | Offers the unprocessed `resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`. |
+//	| Method     | Execution Level | Return Type                 | Description                                                                                                             |
+//	|------------|-----------------|-----------------------------|-------------------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct          | `[]Candle`                  | Immediately fetches and returns a slice of `[]Candle`, allowing direct access to each candle's data.                    |
+//	| **Packed** | Intermediate    | `*BulkStockCandlesResponse` | Delivers a `*StockCandlesResponse` object containing the data, which requires unpacking to access the `[]Candle` slice. |
+//	| **Raw**    | Low-level       | `*resty.Response`           | Offers the unprocessed `*resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -42,9 +42,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*BulkStockCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*BulkStockCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/stocks/bulkcandles/]: https://www.marketdata.app/docs/api/stocks/bulkcandles
 type BulkStockCandlesRequest struct {

@@ -4,11 +4,11 @@
 //
 // Utilize [IndexQuoteRequest] to make requests to the endpoint through one of the three supported execution methods:
 //
-//	| Method     | Execution     | Return Type                | Description                                                                                               |
-//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//	| **Get**    | Direct        | `[]IndexQuote`             | Directly returns a slice of `[]IndexQuote`, facilitating individual access to each quote.                 |
-//	| **Packed** | Intermediate  | `IndexQuotesResponse`      | Returns a packed `IndexQuotesResponse` object. Must be unpacked to access the `[]IndexQuote` slice.       |
-//	| **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
+//	| Method     | Execution     | Return Type                 | Description                                                                                                |
+//	|------------|---------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]IndexQuote`              | Directly returns a slice of `[]IndexQuote`, facilitating individual access to each quote.                  |
+//	| **Packed** | Intermediate  | `*IndexQuotesResponse`      | Returns a packed `*IndexQuotesResponse` object. Must be unpacked to access the `[]IndexQuote` slice.       |
+//	| **Raw**    | Low-level     | `*resty.Response`           | Offers the raw `*resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -39,9 +39,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndexQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Get() ([]IndexQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Get(...*MarketDataClient) ([]IndexQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*IndexQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/indices/quotes/]: https://www.marketdata.app/docs/api/indices/quotes
 type IndexQuoteRequest struct {

@@ -38,9 +38,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Get() ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//   - Packed() (*OptionQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Get(...*MarketDataClient) ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed(...*MarketDataClient) (*OptionQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/options/quotes/]: https://www.marketdata.app/docs/api/options/quotes
 type OptionQuoteRequest struct {
