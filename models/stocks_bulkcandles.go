@@ -49,7 +49,7 @@ type BulkStockCandlesResponse struct {
 func (bscr *BulkStockCandlesResponse) Unpack() ([]Candle, error) {
 	var bulkStockCandles []Candle
 	for i := range bscr.Date {
-		bulkStockCandle := Candle{
+		stockCandle := Candle{
 			Symbol: bscr.Symbol[i],
 			Date:   time.Unix(bscr.Date[i], 0),
 			Open:   bscr.Open[i],
@@ -58,7 +58,7 @@ func (bscr *BulkStockCandlesResponse) Unpack() ([]Candle, error) {
 			Close:  bscr.Close[i],
 			Volume: bscr.Volume[i],
 		}
-		bulkStockCandles = append(bulkStockCandles, bulkStockCandle)
+		bulkStockCandles = append(bulkStockCandles, stockCandle)
 	}
 	return bulkStockCandles, nil
 }

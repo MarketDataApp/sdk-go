@@ -1,3 +1,14 @@
+// Package client includes types and methods to access the Stock Candles endpoint. Retrieve historical price candles for any supported stock symbol.
+//
+// # Making Requests
+//
+// Use [StockCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
+//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, facilitating individual access to each candle.                    |
+//	| **Packed** | Intermediate  | `StockCandlesResponse`     | Returns a packed `StockCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.          |
+//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -34,9 +45,10 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[/v1/stocks/candles]: https://www.marketdata.app/docs/api/stocks/candles
+//
+// [/v1/stocks/candles]: https://www.marketdata.app/docs/api/stocks/candles
 type StockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *parameters.StockCandleParams
@@ -283,7 +295,7 @@ func (scr *StockCandlesRequest) Packed(optionalClients ...*MarketDataClient) (*m
 //
 // # Returns
 //
-//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scr *StockCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if scr == nil {

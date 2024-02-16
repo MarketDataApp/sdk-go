@@ -1,3 +1,15 @@
+// Package client provides functionalities to interact with the Bulk Stock Candles endpoint.
+// Get bulk historical price data for many stock symbols at once or even obtain a full market snapshot.
+//
+// # Making Requests
+//
+// Utilize the [BulkStockCandlesRequest] for querying the endpoint through one of the three available methods:
+//
+//	| Method     | Execution Level | Return Type                | Description                                                                                                            |
+//	|------------|-----------------|----------------------------|------------------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct          | `[]Candle`                 | Immediately fetches and returns a slice of `[]Candle`, allowing direct access to each candle's data.                   |
+//	| **Packed** | Intermediate    | `BulkStockCandlesResponse` | Delivers a `StockCandlesResponse` object containing the data, which requires unpacking to access the `[]Candle` slice. |
+//	| **Raw**    | Low-level       | `resty.Response`           | Offers the unprocessed `resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -31,9 +43,10 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*BulkStockCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[/v1/stocks/bulkcandles]: https://www.marketdata.app/docs/api/stocks/bulkcandles
+//
+// [/v1/stocks/bulkcandles/]: https://www.marketdata.app/docs/api/stocks/bulkcandles
 type BulkStockCandlesRequest struct {
 	*baseRequest
 	stockCandleParams *parameters.StockCandleParams
@@ -186,7 +199,7 @@ func (bscr *BulkStockCandlesRequest) Packed(optionalClients ...*MarketDataClient
 //
 // # Returns
 //
-//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (bscr *BulkStockCandlesRequest) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if bscr == nil {

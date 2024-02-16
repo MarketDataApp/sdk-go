@@ -1,3 +1,15 @@
+// Package client provides functionalities to interact with the Options Quotes endpoint.
+// Retrieve an option quote for a given option symbol.
+//
+// # Making Requests
+//
+// Utilize [OptionQuoteRequest] for querying the endpoint through one of the three available methods:
+//
+//	| Method     | Execution Level | Return Type                  | Description                                                                                                                |
+//	|------------|-----------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct          | `[]OptionQuote`              | Immediately fetches a slice of `[]OptionQuote`, allowing direct access to the quote data.                                  |
+//	| **Packed** | Intermediate    | `*OptionQuotesResponse`      | Delivers a `*OptionQuotesResponse` object containing the data, which requires unpacking to access the `OptionQuote` data.  |
+//	| **Raw**    | Low-level       | `*resty.Response`            | Offers the unprocessed `*resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -26,9 +38,10 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
+//   - Get() ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed() (*OptionQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//
 // [/v1/options/quotes/]: https://www.marketdata.app/docs/api/options/quotes
 type OptionQuoteRequest struct {
 	*baseRequest

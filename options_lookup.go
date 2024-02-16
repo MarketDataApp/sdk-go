@@ -1,3 +1,15 @@
+// Package client provides functionalities to interact with the Options Lookup endpoint.
+// Lookup the OCC-formatted option symbol based on user input.
+//
+// # Making Requests
+//
+// Utilize [OptionsLookupRequest] for querying the endpoint through one of the three available methods:
+//
+//	| Method     | Execution Level | Return Type                  | Description                                                                                                             |
+//	|------------|-----------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct          | `string`                     | Immediately fetches and `string`, allowing direct access to the option symbol.                                          |
+//	| **Packed** | Intermediate    | `*OptionLookupResponse`      | Delivers a `*OptionLookupResponse` object containing the data, which requires unpacking to access the `string` data.    |
+//	| **Raw**    | Low-level       | `*resty.Response`            | Offers the unprocessed `*resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -23,9 +35,10 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
+//   - Get() (string, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed() (*OptionLookupResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//
 // [/v1/options/lookup/]: https://www.marketdata.app/docs/api/options/lookup
 type OptionLookupRequest struct {
 	*baseRequest

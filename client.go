@@ -241,6 +241,9 @@ func New() *MarketDataClient {
 	// Enable tracing for the client to facilitate debugging.
 	client.Client.EnableTrace()
 
+	// Set a default timeout of 95 seconds for all requests.
+    client.Client.SetTimeout(95 * time.Second)
+
 	// Set the OnBeforeRequest hook to perform actions before sending a request.
 	// Currently, this hook does not perform any actions but can be used for logging or modifying requests.
 	client.Client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
@@ -269,6 +272,25 @@ func New() *MarketDataClient {
 func (c *MarketDataClient) Debug(enable bool) *MarketDataClient {
 	c.debug = enable
 	return c
+}
+
+// Timeout sets the request timeout for the MarketDataClient.
+//
+// This method allows users to specify a custom timeout duration for all HTTP requests
+// made by the client. The timeout duration is specified in seconds. Setting a timeout
+// helps in preventing indefinitely hanging requests in case of network issues or slow
+// server responses.
+//
+// # Parameters
+//
+//   - int: The timeout duration in seconds. A duration of 0 means no timeout.
+//
+// # Returns
+//
+//   - *MarketDataClient: A pointer to the MarketDataClient instance, allowing for method chaining.
+func (c *MarketDataClient) Timeout(seconds int) *MarketDataClient {
+    c.Client.SetTimeout(time.Duration(seconds) * time.Second)
+    return c
 }
 
 // updateRateLimit updates the client's rate limit information based on the response headers.

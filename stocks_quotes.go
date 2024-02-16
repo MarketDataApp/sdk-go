@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Stock Quotes endpoint.
+// Retrieve real-time quotes for any supported stock symbol.
+//
+// # Making Requests
+//
+// Utilize [StockQuoteRequest] to make requests to the endpoint through one of the three supported execution methods:
+//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockQuote`             | Directly returns a slice of `[]StockQuote`, facilitating individual access to each stock quote.           |
+//	| **Packed** | Intermediate  | `StockQuotesResponse`      | Returns a packed `StockQuotesResponse` object. Must be unpacked to access the `[]StockQuote` slice.       |
+//	| **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -22,9 +34,10 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[/v1/stocks/quotes/]: https://www.marketdata.app/docs/api/stocks/quotes
+//
+// [/v1/stocks/quotes/]: https://www.marketdata.app/docs/api/stocks/quotes
 type StockQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams

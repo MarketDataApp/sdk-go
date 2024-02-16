@@ -1,3 +1,16 @@
+// Package client provides functionalities to interact with the Options Chain endpoint.
+// Retrieve a a complete or filtered options chain for a given underlying symbol. Both real-time and historical requests are possible.
+//
+// # Making Requests
+//
+// Utilize [OptionChainRequest] for querying the endpoint through one of the three available methods:
+//
+//  | Method     | Execution Level | Return Type                  | Description                                                                                                                      |
+//  |------------|-----------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+//  | **Get**    | Direct          | `[]OptionQuote`              | Immediately fetches a slice of `[]models.OptionQuote`, allowing direct access to the options chain data.                         |
+//  | **Packed** | Intermediate    | `*OptionQuotesResponse`      | Delivers a `*models.OptionQuotesResponse` object containing the data, which requires unpacking to access the `OptionQuote` data. |
+//  | **Raw**    | Low-level       | `*resty.Response`            | Offers the unprocessed `*resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`.          |
+//
 package client
 
 import (
@@ -45,11 +58,11 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Get() ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //   - Packed() (*OptionQuotesResponse, error): Packs the request parameters and sends the request, returning a *OptionQuotesResponse response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
-// [/v1/options/chain/]: https://www.marketdata.app/docs/api/options/chain
+//[/v1/options/chain/]: https://www.marketdata.app/docs/api/options/chain
 type OptionChainRequest struct {
 	*baseRequest
 	symbolParams *parameters.SymbolParams

@@ -5,10 +5,20 @@ import os
 
 # Central mapping of URLs to their corresponding title and sidebar position
 URL_TO_INFO = {
+    "https://www.marketdata.app/docs/api/markets/status": {"title": "Status", "sidebar_position": 1},
     "https://www.marketdata.app/docs/api/indices/candles": {"title": "Candles", "sidebar_position": 1},
     "https://www.marketdata.app/docs/api/indices/quotes": {"title": "Quotes", "sidebar_position": 2},
-    "https://www.marketdata.app/docs/api/markets/status": {"title": "Status", "sidebar_position": 1},
-
+    "https://www.marketdata.app/docs/api/stocks/candles": {"title": "Candles", "sidebar_position": 1},
+    "https://www.marketdata.app/docs/api/stocks/bulkcandles": {"title": "Bulk Candles", "sidebar_position": 2},
+    "https://www.marketdata.app/docs/api/stocks/quotes": {"title": "Quotes", "sidebar_position": 3},
+    "https://www.marketdata.app/docs/api/stocks/bulkquotes": {"title": "Bulk Quotes", "sidebar_position": 4},
+    "https://www.marketdata.app/docs/api/stocks/earnings": {"title": "Earnings", "sidebar_position": 5},
+    "https://www.marketdata.app/docs/api/stocks/news": {"title": "News", "sidebar_position": 6},
+    "https://www.marketdata.app/docs/api/options/expirations": {"title": "Expirations", "sidebar_position": 1},
+    "https://www.marketdata.app/docs/api/options/lookup": {"title": "Lookup", "sidebar_position": 2},
+    "https://www.marketdata.app/docs/api/options/strikes": {"title": "Strikes", "sidebar_position": 3},
+    "https://www.marketdata.app/docs/api/options/chain": {"title": "Option Chain", "sidebar_position": 4},
+    "https://www.marketdata.app/docs/api/options/quotes": {"title": "Quotes", "sidebar_position": 5},
 
     # Add more mappings as needed
 }

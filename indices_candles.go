@@ -1,15 +1,14 @@
 // Package client includes types and methods to access the Index Candles endpoint. Get historical price candles for any supported stock index.
-// 
+//
 // # Making Requests
 //
 // Use [IndicesCandlesRequest] to make requests to the endpoint using any of the three supported execution methods:
 //
-//  | Method     | Execution     | Return Type                | Description                                                                                               |
-//  |------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//  | **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, making it straightforward to access each candle individually.     |
-//  | **Packed** | Intermediate  | `IndicesCandlesResponse`   | Returns a packed `IndicesCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.        |
-//  | **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
-//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]Candle`                 | Directly returns a slice of `[]Candle`, making it straightforward to access each candle individually.     |
+//	| **Packed** | Intermediate  | `IndicesCandlesResponse`   | Returns a packed `IndicesCandlesResponse` object. Must be unpacked to access the `[]Candle` slice.        |
+//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -27,7 +26,7 @@ import (
 //   - IndexCandles(client ...*MarketDataClient) *IndicesCandlesRequest: IndexCandles creates a new *IndicesCandlesRequest and returns a pointer to the request allowing for method chaining.
 //
 // # Setter Methods
-// 
+//
 // These methods are used to set the parameters of the request. They allow for method chaining
 // by returning a pointer to the *IndicesCandlesRequest instance they modify.
 //
@@ -37,12 +36,12 @@ import (
 //   - From(interface{}) *IndicesCandlesRequest: Sets the 'from' date parameter for the request.
 //
 // # Execution Methods
-// 
+//
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
 //   - Get(...*MarketDataClient) ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed(...*MarketDataClient) (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/indices/candles/]: https://www.marketdata.app/docs/api/indices/candles
@@ -129,7 +128,7 @@ func (icr *IndicesCandlesRequest) Date(q interface{}) *IndicesCandlesRequest {
 
 // From sets the 'from' date parameter for the IndicesCandlesRequest. It configures the starting point of the date range for which the candle data is requested.
 //
-// # Parameters 
+// # Parameters
 //
 //   - interface{}: An interface{} that represents the starting date. It can be a string, a time.Time object, a Unix timestamp or any other type that the underlying dates package can process.
 //

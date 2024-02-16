@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Stock Earnings endpoint.
+// Retrieve earnings data for any supported stock symbol.
+//
+// # Making Requests
+//
+// Use [StockEarningsRequest] to make requests to the endpoint using any of the three supported execution methods:
+//
+//	| Method     | Execution     | Return Type                | Description                                                                                                    |
+//	|------------|---------------|----------------------------|----------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockEarningsReport`    | Directly returns a slice of `[]StockEarningsReport`, facilitating individual access to each earnings report.   |
+//	| **Packed** | Intermediate  | `StockEarningsResponse`    | Returns a packed `StockEarningsResponse` object. Must be unpacked to access the `[]StockEarningsReport` slice. |
+//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`.      |
 package client
 
 import (
@@ -30,9 +42,10 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[v1/stocks/earnings/]: https://www.marketdata.app/docs/api/stocks/earnings
+//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Get() ([]StockEarningsReport, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//
+// [v1/stocks/earnings/]: https://www.marketdata.app/docs/api/stocks/earnings
 type StockEarningsRequest struct {
 	*baseRequest
 	symbolParams        *parameters.SymbolParams

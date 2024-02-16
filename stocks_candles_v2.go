@@ -102,7 +102,7 @@ func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient)
 //
 // # Returns
 //
-//   - []models.StockCandle: A slice of StockCandle containing the unpacked candle data from the response.
+//   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
 	if scrV2 == nil {

@@ -1,15 +1,14 @@
 // Package client includes types and methods to access the Index Quotes endpoint. Retrieve real-time quotes for any supported index.
-// 
+//
 // # Making Requests
 //
 // Utilize [IndexQuoteRequest] to make requests to the endpoint through one of the three supported execution methods:
 //
-//  | Method     | Execution     | Return Type                | Description                                                                                               |
-//  |------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
-//  | **Get**    | Direct        | `[]IndexQuote`             | Directly returns a slice of `[]IndexQuote`, facilitating individual access to each quote.                 |
-//  | **Packed** | Intermediate  | `IndexQuotesResponse`      | Returns a packed `IndexQuotesResponse` object. Must be unpacked to access the `[]IndexQuote` slice.       |
-//  | **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
-//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]IndexQuote`             | Directly returns a slice of `[]IndexQuote`, facilitating individual access to each quote.                 |
+//	| **Packed** | Intermediate  | `IndexQuotesResponse`      | Returns a packed `IndexQuotesResponse` object. Must be unpacked to access the `[]IndexQuote` slice.       |
+//	| **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -28,7 +27,7 @@ import (
 //   - IndexQuotes(client ...*MarketDataClient): IndexQuotes creates a new *IndexQuoteRequest and returns a pointer to the request allowing for method chaining.
 //
 // # Setter Methods
-// 
+//
 // These methods are used to set the parameters of the request. They allow for method chaining
 // by returning a pointer to the *IndexQuoteRequest instance they modify.
 //
@@ -36,15 +35,15 @@ import (
 //   - FiftyTwoWeek(bool) *IndexQuoteRequest: Sets the fifty-two-week parameter for the request.
 //
 // # Execution Methods
-// 
+//
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndexQuotesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*IndexQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]IndexQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //
-//[/v1/indices/quotes/]: https://www.marketdata.app/docs/api/indices/quotes
+// [/v1/indices/quotes/]: https://www.marketdata.app/docs/api/indices/quotes
 type IndexQuoteRequest struct {
 	*baseRequest
 	symbolParams       *parameters.SymbolParams
@@ -151,7 +150,7 @@ func (iqr *IndexQuoteRequest) Packed(optionalClients ...*MarketDataClient) (*mod
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of IndexQuote using the Unpack method from the response.
 // An optional MarketDataClient can be passed to replace the client used in the request.
-// 
+//
 // # Parameters
 //
 //   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,

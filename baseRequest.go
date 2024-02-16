@@ -138,7 +138,7 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 		return params, nil
 	}
 
-	if osr, ok := br.child.(*OptionsStrikesRequest); ok {
+	if osr, ok := br.child.(*OptionStrikesRequest); ok {
 		params, err := osr.getParams()
 		if err != nil {
 			return nil, err

@@ -30,8 +30,8 @@ func OptionsQuotesExample() {
 
 }
 
-func OptionsStrikesExample() {
-	resp, err := api.OptionsStrikes().UnderlyingSymbol("AAPL").Get()
+func OptionStrikesExample() {
+	resp, err := api.OptionStrikes().UnderlyingSymbol("AAPL").Get()
 	if err != nil {
 		fmt.Print(err)
 		return

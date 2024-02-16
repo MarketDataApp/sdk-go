@@ -21,7 +21,7 @@ import (
 //
 // # Methods
 //
-//   - Unpack() ([]Candle, error): Converts a StockCandlesResponse into a slice of StockCandle.
+//   - Unpack() ([]Candle, error): Converts a StockCandlesResponse into a slice of Candle.
 //   - String() string: Returns a string representation of the StockCandlesResponse.
 //   - IsValid() bool: Checks if a StockCandlesResponse is valid.
 //   - Validate() error: Validates a StockCandlesResponse.
@@ -251,7 +251,7 @@ func (s *StockCandlesResponse) getVersion() (int, error) {
 	} else if s.Date != nil && s.Open != nil && s.High != nil && s.Low != nil && s.Close != nil && s.Volume != nil && s.VWAP != nil && s.N != nil && len(*s.VWAP) > 0 && len(*s.N) > 0 {
 		return 2, nil
 	} else {
-		return 0, fmt.Errorf("invalid StockCandle version")
+		return 0, fmt.Errorf("invalid Candle version")
 	}
 }
 

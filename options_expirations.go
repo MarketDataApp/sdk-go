@@ -1,3 +1,15 @@
+// Package client provides functionalities to interact with the Options Expirations endpoint.
+// Get a list of current or historical option expiration dates for an underlying symbol.
+//
+// # Making Requests
+//
+// Utilize [OptionsExpirationsRequest] for querying the endpoint through one of the three available methods:
+//
+//	| Method     | Execution Level | Return Type                   | Description                                                                                                                      |
+//	|------------|-----------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct          | `[]time.Time`                 | Immediately fetches and returns a slice of `[]time.Time`, allowing direct access to each expiration date.                        |
+//	| **Packed** | Intermediate    | `*OptionsExpirationsResponse` | Delivers a `*OptionsExpirationsResponse` object containing the data, which requires unpacking to access the `[]time.Time` slice. |
+//	| **Raw**    | Low-level       | `*resty.Response`             | Offers the unprocessed `*resty.Response` for those seeking full control and access to the raw JSON or `*http.Response`.          |
 package client
 
 import (
@@ -26,9 +38,10 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
+//   - Get() ([]time.Time, error): Sends the request, unpacks the response, and returns []time.Time allowing direct-access to the data.
+//   - Packed() (*OptionsExpirationsResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
-//   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//
 // [/v1/options/expirations/]: https://www.marketdata.app/docs/api/options/expirations
 type OptionsExpirationsRequest struct {
 	*baseRequest

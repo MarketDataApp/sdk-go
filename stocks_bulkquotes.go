@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Bulk Stock Quotes endpoint.
+// Retrieve real-time quotes for multiple stocks symbols in a single request or even get a full market snapshot with a quote for all symbols.
+//
+// # Making Requests
+//
+// Utilize [BulkStockQuotesRequest] to make requests to the endpoint through one of the three supported execution methods:
+//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockQuote`             | Directly returns a slice of `[]StockQuote`, facilitating individual access to each stock quote.           |
+//	| **Packed** | Intermediate  | `StockQuotesResponse`      | Returns a packed `StockQuotesResponse` object. Must be unpacked to access the `[]StockQuote` slice.       |
+//	| **Raw**    | Low-level     | `resty.Response`           | Offers the raw `resty.Response` for utmost flexibility. Direct access to raw JSON or `*http.Response`.    |
 package client
 
 import (
@@ -26,15 +38,16 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*StockQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[v1/stocks/bulkquotes/]: https://www.marketdata.app/docs/api/stocks/bulkquotes
+//
+// [v1/stocks/bulkquotes/]: https://www.marketdata.app/docs/api/stocks/bulkquotes
 type BulkStockQuotesRequest struct {
 	*baseRequest
 	bulkStockParams *parameters.BulkStockParams
 }
 
-// Symbols sets the symbols parameter for the BulkStockCandlesRequest.
+// Symbols sets the symbols parameter for the BulkStockQuotesRequest.
 // This method is used to specify multiple stock symbols for which candle data is requested.
 //
 // # Parameters
@@ -43,7 +56,7 @@ type BulkStockQuotesRequest struct {
 //
 // # Returns
 //
-//   - *BulkStockCandlesRequest: This method returns a pointer to the BulkStockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *BulkStockQuotesRequest: This method returns a pointer to the BulkStockQuotesRequest instance it was called on. This allows for method chaining.
 func (bs *BulkStockQuotesRequest) Symbols(q []string) *BulkStockQuotesRequest {
 	if bs == nil {
 		return nil
@@ -55,7 +68,8 @@ func (bs *BulkStockQuotesRequest) Symbols(q []string) *BulkStockQuotesRequest {
 	return bs
 }
 
-// Snapshot sets the snapshot parameter for the BulkStockCandlesRequest. This method is used to enable or disable the snapshot feature in the request and will result in all available tickers being returned in the response.
+// Snapshot sets the snapshot parameter for the BulkStockQuotesRequest. This method is used to enable
+// or disable the snapshot feature in the request and will result in all available tickers being returned in the response.
 //
 // # Parameters
 //
@@ -63,7 +77,7 @@ func (bs *BulkStockQuotesRequest) Symbols(q []string) *BulkStockQuotesRequest {
 //
 // # Returns
 //
-//   - *BulkStockCandlesRequest: This method returns a pointer to the *BulkStockCandlesRequest instance it was called on. This allows for method chaining.
+//   - *BulkStockQuotesRequest: This method returns a pointer to the *BulkStockQuotesRequest instance it was called on. This allows for method chaining.
 func (bs *BulkStockQuotesRequest) Snapshot(q bool) *BulkStockQuotesRequest {
 	if bs == nil {
 		return nil

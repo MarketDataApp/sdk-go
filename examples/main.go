@@ -23,7 +23,7 @@ func optionsExamples() {
 	OptionsChainExample()
 
 	fmt.Println("Staring Options/Strikes example...")
-	OptionsStrikesExample()
+	OptionStrikesExample()
 
 	fmt.Println("Staring Options/Quotes example...")
 	OptionsQuotesExample()

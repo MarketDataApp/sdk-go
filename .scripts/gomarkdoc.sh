@@ -49,10 +49,25 @@ move_and_merge_go_dir() {
 process_group() {
     GROUP_NAME=$1
 
+    # Special handling for the "options_chain" group to use "options_quotes.go" for models
+    if [ "$GROUP_NAME" == "options_chain" ]; then
+        echo "Processing options_chain group with an exception"
+        MODEL_MAIN_FILE="$MODELS_DIR/options_quotes.go"
+        MODEL_TEST_FILE="$MODELS_DIR/options_quotes_test.go"
+    else
+        # Remove the word "bulk" from the group name if it exists
+        MODEL_GROUP_NAME=${GROUP_NAME/bulk/}
+
+        MAIN_FILE="${GROUP_NAME}.go"
+        TEST_FILE="${GROUP_NAME}_test.go"
+        MODEL_MAIN_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}.go"
+        MODEL_TEST_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}_test.go"
+    fi
+
     MAIN_FILE="${GROUP_NAME}.go"
     TEST_FILE="${GROUP_NAME}_test.go"
-    MODEL_MAIN_FILE="$MODELS_DIR/${GROUP_NAME}.go"
-    MODEL_TEST_FILE="$MODELS_DIR/${GROUP_NAME}_test.go"
+    MODEL_MAIN_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}.go"
+    MODEL_TEST_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}_test.go"
     CANDLE_FILE="$MODELS_DIR/candle.go" # Path to the candle.go file
     CANDLE_TEST_FILE="$MODELS_DIR/candle_test.go" # Path to the candle.go file
 
@@ -113,6 +128,19 @@ process_group() {
 process_group "indices_candles"
 process_group "indices_quotes"
 process_group "markets_status"
+process_group "stocks_candles"
+process_group "stocks_quotes"
+process_group "stocks_earnings"
+process_group "stocks_news"
+process_group "stocks_bulkcandles"
+process_group "stocks_bulkquotes"
+process_group "options_expirations"
+process_group "options_lookup"
+process_group "options_quotes"
+process_group "options_strikes"
+process_group "options_chain"
+
+
 
 # Add more calls to process_group with different group names as needed
 

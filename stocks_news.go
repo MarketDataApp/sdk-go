@@ -1,3 +1,15 @@
+// Package client includes types and methods to access the Stock News endpoint.
+// Retrieve news articles for any supported stock symbol.
+//
+// # Making Requests
+//
+// Use [StockNewsRequest] to make requests to the endpoint using any of the three supported execution methods:
+//
+//	| Method     | Execution     | Return Type                | Description                                                                                               |
+//	|------------|---------------|----------------------------|-----------------------------------------------------------------------------------------------------------|
+//	| **Get**    | Direct        | `[]StockNews  `            | Directly returns a slice of `[]StockNews`, facilitating individual access to each news article.           |
+//	| **Packed** | Intermediate  | `StockNewsResponse`        | Returns a packed `StockNewsResponse` object. Must be unpacked to access the `[]StockNews` slice.          |
+//	| **Raw**    | Low-level     | `resty.Response`           | Provides the raw `resty.Response` for maximum flexibility. Direct access to raw JSON or `*http.Response`. |
 package client
 
 import (
@@ -25,9 +37,10 @@ import (
 // They handle the actual communication with the API endpoint.
 //
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
-//   - Packed() (*IndicesCandlesResponse, error): Packs the request parameters and sends the request, returning a structured response.
+//   - Packed() (*IndicesCandlesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Get() ([]Candle, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//[/v1/stocks/news/]: https://www.marketdata.app/docs/api/stocks/news
+//
+// [/v1/stocks/news/]: https://www.marketdata.app/docs/api/stocks/news
 type StockNewsRequest struct {
 	*baseRequest
 	symbolParams *parameters.SymbolParams
