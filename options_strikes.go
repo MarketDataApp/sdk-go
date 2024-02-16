@@ -17,6 +17,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // OptionStrikesRequest represents a request to the [/v1/options/strikes/] endpoint.
@@ -112,6 +113,22 @@ func (o *OptionStrikesRequest) getParams() ([]parameters.MarketDataParam, error)
 	}
 	params := []parameters.MarketDataParam{o.underlyingSymbol, o.expiration, o.date}
 	return params, nil
+}
+
+// Raw executes the OptionStrikesRequest and returns the raw *resty.Response.
+// This method allows for an optional MarketDataClient to be passed. If provided, this client replaces the one currently
+// attached to the OptionStrikesRequest. The *resty.Response can be used to directly access the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+//
+// # Returns
+//
+//   - *resty.Response: The raw HTTP response from the executed OptionStrikesRequest.
+//   - error: An error object if the OptionStrikesRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (osr *OptionStrikesRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return osr.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the OptionStrikesRequest and returns the OptionStrikesResponse.

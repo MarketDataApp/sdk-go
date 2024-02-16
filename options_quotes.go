@@ -17,6 +17,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // OptionQuotesRequest represents a request to the [/v1/options/quotes/] endpoint for retrieving options quotes.
@@ -149,6 +150,22 @@ func (oqr *OptionQuoteRequest) getParams() ([]parameters.MarketDataParam, error)
 	}
 	params := []parameters.MarketDataParam{oqr.symbolParams, oqr.dateParams}
 	return params, nil
+}
+
+// Raw executes the OptionQuoteRequest and returns the raw *resty.Response.
+// This method allows for an optional MarketDataClient to be passed. If provided, it replaces the default client
+// used for the request. The *resty.Response can be used to access the raw JSON or *http.Response directly.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+//
+// # Returns
+//
+//   - *resty.Response: The raw HTTP response from the executed request.
+//   - error: An error object if the OptionQuoteRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (oqr *OptionQuoteRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return oqr.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the OptionQuoteRequest and returns the OptionQuotesResponse.

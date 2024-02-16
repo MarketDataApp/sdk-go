@@ -17,6 +17,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // OptionsLookupRequest represents a request to the [/v1/options/lookup/] endpoint for retrieving an OCC-formatted option symbol based on user input.
@@ -78,6 +79,22 @@ func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) 
 	}
 	params := []parameters.MarketDataParam{o.userInput}
 	return params, nil
+}
+
+// Raw executes the OptionLookupRequest and returns the raw *resty.Response.
+// This method optionally accepts a *MarketDataClient to use for the request, replacing the default client if provided.
+// The *resty.Response allows access to the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: An optional variadic parameter that can accept a *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+//
+// # Returns
+//
+//   - *resty.Response: The raw HTTP response from the executed OptionLookupRequest.
+//   - error: An error object if the request fails due to being nil, the MarketDataClient being nil, or other execution errors.
+func (olr *OptionLookupRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return olr.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the OptionLookupRequest and returns the OptionsLookupResponse.

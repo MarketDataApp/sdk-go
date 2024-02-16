@@ -16,6 +16,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // MarketStatusRequest represents a request to the [/v1/markets/status/] endpoint for market status information.
@@ -164,6 +165,22 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 		msr.baseRequest.Error = err
 	}
 	return msr
+}
+
+// Raw executes the MarketStatusRequest and returns the raw *resty.Response.
+// This method optionally accepts a *MarketDataClient to use for the request, replacing the default client if provided.
+// The *resty.Response can be directly used to access the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: An optional variadic parameter that can accept a *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+//
+// # Returns
+//
+//   - *resty.Response: The raw HTTP response from the executed MarketStatusRequest.
+//   - error: An error object if the MarketStatusRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (msr *MarketStatusRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return msr.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the MarketStatusRequest and returns the MarketStatusResponse.

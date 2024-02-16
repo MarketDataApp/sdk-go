@@ -17,6 +17,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // StockEarningsRequest represents a request to the [/v1/stocks/earnings/] endpoint.
@@ -174,6 +175,22 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 	}
 	params := []parameters.MarketDataParam{ser.symbolParams, ser.dateParams, ser.stockEarningsParams}
 	return params, nil
+}
+
+// Raw executes the StockEarningsRequest and returns the raw *resty.Response.
+// This method allows for an optional MarketDataClient to be passed. If provided, this client replaces the one currently
+// attached to the StockEarningsRequest. The *resty.Response can be used to access the raw JSON or *http.Response directly.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, it replaces the current *MarketDataClient for this StockEarningsRequest.
+//
+// # Returns
+//
+//   - *resty.Response: The raw response from the executed StockEarningsRequest.
+//   - error: An error object if the StockEarningsRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (ser *StockEarningsRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return ser.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the StockEarningsRequest and returns the StockEarningsResponse.

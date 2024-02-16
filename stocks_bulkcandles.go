@@ -17,6 +17,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // BulkStockCandlesRequest represents a request to the [/v1/stocks/bulkcandles/] endpoint.
@@ -157,6 +158,22 @@ func (bscr *BulkStockCandlesRequest) getParams() ([]parameters.MarketDataParam, 
 	}
 	params := []parameters.MarketDataParam{bscr.dateParams, bscr.bulkStockParams, bscr.resolutionParams, bscr.stockCandleParams}
 	return params, nil
+}
+
+// Raw executes the request and returns the raw *resty.Response.
+// This method allows for an optional MarketDataClient to be passed which, if provided, replaces the client that is currently
+// attached to the request. Using the *resty.Response, it is possible to obtain the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, it replaces the current *MarketDataClient for this request.
+//
+// # Returns
+//
+//   - *resty.Response: The raw response from the executed request.
+//   - error: An error object if the request is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (bscr *BulkStockCandlesRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return bscr.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the BulkStockCandlesRequest and returns the StockCandlesResponse.

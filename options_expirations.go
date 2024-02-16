@@ -18,6 +18,7 @@ import (
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
 	"github.com/MarketDataApp/sdk-go/models"
+	"github.com/go-resty/resty/v2"
 )
 
 // OptionsExpirationsRequest represents a request for retrieving options expirations data from the [/v1/options/expirations/] endpoint.
@@ -122,6 +123,22 @@ func (o *OptionsExpirationsRequest) getParams() ([]parameters.MarketDataParam, e
 	}
 	params := []parameters.MarketDataParam{o.underlyingSymbol, o.strike, o.dateParams}
 	return params, nil
+}
+
+// Raw executes the OptionsExpirationsRequest and returns the raw *resty.Response.
+// This method allows for an optional MarketDataClient to be passed. If provided, it replaces the default client
+// used for this request. The *resty.Response can be used to directly access the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+//
+// # Returns
+//
+//   - *resty.Response: The raw HTTP response from the executed OptionsExpirationsRequest.
+//   - error: An error object if the OptionsExpirationsRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
+func (oer *OptionsExpirationsRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+	return oer.baseRequest.Raw(optionalClients...)
 }
 
 // Packed sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse.
