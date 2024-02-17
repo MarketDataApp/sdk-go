@@ -19,6 +19,7 @@ URL_TO_INFO = {
     "https://www.marketdata.app/docs/api/options/strikes": {"title": "Strikes", "sidebar_position": 3},
     "https://www.marketdata.app/docs/api/options/chain": {"title": "Option Chain", "sidebar_position": 4},
     "https://www.marketdata.app/docs/api/options/quotes": {"title": "Quotes", "sidebar_position": 5},
+    "https://www.marketdata.app/docs/sdk/go/client": {"title": "Client", "sidebar_position": 3},
 
     # Add more mappings as needed
 }
@@ -611,8 +612,16 @@ def combine_files_into_mdx(file_paths):
         if info:
             header_text = f"---\ntitle: {info['title']}\nsidebar_position: {info['sidebar_position']}\n---\n\n"
             combined_content = header_text + combined_content
-            path_after_api = url.split("/api")[-1]
-            output_filename = f"go{path_after_api}.mdx"
+            # Use consistent logic for both /api/ and /sdk/
+            if "/sdk/" in url:
+                base_name = "go"
+                path_after_segment = url.split("/sdk/")[-1]
+            elif "/api/" in url:
+                base_name = "go"
+                path_after_segment = url.split("/api/")[-1]
+            else:
+                continue  # Skip if URL does not contain /api/ or /sdk/
+            output_filename = f"{base_name}/{path_after_segment}.mdx"
             break  # Exit the loop after processing the first matching URL
 
     if "<Tabs>" in combined_content:

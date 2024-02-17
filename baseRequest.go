@@ -1,3 +1,43 @@
+// Package client provides a Go SDK for interacting with the Market Data API.
+// It includes functionality for making API requests, handling responses,
+// managing rate limits, and logging. The SDK supports various data types
+// including stocks, options, and market status information.
+//
+// # Usage
+//
+// To use the SDK, you first need to create an instance of MarketDataClient
+// using the GetClient function. This client will then be used to make
+// API requests to the Market Data API.
+//
+// # Example
+//
+//	client := GetClient()
+//	client.Debug(true) // Enable debug mode to log detailed request and response information
+//	quote, err := client.StockQuotes().Symbol("AAPL").Get()
+//
+// # Authentication
+//
+// The SDK uses an API token for authentication. The token can be set as an
+// environment variable (MARKETDATA_TOKEN) or directly in your code. However,
+// storing tokens in your code is not recommended for security reasons.
+//
+// # Rate Limiting
+//
+// The MarketDataClient automatically tracks and manages the API's rate limits.
+// You can check if the rate limit has been exceeded with the RateLimitExceeded method.
+//
+// # Logging
+//
+// The SDK logs all unsuccessful (400-499 and 500-599) responses to specific log files
+// based on the response status code. Successful responses (200-299) are logged when
+// debug mode is enabled. Logs include detailed information such as request and response
+// headers, response status code, and the response body.
+//
+// # Debug Mode
+//
+// Debug mode can be enabled by calling the Debug method on the MarketDataClient instance.
+// When enabled, the SDK will log detailed information about each request and response,
+// which is useful for troubleshooting.
 package client
 
 import (
@@ -233,6 +273,6 @@ func (request *baseRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Re
 		return nil, fmt.Errorf("MarketDataClient is nil")
 	}
 
-	response, err := request.client.GetRawResponse(request)
+	response, err := request.client.getRawResponse(request)
 	return response, err
 }

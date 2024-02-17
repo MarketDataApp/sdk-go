@@ -37,9 +37,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Get(...*MarketDataClient) ([]StockNews, error): Initiates the request, processes the response, and provides an slice of `StockNews` objects for straightforward access to news articles.
-//   - Packed(...*MarketDataClient) (*StockNewsResponse, error): Delivers a packed `StockNewsResponse` object containing slices of data that directly correspond to the JSON structure returned by the Market Data API.
-//   - Raw(...*MarketDataClient) (*resty.Response, error): Executes the request in its raw form and retrieves the raw HTTP response for maximum flexibility.
+//   - Get() ([]StockNews, error): Initiates the request, processes the response, and provides an slice of `StockNews` objects for straightforward access to news articles.
+//   - Packed() (*StockNewsResponse, error): Delivers a packed `StockNewsResponse` object containing slices of data that directly correspond to the JSON structure returned by the Market Data API.
+//   - Raw() (*resty.Response, error): Executes the request in its raw form and retrieves the raw HTTP response for maximum flexibility.
 //
 // [/v1/stocks/news/]: https://www.marketdata.app/docs/api/stocks/news
 type StockNewsRequest struct {
@@ -163,44 +163,29 @@ func (snr *StockNewsRequest) getParams() ([]parameters.MarketDataParam, error) {
 }
 
 // Raw executes the StockNewsRequest and returns the raw *resty.Response.
-// This method optionally accepts a *MarketDataClient to use for the request, replacing the default client if provided.
-// The *resty.Response allows access to the raw JSON or *http.Response for further processing.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: An optional variadic parameter that can accept a *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+// This method retrieves the raw HTTP response for further processing.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
-//   - error: An error object if the request fails due to being nil, the MarketDataClient being nil, or other execution errors.
-func (snr *StockNewsRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
-	return snr.baseRequest.Raw(optionalClients...)
+//   - error: An error object if the request fails due to being nil or other execution errors.
+func (snr *StockNewsRequest) Raw() (*resty.Response, error) {
+	return snr.baseRequest.Raw()
 }
 
 // Packed sends the StockNewsRequest and returns the StockNewsResponse.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
 //
 // # Returns
 //
 //   - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*models.StockNewsResponse, error) {
+func (snr *StockNewsRequest) Packed() (*models.StockNewsResponse, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
 
-	// Replace the client if an optional client is provided
-	if len(optionalClients) > 0 && optionalClients[0] != nil {
-		snr.baseRequest.client = optionalClients[0]
-	}
-
 	var snrResp models.StockNewsResponse
-	_, err := snr.baseRequest.client.GetFromRequest(snr.baseRequest, &snrResp)
+	_, err := snr.baseRequest.client.getFromRequest(snr.baseRequest, &snrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -210,23 +195,18 @@ func (snr *StockNewsRequest) Packed(optionalClients ...*MarketDataClient) (*mode
 
 // Get sends the StockNewsRequest, unpacks the StockNewsResponse, and returns a slice of StockNews.
 // It returns an error if the request or unpacking fails.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
 //
 // # Returns
 //
 //   - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models.StockNews, error) {
+func (snr *StockNewsRequest) Get() ([]models.StockNews, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
 
-	// Use the Packed method to make the request, passing along any optional client
-	snrResp, err := snr.Packed(optionalClients...)
+	// Use the Packed method to make the request
+	snrResp, err := snr.Packed()
 	if err != nil {
 		return nil, err
 	}
@@ -240,20 +220,15 @@ func (snr *StockNewsRequest) Get(optionalClients ...*MarketDataClient) ([]models
 	return data, nil
 }
 
-// StockNews creates a new StockNewsRequest and associates it with the provided client.
-// If no client is provided, it uses the default client. This function initializes the request
+// StockNews creates a new StockNewsRequest and associates it with the default client. This function initializes the request
 // with default parameters for symbol, date, and additional news-specific parameters, and sets the request path based on
 // the predefined endpoints for stock news.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
 //
 // # Returns
 //
 //   - *StockNewsRequest: A pointer to the newly created *StockNewsRequest with default parameters and associated client.
-func StockNews(client ...*MarketDataClient) *StockNewsRequest {
-	baseReq := newBaseRequest(client...)
+func StockNews() *StockNewsRequest {
+	baseReq := newBaseRequest()
 	baseReq.path = endpoints[1]["stocks"]["news"]
 
 	snr := &StockNewsRequest{

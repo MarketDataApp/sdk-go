@@ -51,7 +51,7 @@ func (str *StockTickersRequestV2) getParams() ([]parameters.MarketDataParam, err
 }
 
 // Packed sends the StockTickersRequestV2 and returns the TickersResponse.
-// This method checks if the StockTickersRequestV2 receiver is nil, returning an error if strue.
+// This method checks if the StockTickersRequestV2 receiver is nil, returning an error if true.
 // Otherwise, it proceeds to send the request and returns the TickersResponse along with any error encountered during the request.
 //
 // # Returns
@@ -63,7 +63,7 @@ func (str *StockTickersRequestV2) Packed() (*models.TickersResponse, error) {
 		return nil, fmt.Errorf("StockTickersRequestV2 is nil")
 	}
 	var trResp models.TickersResponse
-	_, err := str.baseRequest.client.GetFromRequest(str.baseRequest, &trResp)
+	_, err := str.baseRequest.client.getFromRequest(str.baseRequest, &trResp)
 	if err != nil {
 		return nil, err
 	}
@@ -101,20 +101,15 @@ func (str *StockTickersRequestV2) Get() ([]models.Ticker, error) {
 	return data, nil
 }
 
-// StockTickers creates a new StockTickersRequestV2 and associates it with the provided client.
-// If no client is provided, it uses the default client. This function initializes the request
+// StockTickers creates a new StockTickersRequestV2 and associates it with the default client. This function initializes the request
 // with the default date parameter and sets the request path based on
 // the predefined endpoints for stock tickers.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
 //
 // # Returns
 //
 //   - *StockTickersRequestV2: A pointer to the newly created StockTickersRequestV2 with default parameters and associated client.
-func StockTickers(client ...*MarketDataClient) *StockTickersRequestV2 {
-	baseReq := newBaseRequest(client...)
+func StockTickers() *StockTickersRequestV2 {
+	baseReq := newBaseRequest()
 	baseReq.path = endpoints[2]["stocks"]["tickers"]
 
 	str := &StockTickersRequestV2{

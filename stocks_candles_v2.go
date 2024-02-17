@@ -61,29 +61,18 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 }
 
 // Packed sends the StockCandlesRequestV2 and returns the StockCandlesResponse.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//     it replaces the current client for this request.
 //
 // # Returns
 //
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient) (*models.StockCandlesResponse, error) {
+func (scrV2 *StockCandlesRequestV2) Packed() (*models.StockCandlesResponse, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
 
-	// Replace the client if an optional client is provided
-	if len(optionalClients) > 0 && optionalClients[0] != nil {
-		scrV2.baseRequest.client = optionalClients[0]
-	}
-
 	var scrResp models.StockCandlesResponse
-	_, err := scrV2.baseRequest.client.GetFromRequest(scrV2.baseRequest, &scrResp)
+	_, err := scrV2.baseRequest.client.getFromRequest(scrV2.baseRequest, &scrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -93,24 +82,18 @@ func (scrV2 *StockCandlesRequestV2) Packed(optionalClients ...*MarketDataClient)
 
 // Get sends the StockCandlesRequestV2, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
 // It returns an error if the request or unpacking fails.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided,
-//     it replaces the current client for this request.
 //
 // # Returns
 //
 //   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([]models.Candle, error) {
+func (scrV2 *StockCandlesRequestV2) Get() ([]models.Candle, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
 
-	// Use the Packed method to make the request, passing along any optional client
-	scrResp, err := scrV2.Packed(optionalClients...)
+	// Use the Packed method to make the request
+	scrResp, err := scrV2.Packed()
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +109,8 @@ func (scrV2 *StockCandlesRequestV2) Get(optionalClients ...*MarketDataClient) ([
 
 // StockCandles creates a new CandlesRequest and associates it with the provided client.
 // If no client is provided, it uses the default client.
-func StockCandlesV2(client ...*MarketDataClient) *StockCandlesRequestV2 {
-	baseReq := newBaseRequest(client...)
+func StockCandlesV2() *StockCandlesRequestV2 {
+	baseReq := newBaseRequest()
 	baseReq.path = endpoints[2]["stocks"]["candles"]
 
 	cr := &StockCandlesRequestV2{

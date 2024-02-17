@@ -9,6 +9,25 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// marketDataClient is the default *MarketDataClient
+var marketDataClient *MarketDataClient
+
+const (
+	Version = "1.1.0" // Version specifies the current version of the SDK.
+
+	prodEnv = "prod" // prodEnv is the environment name for production.
+	testEnv = "test" // testEnv is the environment name for testing.
+	devEnv  = "dev"  // devEnv is the environment name for development.
+
+	prodHost = "api.marketdata.app" // prodHost is the hostname for the production environment.
+	testHost = "tst.marketdata.app" // testHost is the hostname for the testing environment.
+	devHost  = "localhost"          // devHost is the hostname for the development environment.
+
+	prodProtocol = "https" // prodProtocol specifies the protocol to use in the production environment.
+	testProtocol = "https" // testProtocol specifies the protocol to use in the testing environment.
+	devProtocol  = "http"  // devProtocol specifies the protocol to use in the development environment.
+)
+
 // getRateLimitConsumed extracts the rate limit consumed value from the response headers.
 // It specifically looks for the "X-Api-RateLimit-Consumed" header and attempts to convert its value to an integer.
 //

@@ -8,7 +8,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func TestNewClient(t *testing.T) {
+func TestGetClient(t *testing.T) {
 	// Generate a new client with the actual token
 	client, err := GetClient(os.Getenv("MARKETDATA_TOKEN"))
 	if err != nil {
@@ -115,7 +115,7 @@ func TestEnvironmentMethod(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new MarketDataClient instance
-			client := New()
+			client := new()
 
 			// Set the environment using the Environment method
 			client = client.Environment(tc.environment)

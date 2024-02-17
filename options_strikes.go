@@ -35,9 +35,9 @@ import (
 // These methods are used to send the request in different formats or retrieve the data.
 // They handle the actual communication with the API endpoint.
 //
-//   - Get(...*MarketDataClient) ([]OptionStrikes, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
-//   - Packed(...*MarketDataClient) (*OptionStrikesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
-//   - Raw(...*MarketDataClient) (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//   - Get() ([]OptionStrikes, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
+//   - Packed() (*OptionStrikesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
+//   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
 //
 // [/v1/options/strikes/]: https://www.marketdata.app/docs/api/options/strikes
 type OptionStrikesRequest struct {
@@ -116,44 +116,29 @@ func (o *OptionStrikesRequest) getParams() ([]parameters.MarketDataParam, error)
 }
 
 // Raw executes the OptionStrikesRequest and returns the raw *resty.Response.
-// This method allows for an optional MarketDataClient to be passed. If provided, this client replaces the one currently
-// attached to the OptionStrikesRequest. The *resty.Response can be used to directly access the raw JSON or *http.Response.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept an optional *MarketDataClient pointer. If provided, this client is used for the request instead of the default.
+// This method returns the *resty.Response which can be used to directly access the raw JSON or *http.Response.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed OptionStrikesRequest.
-//   - error: An error object if the OptionStrikesRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
-func (osr *OptionStrikesRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
-	return osr.baseRequest.Raw(optionalClients...)
+//   - error: An error object if the OptionStrikesRequest is nil or if an error occurs during the request execution.
+func (osr *OptionStrikesRequest) Raw() (*resty.Response, error) {
+	return osr.baseRequest.Raw()
 }
 
 // Packed sends the OptionStrikesRequest and returns the OptionStrikesResponse.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
 //
 // # Returns
 //
 //   - *models.OptionStrikesResponse: A pointer to the OptionStrikesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (osr *OptionStrikesRequest) Packed(optionalClients ...*MarketDataClient) (*models.OptionStrikesResponse, error) {
+func (osr *OptionStrikesRequest) Packed() (*models.OptionStrikesResponse, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionStrikesRequest is nil")
 	}
 
-	// Replace the client if an optional client is provided
-	if len(optionalClients) > 0 && optionalClients[0] != nil {
-		osr.baseRequest.client = optionalClients[0]
-	}
-
 	var osrResp models.OptionStrikesResponse
-	_, err := osr.baseRequest.client.GetFromRequest(osr.baseRequest, &osrResp)
+	_, err := osr.baseRequest.client.getFromRequest(osr.baseRequest, &osrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -163,23 +148,18 @@ func (osr *OptionStrikesRequest) Packed(optionalClients ...*MarketDataClient) (*
 
 // Get sends the OptionStrikesRequest, unpacks the OptionStrikesResponse, and returns a slice of OptionStrikes.
 // It returns an error if the request or unpacking fails.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
 //
 // # Returns
 //
 //   - []models.OptionStrikes: A slice of OptionStrikes containing the unpacked options strikes data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (osr *OptionStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]models.OptionStrikes, error) {
+func (osr *OptionStrikesRequest) Get() ([]models.OptionStrikes, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionStrikesRequest is nil")
 	}
 
-	// Use the Packed method to make the request, passing along any optional client
-	osrResp, err := osr.Packed(optionalClients...)
+	// Use the Packed method to make the request
+	osrResp, err := osr.Packed()
 	if err != nil {
 		return nil, err
 	}
@@ -193,20 +173,15 @@ func (osr *OptionStrikesRequest) Get(optionalClients ...*MarketDataClient) ([]mo
 	return data, nil
 }
 
-// OptionStrikes creates a new OptionStrikesRequest and associates it with the provided client.
-// If no client is provided, it uses the default client. This function initializes the request
+// OptionStrikes creates a new OptionStrikesRequest and uses the default client. This function initializes the request
 // with default parameters for underlying symbol, expiration, and date, and sets the request path based on
 // the predefined endpoints for options strikes.
 //
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If no client is provided, the default client is used.
-//
 // # Returns
 //
-//   - *OptionStrikesRequest: A pointer to the newly created OptionStrikesRequest with default parameters and associated client.
-func OptionStrikes(client ...*MarketDataClient) *OptionStrikesRequest {
-	baseReq := newBaseRequest(client...)
+//   - *OptionStrikesRequest: A pointer to the newly created OptionStrikesRequest with default parameters.
+func OptionStrikes() *OptionStrikesRequest {
+	baseReq := newBaseRequest()
 	baseReq.path = endpoints[1]["options"]["strikes"]
 
 	osr := &OptionStrikesRequest{

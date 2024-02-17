@@ -35,10 +35,13 @@ DEST_DIR="${SRC_DIR}/../documentation/sdk/go/"
 # Function to move and merge the 'go' directory to the destination directory
 move_and_merge_go_dir() {
     SOURCE_DIR="$OUTPUT_DIR/go" # Assuming the 'go' folder is directly inside the OUTPUT_DIR
-
-    # Use rsync to copy files from source to destination. 
-    rsync -av --remove-source-files "$SOURCE_DIR/" "$DEST_DIR/"
-
+    if [ "$PERFORM_CLEANUP" = true ]; then
+        # Use rsync to copy files from source to destination and remove the source files.
+        rsync -av --remove-source-files "$SOURCE_DIR/" "$DEST_DIR/"
+    else
+        # Use rsync to copy files from source to destination without removing the source files.
+        rsync -av "$SOURCE_DIR/" "$DEST_DIR/"
+    fi
     # Find and remove empty directories in the source directory
     find "$SOURCE_DIR" -type d -empty -delete
 
@@ -58,16 +61,12 @@ process_group() {
         # Remove the word "bulk" from the group name if it exists
         MODEL_GROUP_NAME=${GROUP_NAME/bulk/}
 
-        MAIN_FILE="${GROUP_NAME}.go"
-        TEST_FILE="${GROUP_NAME}_test.go"
         MODEL_MAIN_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}.go"
         MODEL_TEST_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}_test.go"
     fi
 
     MAIN_FILE="${GROUP_NAME}.go"
     TEST_FILE="${GROUP_NAME}_test.go"
-    MODEL_MAIN_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}.go"
-    MODEL_TEST_FILE="$MODELS_DIR/${MODEL_GROUP_NAME}_test.go"
     CANDLE_FILE="$MODELS_DIR/candle.go" # Path to the candle.go file
     CANDLE_TEST_FILE="$MODELS_DIR/candle_test.go" # Path to the candle.go file
 
@@ -76,13 +75,21 @@ process_group() {
     TMP_DIR=$(create_tmp_dir)
     echo "Using temporary directory for main files: $TMP_DIR"
 
+    MAIN_FILES_COPIED=false
+
     if [ -f "$SRC_DIR/$MAIN_FILE" ]; then
+        echo "Copying file: $SRC_DIR/$MAIN_FILE to $TMP_DIR"
         cp "$SRC_DIR/$MAIN_FILE" "$TMP_DIR"
+        MAIN_FILES_COPIED=true
     fi
     if [ -f "$SRC_DIR/$TEST_FILE" ]; then
+        echo "Copying file: $SRC_DIR/$TEST_FILE to $TMP_DIR"
         cp "$SRC_DIR/$TEST_FILE" "$TMP_DIR"
+        MAIN_FILES_COPIED=true
     fi
-    gomarkdoc --output "$OUTPUT_DIR/${GROUP_NAME}_request.md" "$TMP_DIR"
+    if [ "$MAIN_FILES_COPIED" = true ]; then
+        gomarkdoc --output "$OUTPUT_DIR/${GROUP_NAME}_request.md" "$TMP_DIR"
+    fi
 
     rm -rf "$TMP_DIR"
 
@@ -90,11 +97,17 @@ process_group() {
     TMP_DIR=$(create_tmp_dir)
     echo "Using new temporary directory for model files: $TMP_DIR"
 
+    MODEL_FILES_COPIED=false
+
     if [ -f "$SRC_DIR/$MODEL_MAIN_FILE" ]; then
+        echo "Copying file: $SRC_DIR/$MODEL_MAIN_FILE to $TMP_DIR"
         cp "$SRC_DIR/$MODEL_MAIN_FILE" "$TMP_DIR"
+        MODEL_FILES_COPIED=true
     fi
     if [ -f "$SRC_DIR/$MODEL_TEST_FILE" ]; then
+        echo "Copying file: $SRC_DIR/$MODEL_TEST_FILE to $TMP_DIR"
         cp "$SRC_DIR/$MODEL_TEST_FILE" "$TMP_DIR"
+        MODEL_FILES_COPIED=true
     fi
     # Check if the group name contains "candles" and copy candle.go if it does
     if [[ "$GROUP_NAME" == *"candles"* ]]; then
@@ -107,7 +120,9 @@ process_group() {
         fi
     fi
 
-    gomarkdoc --output "$OUTPUT_DIR/${GROUP_NAME}_response.md" "$TMP_DIR"
+    if [ "$MODEL_FILES_COPIED" = true ]; then
+        gomarkdoc --output "$OUTPUT_DIR/${GROUP_NAME}_response.md" "$TMP_DIR"
+    fi
 
     # Clean up temporary directory
     rm -rf "$TMP_DIR"
@@ -139,6 +154,7 @@ process_group "options_lookup"
 process_group "options_quotes"
 process_group "options_strikes"
 process_group "options_chain"
+process_group "client"
 
 
 
