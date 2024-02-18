@@ -615,7 +615,7 @@ def combine_files_into_mdx(file_paths):
             # Use consistent logic for both /api/ and /sdk/
             if "/sdk/" in url:
                 base_name = "go"
-                path_after_segment = url.split("/sdk/")[-1]
+                path_after_segment = url.split("/go/")[-1]
             elif "/api/" in url:
                 base_name = "go"
                 path_after_segment = url.split("/api/")[-1]

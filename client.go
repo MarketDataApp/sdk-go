@@ -11,7 +11,6 @@
 // 4. Check the rate limit in the client to keep track of your requests.
 // 5. Check the in-memory logs to see the raw request and response details.
 //
-// # 
 // [Market Data Go Client]: https://www.marketdata.app/docs/sdk/go/client
 package client
 
