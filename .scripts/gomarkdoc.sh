@@ -139,6 +139,11 @@ process_group() {
     echo "Markdown processing and cleanup completed for $GROUP_NAME"
 }
 
+: '
+MOVE PROCESS GROUPS HERE TO AVOID PROCESSING
+
+'
+
 # Call process_group for each group name
 process_group "indices_candles"
 process_group "indices_quotes"
@@ -155,7 +160,7 @@ process_group "options_quotes"
 process_group "options_strikes"
 process_group "options_chain"
 process_group "client"
-
+process_group "logging"
 
 
 # Add more calls to process_group with different group names as needed

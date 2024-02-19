@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MarketDataApp/sdk-go/helpers/logging"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -147,14 +146,14 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 	body := string(resp.Body())
 
 	// Create a new log entry with the gathered information.
-	logEntry := logging.AddToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
+	logEntry := addToLog(GetLogs(), time.Now(), rayID, req.URL, rateLimitConsumed, delay, status, body, redactedHeaders, resHeaders)
 	// If debug mode is enabled and the log entry is not nil, pretty print the log entry.
 	if c.debug && logEntry != nil {
 		logEntry.PrettyPrint()
 	}
 	// If the log entry is not nil, write it to the log.
 	if logEntry != nil {
-		logEntry.WriteToLog(c.debug)
+		logEntry.writeToLog(c.debug)
 	}
 	return nil
 }
@@ -604,14 +603,4 @@ func (c *MarketDataClient) Token(bearerToken string) error {
 	}
 
 	return fmt.Errorf("invalid token. received non-OK status: %s", resp.Status()) // Return error for non-successful response
-}
-
-// GetLogs retrieves a pointer to the HttpRequestLogs instance, allowing access to the logs collected during HTTP requests.
-// This method is primarily used for debugging and monitoring purposes, providing insights into the HTTP request lifecycle and any issues that may have occurred.
-//
-// # Returns
-//
-//   - *logging.HttpRequestLogs: A pointer to the HttpRequestLogs instance containing logs of HTTP requests.
-func GetLogs() *logging.HttpRequestLogs {
-	return logging.Logs
 }
