@@ -63,8 +63,9 @@ type MarketDataLogs struct {
 	// Beyond this limit, older entries may be evicted or ignored.
 	MaxEntries int
 
-	// MemoryLimit specifies the maximum amount of memory (in bytes) that can be used for storing log entries.
-	// This helps in preventing excessive memory usage by in-memory log storage.
+	// MemoryLimit specifies the maximum amount of memory (in bytes) that can be used for
+	// storing log entries.  This helps in preventing excessive memory usage by in-memory
+	// log storage.
 	MemoryLimit int64
 
 	// SuccessLogger is a zap logger used for logging successful operations.
@@ -85,9 +86,9 @@ type MarketDataLogs struct {
 // # Returns
 //
 //   - An int64 representing the total memory usage of all log entries in bytes.
-func (h *MarketDataLogs) totalMemoryUsage() int64 {
+func (l *MarketDataLogs) totalMemoryUsage() int64 {
 	total := int64(0)
-	for _, log := range h.Logs {
+	for _, log := range l.Logs {
 		total += log.memory
 	}
 	return total
@@ -104,10 +105,10 @@ func (h *MarketDataLogs) totalMemoryUsage() int64 {
 //    MarketDataLogs{
 //      LogEntry[0]: {Timestamp: 2024-02-19 15:16:30 -05:00, Status: 200, Request: https://api.marketdata.app/v1/stocks/candles/4H/AAPL/?from=2023-01-01&to=2023-01-04, RequestHeaders: map[Authorization:[Bearer **********************************************************8IH6] User-Agent:[sdk-go/1.1.0]], RayID: 8581301bc9e974ca-MIA, RateLimitConsumed: 0, Delay: 1002ms, Response Headers: map[Allow:[GET, HEAD, OPTIONS] Alt-Svc:[h3=":443"; ma=86400] Cf-Cache-Status:[DYNAMIC] Cf-Ray:[8581301bc9e974ca-MIA] Content-Type:[application/json] Cross-Origin-Opener-Policy:[same-origin] Date:[Mon, 19 Feb 2024 20:16:30 GMT] Nel:[{"success_fraction":0,"report_to":"cf-nel","max_age":604800}] Referrer-Policy:[same-origin] Report-To:[{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=ar7qRMEAxiHJcyRqlRlZvfzqv80inCp91LwdsxTfo51%2FSmdqz6NoadysPyFlMZKtDMG1IsDllX0GXXPjNsvjg4gQBr%2FLJ8G5Ad1z5lDXfhqrSee7umXzVf7dYmAFwq4x4sPMANE%3D"}],"group":"cf-nel","max_age":604800}] Server:[cloudflare] Vary:[Accept, Origin] X-Api-Ratelimit-Consumed:[0] X-Api-Ratelimit-Limit:[100000] X-Api-Ratelimit-Remaining:[99973] X-Api-Ratelimit-Reset:[1708439400] X-Api-Response-Log-Id:[88078705] X-Content-Type-Options:[nosniff] X-Frame-Options:[DENY]], Response: {"s":"ok","t":[1672756200,1672770600,1672842600,1672857000],"o":[130.28,124.6699,126.89,127.265],"h":[130.9,125.42,128.6557,127.87],"l":[124.19,124.17,125.08,125.28],"c":[124.6499,125.05,127.2601,126.38],"v":[64411753,30727802,49976607,28870878]}}
 //    }
-func (h *MarketDataLogs) String() string {
+func (l *MarketDataLogs) String() string {
 	var sb strings.Builder
 	sb.WriteString("MarketDataLogs{\n")
-	for i, log := range h.Logs {
+	for i, log := range l.Logs {
 		sb.WriteString(fmt.Sprintf("  LogEntry[%d]: %s\n", i, log.detailedString(false)))
 	}
 	sb.WriteString("}")
@@ -121,28 +122,28 @@ func (h *MarketDataLogs) String() string {
 // # Returns
 //
 //   - string: A string representing the response of the last log entry. If no logs are available, returns "No logs available".
-func (h *MarketDataLogs) LatestString() string {
+func (l *MarketDataLogs) LatestString() string {
 	// Step 2: Check if there are no logs
-	if len(h.Logs) == 0 {
+	if len(l.Logs) == 0 {
 		// Return an appropriate response for no logs
 		return "No logs available"
 	}
 
 	// Step 3: Calculate the index of the last log entry and access it
-	lastLogIndex := len(h.Logs) - 1
-	lastLog := h.Logs[lastLogIndex]
+	lastLogIndex := len(l.Logs) - 1
+	lastLog := l.Logs[lastLogIndex]
 
 	// Step 4: Return the Response of the last log entry
 	return lastLog.Response
 }
 
 // PrintLatest prints the latest HTTP request log entry.
-func (h *MarketDataLogs) PrintLatest() {
-	if len(h.Logs) == 0 {
+func (l *MarketDataLogs) PrintLatest() {
+	if len(l.Logs) == 0 {
 		fmt.Println("No logs available")
 	} else {
 		fmt.Println(blue("Latest Log Entry:"))
-		h.Logs[len(h.Logs)-1].PrettyPrint()
+		l.Logs[len(l.Logs)-1].PrettyPrint()
 	}
 }
 
@@ -171,44 +172,44 @@ type LogEntry struct {
 // # Parameters
 //
 //   - debug: A boolean indicating whether to log as a debug message.
-func (h LogEntry) writeToLog(debug bool) {
+func (l LogEntry) writeToLog(debug bool) {
 	var logger *zap.Logger
 	var logMessage string
 
 	// Try to parse the JSON response into a map
 	var jsonResponse map[string]interface{}
-	err := json.Unmarshal([]byte(h.Response), &jsonResponse)
+	err := json.Unmarshal([]byte(l.Response), &jsonResponse)
 
 	// If the parsing fails, log the response as a string
 	var responseBody interface{}
 	if err != nil {
-		responseBody = h.Response
+		responseBody = l.Response
 	} else {
 		responseBody = jsonResponse
 	}
 
-	if h.Status >= 200 && h.Status < 300 {
+	if l.Status >= 200 && l.Status < 300 {
 		if debug {
 			logger = logs.SuccessLogger
 			logMessage = "Successful Request"
 		}
-	} else if h.Status >= 400 && h.Status < 500 {
+	} else if l.Status >= 400 && l.Status < 500 {
 		logger = logs.ClientErrorLogger
 		logMessage = "Client Error"
-	} else if h.Status >= 500 {
+	} else if l.Status >= 500 {
 		logger = logs.ServerErrorLogger
 		logMessage = "Server Error"
 	}
 
 	if logger != nil {
 		logger.Info(logMessage,
-			zap.String("cf_ray", h.RayID),
-			zap.String("request_url", h.Request),
-			zap.Int("ratelimit_consumed", h.RateLimitConsumed),
-			zap.Int("response_code", h.Status),
-			zap.Int64("delay_ms", h.Delay),
-			zap.Any("request_headers", h.RequestHeaders),
-			zap.Any("response_headers", h.ResponseHeaders),
+			zap.String("cf_ray", l.RayID),
+			zap.String("request_url", l.Request),
+			zap.Int("ratelimit_consumed", l.RateLimitConsumed),
+			zap.Int("response_code", l.Status),
+			zap.Int64("delay_ms", l.Delay),
+			zap.Any("request_headers", l.RequestHeaders),
+			zap.Any("response_headers", l.ResponseHeaders),
 			zap.Any("response_body", responseBody), // Log the parsed JSON response or the original string
 
 		)
@@ -225,23 +226,23 @@ func (h LogEntry) writeToLog(debug bool) {
 //
 //    LogEntry{Timestamp: 2024-02-19 14:53:34 -05:00, Status: 200, Request: https://api.marketdata.app/v1/stocks/candles/4H/AAPL/?from=2023-01-01&to=2023-01-04, RequestHeaders: map[Authorization:[Bearer **********************************************************L06F] User-Agent:[sdk-go/1.1.0]], RayID: 85810e82de8e7438-MIA, RateLimitConsumed: 0, Delay: 893ms, Response Headers: map[Allow:[GET, HEAD, OPTIONS] Alt-Svc:[h3=":443"; ma=86400] Cf-Cache-Status:[DYNAMIC] Cf-Ray:[85810e82de8e7438-MIA] Content-Type:[application/json] Cross-Origin-Opener-Policy:[same-origin] Date:[Mon, 19 Feb 2024 19:53:34 GMT] Nel:[{"success_fraction":0,"report_to":"cf-nel","max_age":604800}] Referrer-Policy:[same-origin] Report-To:[{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=r18O66yjJ%2FxXqOnCb3a76wBgpZaCbhJcot%2Bfgl1oHna2LigHHAYRaXg8dNLiJYHes0ezAaIdXLhVNGQBo%2FBAte6%2ByNcaZku5cV19FPyiD2%2BKXJeEtnFN6pJUsUA77sxk%2FfWxOFU%3D"}],"group":"cf-nel","max_age":604800}] Server:[cloudflare] Vary:[Accept, Origin] X-Api-Ratelimit-Consumed:[0] X-Api-Ratelimit-Limit:[100000] X-Api-Ratelimit-Remaining:[99973] X-Api-Ratelimit-Reset:[1708439400] X-Api-Response-Log-Id:[88061028] X-Content-Type-Options:[nosniff] X-Frame-Options:[DENY]], Response: {"s":"ok","t":[1672756200,1672770600,1672842600,1672857000],"o":[130.28,124.6699,126.89,127.265],"h":[130.9,125.42,128.6557,127.87],"l":[124.19,124.17,125.08,125.28],"c":[124.6499,125.05,127.2601,126.38],"v":[64411753,30727802,49976607,28870878]}}
 //
-func (h LogEntry) String() string {
-	return h.detailedString(true)
+func (l LogEntry) String() string {
+	return l.detailedString(true)
 }
 
 // PrettyPrint prints a formatted representation of the HTTP request log entry.
-func (h LogEntry) PrettyPrint() {
-	fmt.Println(blue("Timestamp:"), h.Timestamp.Format("2006-01-02 15:04:05"))
-	fmt.Println(blue("Request:"), h.Request)
+func (l LogEntry) PrettyPrint() {
+	fmt.Println(blue("Timestamp:"), l.Timestamp.Format("2006-01-02 15:04:05"))
+	fmt.Println(blue("Request:"), l.Request)
 	fmt.Println(blue("Request Headers:"))
-	h.printHeaders(h.RequestHeaders)
-	fmt.Println(blue("Status:"), h.Status)
-	fmt.Println(blue("Ray ID:"), h.RayID)
-	fmt.Println(blue("Rate Limit Consumed:"), h.RateLimitConsumed)
-	fmt.Println(blue("Delay:"), fmt.Sprintf("%dms", h.Delay))
+	l.printHeaders(l.RequestHeaders)
+	fmt.Println(blue("Status:"), l.Status)
+	fmt.Println(blue("Ray ID:"), l.RayID)
+	fmt.Println(blue("Rate Limit Consumed:"), l.RateLimitConsumed)
+	fmt.Println(blue("Delay:"), fmt.Sprintf("%dms", l.Delay))
 	fmt.Println(blue("Response Headers:"))
-	h.printHeaders(h.ResponseHeaders)
-	fmt.Println(blue("Response:"), h.Response)
+	l.printHeaders(l.ResponseHeaders)
+	fmt.Println(blue("Response:"), l.Response)
 }
 
 // printHeaders prints the HTTP headers in a formatted manner. Headers starting with "X-Api-Ratelimit" are highlighted.
@@ -271,14 +272,14 @@ func (h LogEntry) printHeaders(headers http.Header) {
 // # Returns
 //
 //   - An integer representing the memory usage of the log entry in bytes.
-func (h LogEntry) memoryUsage() int {
+func (l LogEntry) memoryUsage() int {
 	// Size of time.Time (24 bytes)
 	timestampSize := 24
 
 	// Size of string: size of string header (16 bytes) + length of string
-	rayIDSize := 16 + len(h.RayID)
-	requestSize := 16 + len(h.Request)
-	responseSize := 16 + len(h.Response)
+	rayIDSize := 16 + len(l.RayID)
+	requestSize := 16 + len(l.Request)
+	responseSize := 16 + len(l.Response)
 
 	// Size of int (4 bytes)
 	statusSize := 4
@@ -289,8 +290,8 @@ func (h LogEntry) memoryUsage() int {
 	memorySize := 8
 
 	// Size of http.Header
-	reqHeadersSize := h.headerSize(h.RequestHeaders)
-	resHeadersSize := h.headerSize(h.ResponseHeaders)
+	reqHeadersSize := l.headerSize(l.RequestHeaders)
+	resHeadersSize := l.headerSize(l.ResponseHeaders)
 
 	totalSize := timestampSize + rayIDSize + requestSize + statusSize + rateLimitConsumedSize + delaySize + responseSize + memorySize + reqHeadersSize + resHeadersSize
 
@@ -363,7 +364,7 @@ func newLogEntry(timestamp time.Time, rayID string, request string, rateLimitCon
 //
 // # Parameters
 //
-//   - h *MarketDataLogs: A pointer to the MarketDataLogs to which the new log entry will be added.
+//   - l *MarketDataLogs: A pointer to the MarketDataLogs to which the new log entry will be added.
 //   - timestamp time.Time: The timestamp of the HTTP request.
 //   - rayID string: The unique identifier for the request.
 //   - request string: The URL of the HTTP request.
@@ -377,7 +378,7 @@ func newLogEntry(timestamp time.Time, rayID string, request string, rateLimitCon
 // # Returns
 //
 //   - *LogEntry: A pointer to the newly added LogEntry entry. Returns nil if the log entry is not added.
-func addToLog(h *MarketDataLogs, timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) *LogEntry {
+func addToLog(l *MarketDataLogs, timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) *LogEntry {
 	if request == "https://api.marketdata.app/user/" {
 		// If the URL starts with https://api.marketdata.app/user/ do not add it to the log.
 		// Just return without doing anything in this case.
@@ -386,21 +387,21 @@ func addToLog(h *MarketDataLogs, timestamp time.Time, rayID string, request stri
 
 	log := newLogEntry(timestamp, rayID, request, rateLimitConsumed, delay, status, body, reqHeaders, resHeaders)
 
-	h.Logs = append(h.Logs, log)
+	l.Logs = append(l.Logs, log)
 
 	// Trim the log to ensure the total memory usage and the number of log entries are below their limits
-	h.trimLog()
+	l.trimLog()
 
 	// Return a pointer to the new log entry
-	return &h.Logs[len(h.Logs)-1]
+	return &l.Logs[len(l.Logs)-1]
 }
 
 // trimLog trims the MarketDataLogs to ensure that the total memory usage and the number of log entries do not exceed their respective limits.
 // It iteratively removes the oldest log entry until the memory usage is below the MemoryLimit and the number of entries is less than or equal to MaxLogEntries.
-func (h *MarketDataLogs) trimLog() {
+func (l *MarketDataLogs) trimLog() {
 	// While the total memory usage is above the limit or there are too many log entries, remove the oldest log entry
-	for (h.totalMemoryUsage() > logs.MemoryLimit || len(h.Logs) > logs.MaxEntries) && len(h.Logs) > 0 {
-		h.Logs = h.Logs[1:]
+	for (l.totalMemoryUsage() > logs.MemoryLimit || len(l.Logs) > logs.MaxEntries) && len(l.Logs) > 0 {
+		l.Logs = l.Logs[1:]
 	}
 }
 
@@ -413,13 +414,13 @@ func (h *MarketDataLogs) trimLog() {
 // # Returns
 //
 //   - string: A string representing the log entry, optionally prefixed with "LogEntry".
-func (h LogEntry) detailedString(includeStructName bool) string {
+func (l LogEntry) detailedString(includeStructName bool) string {
 	prefix := ""
 	if includeStructName {
 		prefix = "LogEntry"
 	}
 	return fmt.Sprintf("%s{Timestamp: %v, Status: %d, Request: %s, RequestHeaders: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s}",
-		prefix, dates.TimeString(h.Timestamp), h.Status, h.Request, h.RequestHeaders, h.RayID, h.RateLimitConsumed, h.Delay, h.ResponseHeaders, h.Response)
+		prefix, dates.TimeString(l.Timestamp), l.Status, l.Request, l.RequestHeaders, l.RayID, l.RateLimitConsumed, l.Delay, l.ResponseHeaders, l.Response)
 }
 
 // init initializes the logging system for the application.
