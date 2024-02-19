@@ -3,6 +3,16 @@
 // managing rate limits, and logging. The SDK supports various data types
 // including stocks, options, indices, and market status information.
 //
+// # Singleton Client
+//
+// The [MarketDataClient] is a singleton client that is used to interact with the Market Data API. 
+// If you are using an environment variable to store your token, the client will be intialized automatically
+// when the package is imported. If you are not using an environment variable, you can initialize the client
+// manually using the [NewClient] method. 
+//
+// After you initialize it for the first time, it is not neccessary to reinitialize it again. The client is thread-safe and can be used
+// across multiple goroutines. Do not attempt to create multiple instances of the client.
+//
 // # Get Started Quickly with the MarketDataClient
 //
 //  1. Use [GetClient] to fetch the [MarketDataClient] instance and set the API token.
@@ -222,11 +232,14 @@ func (c *MarketDataClient) setDefaultResetTime() {
 	c.RateLimitReset = defaultReset
 }
 
-// New creates and configures a new MarketDataClient instance with default settings. This method is primarily used to initialize a client with predefined configurations such as the default rate limit reset time, production environment setup, and common HTTP headers and hooks. It's the starting point for interacting with the MarketDataClient functionalities.
+// NewClient creates and configures a new MarketDataClient instance with default settings. 
+// This method is primarily used to initialize a client with predefined configurations such as the default
+// rate limit reset time, production environment setup, and common HTTP headers and hooks. 
+// It's the starting point for interacting with the [MarketDataClient] functionalities.
 //
 // # Returns
 //
-//   - *MarketDataClient: A pointer to the newly created MarketDataClient instance with default configurations applied.
+//   - error: An error if the token failed to authorize with the Market Data API.
 func NewClient(token string) error {
 	client := newClient()
 

@@ -15,10 +15,10 @@
 //
 // # Getting Started With Logging
 //
-//   1. Initialize the MarketDataClient with your API token.
-//   2. Enable Debug mode for verbose logging during development.
-//   3. Perform HTTP requests and utilize the logging features to monitor request details, responses, and rate limit usage.
-//   4. Review the in-memory logs or structured log files to analyze HTTP interactions and troubleshoot issues.
+//  1. Initialize the MarketDataClient with your API token.
+//  2. Enable Debug mode for verbose logging during development.
+//  3. Perform HTTP requests and utilize the logging features to monitor request details, responses, and rate limit usage.
+//  4. Review the in-memory logs or structured log files to analyze HTTP interactions and troubleshoot issues.
 //
 // [comprehensive logging framework]: https://www.marketdata.app/docs/sdk/go/logging
 package client
@@ -33,6 +33,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MarketDataApp/sdk-go/helpers/dates"
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -96,16 +97,22 @@ func (h *MarketDataLogs) totalMemoryUsage() int64 {
 //
 // # Returns
 //
-//   - A string representing all log entries.
+//   - string: A string representing all log entries, with log entry numbers starting at 0.
+//
+// # Example
+//
+//    MarketDataLogs{
+//      LogEntry[0]: {Timestamp: 2024-02-19 15:16:30 -05:00, Status: 200, Request: https://api.marketdata.app/v1/stocks/candles/4H/AAPL/?from=2023-01-01&to=2023-01-04, RequestHeaders: map[Authorization:[Bearer **********************************************************8IH6] User-Agent:[sdk-go/1.1.0]], RayID: 8581301bc9e974ca-MIA, RateLimitConsumed: 0, Delay: 1002ms, Response Headers: map[Allow:[GET, HEAD, OPTIONS] Alt-Svc:[h3=":443"; ma=86400] Cf-Cache-Status:[DYNAMIC] Cf-Ray:[8581301bc9e974ca-MIA] Content-Type:[application/json] Cross-Origin-Opener-Policy:[same-origin] Date:[Mon, 19 Feb 2024 20:16:30 GMT] Nel:[{"success_fraction":0,"report_to":"cf-nel","max_age":604800}] Referrer-Policy:[same-origin] Report-To:[{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=ar7qRMEAxiHJcyRqlRlZvfzqv80inCp91LwdsxTfo51%2FSmdqz6NoadysPyFlMZKtDMG1IsDllX0GXXPjNsvjg4gQBr%2FLJ8G5Ad1z5lDXfhqrSee7umXzVf7dYmAFwq4x4sPMANE%3D"}],"group":"cf-nel","max_age":604800}] Server:[cloudflare] Vary:[Accept, Origin] X-Api-Ratelimit-Consumed:[0] X-Api-Ratelimit-Limit:[100000] X-Api-Ratelimit-Remaining:[99973] X-Api-Ratelimit-Reset:[1708439400] X-Api-Response-Log-Id:[88078705] X-Content-Type-Options:[nosniff] X-Frame-Options:[DENY]], Response: {"s":"ok","t":[1672756200,1672770600,1672842600,1672857000],"o":[130.28,124.6699,126.89,127.265],"h":[130.9,125.42,128.6557,127.87],"l":[124.19,124.17,125.08,125.28],"c":[124.6499,125.05,127.2601,126.38],"v":[64411753,30727802,49976607,28870878]}}
+//    }
 func (h *MarketDataLogs) String() string {
 	var sb strings.Builder
-	for _, log := range h.Logs {
-		sb.WriteString(log.String())
-		sb.WriteString("\n")
+	sb.WriteString("MarketDataLogs{\n")
+	for i, log := range h.Logs {
+		sb.WriteString(fmt.Sprintf("  LogEntry[%d]: %s\n", i, log.detailedString(false)))
 	}
+	sb.WriteString("}")
 	return sb.String()
 }
-
 // LatestString returns the response of the last log entry in the MarketDataLogs.
 //
 // This method checks if there are any logs present. If there are no logs, it returns a message indicating that no logs are available.
@@ -113,7 +120,7 @@ func (h *MarketDataLogs) String() string {
 //
 // # Returns
 //
-//   - A string representing the response of the last log entry. If no logs are available, returns "No logs available".
+//   - string: A string representing the response of the last log entry. If no logs are available, returns "No logs available".
 func (h *MarketDataLogs) LatestString() string {
 	// Step 2: Check if there are no logs
 	if len(h.Logs) == 0 {
@@ -159,7 +166,7 @@ type LogEntry struct {
 	memory            int64       // The amount of memory (in bytes) used by the log entry
 }
 
-// WriteToLog writes the log entry to the appropriate logger based on the HTTP response status.
+// writeToLog writes the log entry to the appropriate logger based on the HTTP response status.
 //
 // # Parameters
 //
@@ -212,10 +219,14 @@ func (h LogEntry) writeToLog(debug bool) {
 //
 // # Returns
 //
-//   - A string representing the log entry.
+//   - string: A string representing the log entry.
+//
+// # Example
+//
+//    LogEntry{Timestamp: 2024-02-19 14:53:34 -05:00, Status: 200, Request: https://api.marketdata.app/v1/stocks/candles/4H/AAPL/?from=2023-01-01&to=2023-01-04, RequestHeaders: map[Authorization:[Bearer **********************************************************L06F] User-Agent:[sdk-go/1.1.0]], RayID: 85810e82de8e7438-MIA, RateLimitConsumed: 0, Delay: 893ms, Response Headers: map[Allow:[GET, HEAD, OPTIONS] Alt-Svc:[h3=":443"; ma=86400] Cf-Cache-Status:[DYNAMIC] Cf-Ray:[85810e82de8e7438-MIA] Content-Type:[application/json] Cross-Origin-Opener-Policy:[same-origin] Date:[Mon, 19 Feb 2024 19:53:34 GMT] Nel:[{"success_fraction":0,"report_to":"cf-nel","max_age":604800}] Referrer-Policy:[same-origin] Report-To:[{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=r18O66yjJ%2FxXqOnCb3a76wBgpZaCbhJcot%2Bfgl1oHna2LigHHAYRaXg8dNLiJYHes0ezAaIdXLhVNGQBo%2FBAte6%2ByNcaZku5cV19FPyiD2%2BKXJeEtnFN6pJUsUA77sxk%2FfWxOFU%3D"}],"group":"cf-nel","max_age":604800}] Server:[cloudflare] Vary:[Accept, Origin] X-Api-Ratelimit-Consumed:[0] X-Api-Ratelimit-Limit:[100000] X-Api-Ratelimit-Remaining:[99973] X-Api-Ratelimit-Reset:[1708439400] X-Api-Response-Log-Id:[88061028] X-Content-Type-Options:[nosniff] X-Frame-Options:[DENY]], Response: {"s":"ok","t":[1672756200,1672770600,1672842600,1672857000],"o":[130.28,124.6699,126.89,127.265],"h":[130.9,125.42,128.6557,127.87],"l":[124.19,124.17,125.08,125.28],"c":[124.6499,125.05,127.2601,126.38],"v":[64411753,30727802,49976607,28870878]}}
+//
 func (h LogEntry) String() string {
-	return fmt.Sprintf("Timestamp: %v, Status: %d, Request: %s, Request Headers: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s",
-		h.Timestamp.Format("2006-01-02 15:04:05"), h.Status, h.Request, h.RequestHeaders, h.RayID, h.RateLimitConsumed, h.Delay, h.ResponseHeaders, h.Response)
+	return h.detailedString(true)
 }
 
 // PrettyPrint prints a formatted representation of the HTTP request log entry.
@@ -308,7 +319,7 @@ func (h LogEntry) headerSize(header http.Header) int {
 	return size
 }
 
-// NewLogEntry creates a new instance of LogEntry with the provided parameters.
+// newLogEntry creates a new instance of LogEntry with the provided parameters.
 // This function initializes the log entry with details of the HTTP request and response,
 // including timestamps, request and response headers, and other relevant information.
 //
@@ -327,7 +338,7 @@ func (h LogEntry) headerSize(header http.Header) int {
 // # Returns
 //
 //   - LogEntry: An instance of LogEntry populated with the provided parameters and calculated memory usage.
-func NewLogEntry(timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) LogEntry {
+func newLogEntry(timestamp time.Time, rayID string, request string, rateLimitConsumed int, delay int64, status int, body string, reqHeaders http.Header, resHeaders http.Header) LogEntry {
 	log := LogEntry{
 		Timestamp:         timestamp,
 		Status:            status,
@@ -373,7 +384,7 @@ func addToLog(h *MarketDataLogs, timestamp time.Time, rayID string, request stri
 		return nil
 	}
 
-	log := NewLogEntry(timestamp, rayID, request, rateLimitConsumed, delay, status, body, reqHeaders, resHeaders)
+	log := newLogEntry(timestamp, rayID, request, rateLimitConsumed, delay, status, body, reqHeaders, resHeaders)
 
 	h.Logs = append(h.Logs, log)
 
@@ -391,6 +402,24 @@ func (h *MarketDataLogs) trimLog() {
 	for (h.totalMemoryUsage() > logs.MemoryLimit || len(h.Logs) > logs.MaxEntries) && len(h.Logs) > 0 {
 		h.Logs = h.Logs[1:]
 	}
+}
+
+// detailedString returns a string representation of the HTTP request log entry, with an option to include the struct name.
+//
+// # Parameters
+//
+//   - includeStructName: A boolean indicating whether to prefix the output with "LogEntry".
+//
+// # Returns
+//
+//   - string: A string representing the log entry, optionally prefixed with "LogEntry".
+func (h LogEntry) detailedString(includeStructName bool) string {
+	prefix := ""
+	if includeStructName {
+		prefix = "LogEntry"
+	}
+	return fmt.Sprintf("%s{Timestamp: %v, Status: %d, Request: %s, RequestHeaders: %s, RayID: %s, RateLimitConsumed: %d, Delay: %dms, Response Headers: %s, Response: %s}",
+		prefix, dates.TimeString(h.Timestamp), h.Status, h.Request, h.RequestHeaders, h.RayID, h.RateLimitConsumed, h.Delay, h.ResponseHeaders, h.Response)
 }
 
 // init initializes the logging system for the application.
