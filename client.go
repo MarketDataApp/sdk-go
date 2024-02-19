@@ -239,23 +239,20 @@ func (c *MarketDataClient) setDefaultResetTime() {
 //
 // # Returns
 //
-//   - error: An error if the token failed to authorize with the Market Data API.
-func NewClient(token string) error {
+//   - *MarketDataClient: A pointer to the MarketDataClient instance.
+//   - error: An error if the token failed to authorize with the Market Data API or nil if authorization was successful.
+func NewClient(token string) (*MarketDataClient, error) {
 	client := newClient()
 
 	// Set the client's token.
 	err := client.Token(token)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Set the global client if there are no errors
-	if err == nil {
-		marketDataClient = client
-		return nil
-	}
-
-	return errors.New("error setting token")
+	marketDataClient = client
+	return client, nil
 }
 
 func newClient() *MarketDataClient {
@@ -538,13 +535,12 @@ func tryNewClient() error {
 	token := os.Getenv("MARKETDATA_TOKEN") // Retrieve the market data token from environment variables
 
 	if token != "" {
-		err := NewClient(token)
+		_, err := NewClient(token)
 
 		if err != nil {
 			return err
 		}
 		return nil
-
 	}
 	return errors.New("env variable MARKETDATA_TOKEN not set")
 }
