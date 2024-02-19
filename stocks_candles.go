@@ -271,7 +271,7 @@ func (scr *StockCandlesRequest) Raw() (*resty.Response, error) {
 ////
 // # Returns
 //
-//   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
+//   - *StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
 func (scr *StockCandlesRequest) Packed() (*models.StockCandlesResponse, error) {
 	if scr == nil {
@@ -292,7 +292,7 @@ func (scr *StockCandlesRequest) Packed() (*models.StockCandlesResponse, error) {
 //
 // # Returns
 //
-//   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
+//   - []Candle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
 func (scr *StockCandlesRequest) Get() ([]models.Candle, error) {
 	if scr == nil {
