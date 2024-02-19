@@ -295,16 +295,19 @@ func newClient() *MarketDataClient {
 // helps in preventing indefinitely hanging requests in case of network issues or slow
 // server responses.
 //
+// By default the client has a timeout of 95 seconds. The timeout may be lowered, but it cannot be increased.
+// Valid timeouts are between 1 and 95 seconds. Setting the timeout to any invalid integer will cause the
+// client to use the default timeout of 95 seconds.
+//
 // # Parameters
 //
-//   - int: The timeout duration in seconds. A duration of 0 means no timeout. By default the client has a timeout of 95 seconds.
-//
-// # Returns
-//
-//   - *MarketDataClient: A pointer to the MarketDataClient instance, allowing for method chaining.
-func (c *MarketDataClient) Timeout(seconds int) *MarketDataClient {
+//   - int: The timeout duration in seconds. A duration of 0 means no timeout.
+func (c *MarketDataClient) Timeout(seconds int) {
+	if seconds > 95 || seconds < 0 || seconds == 0 {
+		seconds = 95
+	}
+
 	c.Client.SetTimeout(time.Duration(seconds) * time.Second)
-	return c
 }
 
 // updateRateLimit updates the client's rate limit information based on the response headers.
