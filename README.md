@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
 ![SDK Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
-![Lines of Code](https://img.shields.io/badge/lines_of_code-8608-blue)
+![Lines of Code](https://img.shields.io/badge/lines_of_code-8616-blue)
 
 #### Connect With The Market Data Community
 
