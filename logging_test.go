@@ -9,6 +9,7 @@ import (
 func TestLogging(t *testing.T) {
 	// Initialize the MarketData client
 	client, err := GetClient()
+	client.Debug(true)
 	if err != nil {
 		log.Fatalf("Failed to get market data client: %v", err)
 	}
@@ -17,6 +18,7 @@ func TestLogging(t *testing.T) {
 	sc, err := StockCandles().Resolution("D").Symbol("AAPL").Date("2023-01-03").Raw()
 	if err != nil {
 		fmt.Print(err)
+		fmt.Print(client)
 		t.FailNow()
 	}
 

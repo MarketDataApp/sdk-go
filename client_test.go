@@ -1,30 +1,27 @@
 package client
 
 import (
-	"os"
 	"testing"
 
-	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func TestGetClient(t *testing.T) {
 	// Generate a new client with the actual token
-	client, err := GetClient(os.Getenv("MARKETDATA_TOKEN"))
+
+	client, err := GetClient()
 	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
+		t.Errorf("Expected no error with token, got %v", err)
 	}
 	if client == nil {
 		t.Errorf("Expected a client, got nil")
 	}
 
-	// Generate a new client with an invalid token
-	client, err = GetClient("invalid_token")
+	client_err := newClient()
+
+	err = client_err.Token("invalid_token")
 	if err == nil {
 		t.Errorf("Expected an error, got nil")
-	}
-	if client != nil {
-		t.Errorf("Expected nil, got a client")
 	}
 }
 
@@ -34,22 +31,22 @@ func TestGetEnvironment(t *testing.T) {
 	tests := []struct {
 		name     string
 		hostURL  string
-		expected string
+		expected Environment
 	}{
 		{
 			name:     "Production Environment",
 			hostURL:  "https://api.marketdata.app",
-			expected: prodEnv,
+			expected: Production,
 		},
 		{
 			name:     "Testing Environment",
 			hostURL:  "https://tst.marketdata.app",
-			expected: testEnv,
+			expected: Test,
 		},
 		{
 			name:     "Development Environment",
 			hostURL:  "http://localhost",
-			expected: devEnv,
+			expected: Development,
 		},
 		{
 			name:     "Unknown Environment",
@@ -61,12 +58,10 @@ func TestGetEnvironment(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new MarketDataClient instance
-			client := &MarketDataClient{
-				Client: resty.New(),
-			}
+			client := newClient()
 
 			// Set the HostURL to the test case's host URL
-			client.Client.SetHostURL(tc.hostURL)
+			client.Client.SetBaseURL(tc.hostURL)
 
 			// Call getEnvironment and check the result
 			result := client.getEnvironment()
@@ -82,25 +77,25 @@ func TestEnvironmentMethod(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name        string
-		environment string
+		environment Environment
 		expectedURL string
 		expectError bool
 	}{
 		{
 			name:        "Set Production Environment",
-			environment: prodEnv,
+			environment: Production,
 			expectedURL: prodProtocol + "://" + prodHost,
 			expectError: false,
 		},
 		{
 			name:        "Set Testing Environment",
-			environment: testEnv,
+			environment: Test,
 			expectedURL: testProtocol + "://" + testHost,
 			expectError: false,
 		},
 		{
 			name:        "Set Development Environment",
-			environment: devEnv,
+			environment: Development,
 			expectedURL: devProtocol + "://" + devHost,
 			expectError: false,
 		},
@@ -114,20 +109,20 @@ func TestEnvironmentMethod(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a new MarketDataClient instance
-			client := new()
+			// Get the MarketDataClient instance
+			client := newClient()
 
 			// Set the environment using the Environment method
-			client = client.Environment(tc.environment)
+			err := client.Environment(tc.environment)
 
 			// Check if an error was expected
 			if tc.expectError {
-				if client.Error == nil {
+				if err == nil {
 					t.Errorf("Expected an error for environment %s, but got none", tc.environment)
 				}
 			} else {
-				if client.Error != nil {
-					t.Errorf("Did not expect an error for environment %s, but got: %v", tc.environment, client.Error)
+				if err != nil {
+					t.Errorf("Did not expect an error for environment %s, but got: %v", tc.environment, err)
 				}
 
 				// Verify that the baseURL was set correctly

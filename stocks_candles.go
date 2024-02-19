@@ -268,12 +268,7 @@ func (scr *StockCandlesRequest) Raw() (*resty.Response, error) {
 }
 
 // Packed sends the StockCandlesRequest and returns the StockCandlesResponse.
-// An optional MarketDataClient can be passed to replace the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If a client is provided, it replaces the current client for this request.
-//
+////
 // # Returns
 //
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.

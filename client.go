@@ -5,11 +5,11 @@
 //
 // # Get Started Quickly with the MarketDataClient
 //
-// 1. Use [GetClient] to fetch the [MarketDataClient] instance and set the API token.
-// 2. Turn on Debug mode to log detailed request and response information to disk as you learn how to use the SDK.
-// 3. Make a test request.
-// 4. Check the rate limit in the client to keep track of your requests.
-// 5. Check the in-memory logs to see the raw request and response details.
+//  1. Use [GetClient] to fetch the [MarketDataClient] instance and set the API token.
+//  2. Turn on Debug mode to log detailed request and response information to disk as you learn how to use the SDK.
+//  3. Make a test request.
+//  4. Check the rate limit in the client to keep track of your requests.
+//  5. Check the in-memory logs to see the raw request and response details.
 //
 // [Market Data Go Client]: https://www.marketdata.app/docs/sdk/go/client
 package client
@@ -30,6 +30,31 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+// Environment represents the type for different environments in which the MarketDataClient can operate.
+// Customers do not need to set the environment. The [MarketDataClient] will automatically be initialized with a Production
+// environment if no environment is set.
+//
+// Market Data's Go Client supports three environments:
+//
+//  1. Production
+//  2. Test
+//  3. Development.
+//
+// It is used to configure the client to point to the appropriate base URL depending on the environment.
+// This is used for development or testing by Market Data employees.
+type Environment string
+
+const (
+	// Production specifies the production environment. It is used when the client is interacting with the live Market Data API.
+	Production Environment = "prod"
+
+	// Test specifies the testing environment. It is used for testing purposes, allowing interaction with a sandbox version of the Market Data API.
+	Test Environment = "test"
+
+	// Development specifies the development environment. It is typically used during the development phase, pointing to a local or staged version of the Market Data API.
+	Development Environment = "dev"
+)
+
 // MarketDataClient struct defines the structure for the MarketData client instance.
 // It embeds the resty.Client to inherit the HTTP client functionalities.
 // Additionally, it includes fields for managing rate limits and synchronization,
@@ -38,10 +63,10 @@ import (
 //
 // # Setter Methods
 //
-//   - Debug(bool) *MarketDataClient: Enables or disables debug mode for logging detailed request and response information.
-//   - Environment(string) *MarketDataClient: Sets the environment for the MarketDataClient.
-//   - Timeout(int) *MarketDataClient: Sets the request timeout for the MarketDataClient.
-//   - Token(string) *MarketDataClient: Sets the authentication token for the MarketDataClient.
+//   - Debug(bool): Enables or disables debug mode for logging detailed request and response information.
+//   - Environment(Environment): Sets the environment for the MarketDataClient.
+//   - Timeout(int): Sets the request timeout for the MarketDataClient.
+//   - Token(string) error: Sets the authentication token for the MarketDataClient.
 //
 // # Methods
 //
@@ -53,8 +78,17 @@ type MarketDataClient struct {
 	RateLimitRemaining int        // RateLimitRemaining tracks the number of requests that can still be made before hitting the rate limit.
 	RateLimitReset     time.Time  // RateLimitReset indicates the time when the rate limit will be reset.
 	mu                 sync.Mutex // mu is used to ensure thread-safe access to the client's fields.
-	Error              error      // Error captures any errors that occur during the execution of API calls.
-	debug              bool       // debug indicates whether debug mode is enabled, controlling the verbosity of logs.
+	debug              bool       // Debug indicates whether debug mode is enabled, controlling the verbosity of logs.
+}
+
+// Debug enables or disables debug mode for the MarketDataClient. When debug mode is enabled, the client logs detailed request and response information,
+// which can be useful for development and troubleshooting.
+//
+// # Parameters
+//
+//   - bool: A boolean value indicating whether to enable or disable debug mode.
+func (c *MarketDataClient) Debug(enable bool) {
+	c.debug = enable
 }
 
 // RateLimitExceeded checks if the rate limit for API requests has been exceeded.
@@ -90,7 +124,7 @@ func (c *MarketDataClient) RateLimitExceeded() bool {
 // calculates request latency, and constructs a log entry with these details.
 // If debug mode is enabled, the log entry is printed in a human-readable format.
 // Regardless of debug mode, the log entry is written to the log.
-func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *resty.Response) {
+func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *resty.Response) error {
 	// Redact sensitive information from request headers.
 	redactedHeaders := redactAuthorizationHeader(req.Header)
 	// Extract response headers.
@@ -98,16 +132,12 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 	// Attempt to extract rate limit consumed information from the response.
 	rateLimitConsumed, err := getRateLimitConsumed(resp)
 	if err != nil {
-		// If an error occurs, set the client's error field and return early.
-		c.Error = err
-		return
+		return err
 	}
 	// Attempt to extract the ray ID from the response.
 	rayID, err := getRayIDFromResponse(resp)
 	if err != nil {
-		// If an error occurs, set the client's error field and return early.
-		c.Error = err
-		return
+		return err
 	}
 	// Calculate the latency of the request.
 	delay := getLatencyFromRequest(req)
@@ -126,13 +156,18 @@ func (c *MarketDataClient) addLogFromRequestResponse(req *resty.Request, resp *r
 	if logEntry != nil {
 		logEntry.WriteToLog(c.debug)
 	}
+	return nil
 }
 
 // getEnvironment determines the environment the client is operating in based on the host URL.
 // It parses the host URL to extract the hostname and matches it against predefined hostnames
 // for production, testing, and development environments. If a match is found, it returns the
 // corresponding environment name; otherwise, it defaults to "Unknown".
-func (c *MarketDataClient) getEnvironment() string {
+func (c *MarketDataClient) getEnvironment() Environment {
+	if c == nil || c.Client == nil {
+		return "Unknown"
+	}
+
 	u, err := url.Parse(c.Client.HostURL) // Parse the host URL to extract the hostname.
 	if err != nil {
 		log.Printf("Error parsing host URL: %v", err) // Log any error encountered during URL parsing.
@@ -140,11 +175,11 @@ func (c *MarketDataClient) getEnvironment() string {
 	}
 	switch u.Hostname() { // Match the extracted hostname against predefined hostnames.
 	case prodHost:
-		return prodEnv // Return the production environment name if matched.
+		return Production // Return the production environment name if matched.
 	case testHost:
-		return testEnv // Return the testing environment name if matched.
+		return Test // Return the testing environment name if matched.
 	case devHost:
-		return devEnv // Return the development environment name if matched.
+		return Development // Return the development environment name if matched.
 	default:
 		return "Unknown" // Default to "Unknown" if no matches are found.
 	}
@@ -156,6 +191,11 @@ func (c *MarketDataClient) getEnvironment() string {
 //
 //   - string: A formatted string containing the client's environment, rate limit information, and rate limit reset time.
 func (c *MarketDataClient) String() string {
+	// Check if the MarketDataClient instance is nil
+	if c == nil {
+		return "MarketDataClient instance is nil"
+	}
+
 	clientType := c.getEnvironment() // Determine the client's environment.
 	// Format and return the string representation.
 	return fmt.Sprintf("Client Type: %s, RateLimitLimit: %d, RateLimitRemaining: %d, RateLimitReset: %v", clientType, c.RateLimitLimit, c.RateLimitRemaining, c.RateLimitReset)
@@ -188,7 +228,25 @@ func (c *MarketDataClient) setDefaultResetTime() {
 // # Returns
 //
 //   - *MarketDataClient: A pointer to the newly created MarketDataClient instance with default configurations applied.
-func new() *MarketDataClient {
+func NewClient(token string) error {
+	client := newClient()
+
+	// Set the client's token.
+	err := client.Token(token)
+	if err != nil {
+		return err
+	}
+
+	// Set the global client if there are no errors
+	if err == nil {
+		marketDataClient = client
+		return nil
+	}
+
+	return errors.New("error setting token")
+}
+
+func newClient() *MarketDataClient {
 	// Initialize a new MarketDataClient with default resty client and debug mode disabled.
 	client := &MarketDataClient{
 		Client: resty.New(),
@@ -199,7 +257,7 @@ func new() *MarketDataClient {
 	client.setDefaultResetTime()
 
 	// Set the client environment to production.
-	client.Environment(prodEnv)
+	client.Environment(Production)
 
 	// Set the "User-Agent" header to include the SDK version.
 	client.Client.SetHeader("User-Agent", "sdk-go/"+Version)
@@ -228,24 +286,7 @@ func new() *MarketDataClient {
 		return nil
 	})
 
-	// Return the initialized MarketDataClient instance.
 	return client
-}
-
-// Debug is a method that enables or disables the debug mode of the client.
-// Debug mode will result in the request and response headers being printed to
-// the terminal with each request.
-//
-// # Parameters
-//
-//   - enable: A boolean value indicating whether to enable or disable debug mode. By default, debug mode is disabled.
-//
-// # Returns
-//
-//   - *MarketDataClient: A pointer to the MarketDataClient instance, allowing for method chaining.
-func (c *MarketDataClient) Debug(enable bool) *MarketDataClient {
-	c.debug = enable
-	return c
 }
 
 // Timeout sets the request timeout for the MarketDataClient.
@@ -423,50 +464,25 @@ func (c *MarketDataClient) getRawResponse(br *baseRequest) (*resty.Response, err
 	return c.prepareAndExecuteRequest(br, nil)
 }
 
-// GetClient initializes and returns a singleton instance of MarketDataClient.
-// If a token is provided as an argument, it creates a new client instance with that token.
-// If no token is provided, it attempts to use a token from the environment variable "MARKETDATA_TOKEN".
-// This function ensures that only one instance of the client is active at any time,
-// reusing the existing instance if no new token is provided and no errors are present in the current client.
-//
-// # Parameters
-//
-//   - ...string: A variadic string parameter where the first element, if provided, is used as the authentication token for the [MarketDataClient]. If not provided, the function looks for a token in the "MARKETDATA_TOKEN" environment variable.
+// GetClient checks for an existing instance of MarketDataClient and returns it.
+// If the client is not already initialized, it attempts to initialize it.
 //
 // # Returns
 //
-//   - *MarketDataClient: A pointer to the initialized MarketDataClient instance. This client is configured with the provided or environment-sourced token.
-//   - error: An error object that indicates a failure in client initialization. Possible errors include missing token (if no token is provided and none is found in the environment) and any errors encountered during the client's token configuration process.
-func GetClient(token ...string) (*MarketDataClient, error) {
-	if len(token) == 0 {
-		if marketDataClient != nil {
-			if marketDataClient.Error != nil {
-				return nil, marketDataClient.Error
-			}
-			return marketDataClient, nil
+//   - *MarketDataClient: A pointer to the existing or newly initialized MarketDataClient instance.
+//   - error: An error object if the client cannot be initialized.
+func GetClient() (*MarketDataClient, error) {
+	// Check if the global client exists
+	if marketDataClient == nil {
+		// Attempt to initialize the client if it's not already
+		err := tryNewClient()
+		if err != nil {
+			return nil, err // Return the error if client initialization fails
 		}
-		token = append(token, os.Getenv("MARKETDATA_TOKEN"))
 	}
 
-	if token[0] == "" {
-		return nil, errors.New("no token provided")
-	}
-
-	// Always create a new client when a token is provided
-	client := new()
-	if client.Error != nil {
-		return nil, client.Error
-	}
-
-	client.Token(token[0])
-	if client.Error != nil {
-		return nil, client.Error
-	}
-
-	// Save the new client to the global variable if no errors are present
-	marketDataClient = client
-
-	return client, nil
+	// Return the global client if it is initialized
+	return marketDataClient, nil
 }
 
 // Environment configures the base URL of the MarketDataClient based on the provided environment string.
@@ -481,45 +497,63 @@ func GetClient(token ...string) (*MarketDataClient, error) {
 //   - *MarketDataClient: A pointer to the *MarketDataClient instance with the configured environment. This allows for method chaining.
 //
 // If an invalid environment is provided, the client's Error field is set, and the same instance is returned.
-func (c *MarketDataClient) Environment(env string) *MarketDataClient {
+func (c *MarketDataClient) Environment(env Environment) error {
+	if c == nil || c.Client == nil {
+		return errors.New("MarketDataClient is nil")
+	}
+
 	var baseURL string
 	switch env {
-	case prodEnv:
+	case Production:
 		baseURL = prodProtocol + "://" + prodHost // Set baseURL for production environment
-	case testEnv:
+	case Test:
 		baseURL = testProtocol + "://" + testHost // Set baseURL for testing environment
-	case devEnv:
+	case Development:
 		baseURL = devProtocol + "://" + devHost // Set baseURL for development environment
 	default:
-		c.Error = fmt.Errorf("invalid environment: %s", env) // Set error for invalid environment
-		return c
+		return fmt.Errorf("invalid environment: %s", env) // Set error for invalid environment
 	}
 
 	c.Client.SetBaseURL(baseURL) // Configure the client with the determined baseURL
 
-	return c
+	return nil
+}
+func tryNewClient() error {
+	// Default to Production if MARKETDATA_ENV is empty, doesn't exist, or is not a valid option
+	token := os.Getenv("MARKETDATA_TOKEN") // Retrieve the market data token from environment variables
+
+	if token != "" {
+		err := NewClient(token)
+
+		if err != nil {
+			return err
+		}
+		return nil
+
+	}
+	return errors.New("env variable MARKETDATA_TOKEN not set")
 }
 
-// init initializes the global marketDataClient with a token and environment fetched from environment variables.
-// It retrieves the "MARKETDATA_TOKEN" variable and uses it to configure the marketDataClient.
 // It also attempts to retrieve the "MARKETDATA_ENV" variable. If "MARKETDATA_ENV" is empty, doesn't exist, or doesn't use a valid option, it defaults to prodEnv.
 // A new MarketDataClient instance is created and configured with the environment and token, then assigned to the global marketDataClient variable.
 func init() {
-	token := os.Getenv("MARKETDATA_TOKEN") // Retrieve the market data token from environment variables
-	env := os.Getenv("MARKETDATA_ENV")     // Attempt to retrieve the environment from environment variables
+	envValue := os.Getenv("MARKETDATA_ENV")
+	env := Environment(envValue) // Convert the string value to Environment type
 
-	// Default to prodEnv if MARKETDATA_ENV is empty, doesn't exist, or is not a valid option
-	if env != prodEnv && env != testEnv && env != devEnv {
-		env = prodEnv
+	// Default to Production if MARKETDATA_ENV is empty, doesn't exist, or is not a valid option
+	if env != Production && env != Test && env != Development {
+		env = Production
 	}
 
-	// Proceed only if the token is not empty
-	if token != "" {
-		// Create and configure a new MarketDataClient instance with the environment and token
-		client := new().Environment(env).Token(token)
-		if client.Error != nil {
-			marketDataClient = client
-		}
+	err := tryNewClient()
+	if err != nil {
+		fmt.Println("Error initializing MarketDataClient:", err)
+		return
+	}
+
+	// Assign the environment to the global marketDataClient after successful initialization
+	if marketDataClient != nil {
+		marketDataClient.Environment(env)
 	}
 }
 
@@ -533,30 +567,43 @@ func init() {
 //
 // # Returns
 //
-//   - *MarketDataClient: A pointer to the MarketDataClient instance with the configured authentication token, which allows for method chaining.
+//   - error: An error if the authorization was not successful or nil if it was.
 //
-// If an error occurs during the initial request or if the response indicates a failure, the client's Error field is set,
-// and the same instance is returned.
-func (c *MarketDataClient) Token(bearerToken string) *MarketDataClient {
-	// Set the authentication scheme to "Bearer"
-	c.Client.SetAuthScheme("Bearer")
+// # Notes
+//
+// If an error occurs during the initial authorization request or if the response indicates a failure, the client remains unmodified. The token will only be set if authorization is successful.
+func (c *MarketDataClient) Token(bearerToken string) error {
+	if c == nil || c.Client == nil {
+		return fmt.Errorf("MarketDataClient is nil")
+	}
 
-	// Set the authentication token
-	c.Client.SetAuthToken(bearerToken)
+	// Create a temporary client to make the initial request without modifying the original client
+	tempClient := resty.New().SetAuthScheme("Bearer").SetAuthToken(bearerToken)
 
-	// Make an initial request to authorize the token and load the rate limit information
-	resp, err := c.Client.R().Get("https://api.marketdata.app/user/")
+	// Make an initial request to authorize the token
+	resp, err := tempClient.R().Get(user_endpoint)
 	if err != nil {
-		c.Error = err // Set error if there's an issue with the request
-		return c
+		return err // Return error if there's an issue with the request
 	}
 	if !resp.IsSuccess() {
-		err = fmt.Errorf("received non-OK status: %s", resp.Status()) // Create error for non-successful response
-		c.Error = err
-		return c
+		return fmt.Errorf("invalid token. received non-OK status: %s", resp.Status()) // Return error for non-successful response
 	}
 
-	return c
+	// If the token is valid, set the authentication scheme and token on the original client
+	c.Client.SetAuthScheme("Bearer")
+	c.Client.SetAuthToken(bearerToken)
+
+	// Make a second request to load the rate limit information
+	resp, err = c.Client.R().Get(user_endpoint)
+	if err != nil {
+		return err
+	}
+
+	if resp.IsSuccess() {
+		return nil
+	}
+
+	return fmt.Errorf("invalid token. received non-OK status: %s", resp.Status()) // Return error for non-successful response
 }
 
 // GetLogs retrieves a pointer to the HttpRequestLogs instance, allowing access to the logs collected during HTTP requests.

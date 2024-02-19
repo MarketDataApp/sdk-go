@@ -211,6 +211,11 @@ func (br *baseRequest) getPath() (string, error) {
 	if br == nil {
 		return "", fmt.Errorf("path is nil")
 	}
+
+	if br.path == "" {
+		return "", fmt.Errorf("path is empty")
+	}
+
 	return br.path, nil
 }
 
@@ -246,29 +251,17 @@ func (br *baseRequest) getError() error {
 	return br.Error
 }
 
-// Raw executes the request and returns the raw resty.Response. This method allows for an optional MarketDataClient
-// to be passed which, if provided, replaces the client used in the request.
-//
-// # Parameters
-//
-//   - ...*MarketDataClient: A variadic parameter that can accept zero or one MarketDataClient pointer. If provided,
-//     the first MarketDataClient in the slice replaces the current client for this request.
+// Raw executes the request and returns the raw resty.Response.
 //
 // # Returns
 //
 //   - *resty.Response: The raw response from the executed request.
-//   - error: An error object if the baseRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
-func (request *baseRequest) Raw(optionalClients ...*MarketDataClient) (*resty.Response, error) {
+//   - error: An error object if the baseRequest is nil, or if an error occurs during the request execution.
+func (request *baseRequest) Raw() (*resty.Response, error) {
 	if request == nil {
 		return nil, fmt.Errorf("baseRequest is nil")
 	}
 
-	// Replace the client if an optional client is provided
-	if len(optionalClients) > 0 && optionalClients[0] != nil {
-		request.client = optionalClients[0]
-	}
-
-	// Check if the client is nil after potentially replacing it
 	if request.client == nil {
 		return nil, fmt.Errorf("MarketDataClient is nil")
 	}

@@ -15,10 +15,6 @@ var marketDataClient *MarketDataClient
 const (
 	Version = "1.1.0" // Version specifies the current version of the SDK.
 
-	prodEnv = "prod" // prodEnv is the environment name for production.
-	testEnv = "test" // testEnv is the environment name for testing.
-	devEnv  = "dev"  // devEnv is the environment name for development.
-
 	prodHost = "api.marketdata.app" // prodHost is the hostname for the production environment.
 	testHost = "tst.marketdata.app" // testHost is the hostname for the testing environment.
 	devHost  = "localhost"          // devHost is the hostname for the development environment.

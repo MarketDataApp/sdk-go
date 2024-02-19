@@ -1,5 +1,8 @@
 package client
 
+// user_endpoint is the endpoint for the user info API call.
+var user_endpoint = "https://api.marketdata.app/user/"
+
 // endpoints maps API calls to their corresponding endpoints.
 var endpoints = map[int]map[string]map[string]string{
 	1: {
