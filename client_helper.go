@@ -24,6 +24,31 @@ const (
 	devProtocol  = "http"  // devProtocol specifies the protocol to use in the development environment.
 )
 
+// Environment represents the type for different environments in which the MarketDataClient can operate.
+// Customers do not need to set the environment. The [MarketDataClient] will automatically be initialized with a Production
+// environment if no environment is set.
+//
+// Market Data's Go Client supports three environments:
+//
+//  1. Production
+//  2. Test
+//  3. Development.
+//
+// It is used to configure the client to point to the appropriate base URL depending on the environment.
+// This is used for development or testing by Market Data employees.
+type Environment string
+
+const (
+	// Production specifies the production environment. It is used when the client is interacting with the live Market Data API.
+	Production Environment = "prod"
+
+	// Test specifies the testing environment. It is used for testing purposes, allowing interaction with a sandbox version of the Market Data API.
+	Test Environment = "test"
+
+	// Development specifies the development environment. It is typically used during the development phase, pointing to a local or staged version of the Market Data API.
+	Development Environment = "dev"
+)
+
 // getRateLimitConsumed extracts the rate limit consumed value from the response headers.
 // It specifically looks for the "X-Api-RateLimit-Consumed" header and attempts to convert its value to an integer.
 //

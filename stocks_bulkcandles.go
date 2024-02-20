@@ -5,7 +5,7 @@
 //
 // Utilize the [BulkStockCandlesRequest] for querying the endpoint through one of the three available methods:
 //
-//	| Method     | Execution Level | Return Type                 | Description                                                                                                             |
+//	| Method     | Execution       | Return Type                 | Description                                                                                                             |
 //	|------------|-----------------|-----------------------------|-------------------------------------------------------------------------------------------------------------------------|
 //	| **Get**    | Direct          | `[]Candle`                  | Immediately fetches and returns a slice of `[]Candle`, allowing direct access to each candle's data.                    |
 //	| **Packed** | Intermediate    | `*BulkStockCandlesResponse` | Delivers a `*StockCandlesResponse` object containing the data, which requires unpacking to access the `[]Candle` slice. |

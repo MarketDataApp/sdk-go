@@ -15,12 +15,12 @@
 //
 // # Get Started Quickly with the MarketDataClient
 //
-//  1. Use [GetClient] to fetch the [MarketDataClient] instance and set the API token.
-//  2. Turn on Debug mode to log detailed request and response information to disk as you learn how to use the SDK.
-//  3. Make a test request.
-//  4. Check the rate limit in the client to keep track of your requests.
-//  5. Check the in-memory logs to see the raw request and response details.
+//  1. Review the [documentation on authentication] to learn how to set your API token.
+//  2. Use [GetClient] to fetch the [MarketDataClient] instance and use [MarketDataClient.Debug] to log detailed request and response information to disk and the console as you learn how to use the SDK.
+//  3. Make a test request and review the console and the logs. The logs will contain the raw request and response details.
+//  4. Check the rate limit in the client to keep track of your requests and how many requests you have remaining.
 //
+// [documentation on authentication]: https://www.marketdata.app/docs/sdk/go/authentication
 // [Market Data Go Client]: https://www.marketdata.app/docs/sdk/go/client
 package client
 
@@ -37,31 +37,6 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
-)
-
-// Environment represents the type for different environments in which the MarketDataClient can operate.
-// Customers do not need to set the environment. The [MarketDataClient] will automatically be initialized with a Production
-// environment if no environment is set.
-//
-// Market Data's Go Client supports three environments:
-//
-//  1. Production
-//  2. Test
-//  3. Development.
-//
-// It is used to configure the client to point to the appropriate base URL depending on the environment.
-// This is used for development or testing by Market Data employees.
-type Environment string
-
-const (
-	// Production specifies the production environment. It is used when the client is interacting with the live Market Data API.
-	Production Environment = "prod"
-
-	// Test specifies the testing environment. It is used for testing purposes, allowing interaction with a sandbox version of the Market Data API.
-	Test Environment = "test"
-
-	// Development specifies the development environment. It is typically used during the development phase, pointing to a local or staged version of the Market Data API.
-	Development Environment = "dev"
 )
 
 // MarketDataClient struct defines the structure for the MarketData client instance.
@@ -233,9 +208,10 @@ func (c *MarketDataClient) setDefaultResetTime() {
 }
 
 // NewClient creates and configures a new MarketDataClient instance with default settings. 
-// This method is primarily used to initialize a client with predefined configurations such as the default
-// rate limit reset time, production environment setup, and common HTTP headers and hooks. 
-// It's the starting point for interacting with the [MarketDataClient] functionalities.
+// This method is primarily used to initialize a client when you are not using environment
+// variables to store your token. NewClient sets the token and initializes the client with
+// predefined configurations such as the default rate limit reset time, and common HTTP headers and hooks. 
+// It's the starting point for interacting with [MarketDataClient] when you do not use environment variables.
 //
 // # Returns
 //
@@ -477,7 +453,10 @@ func (c *MarketDataClient) getRawResponse(br *baseRequest) (*resty.Response, err
 }
 
 // GetClient checks for an existing instance of MarketDataClient and returns it.
-// If the client is not already initialized, it attempts to initialize it.
+// It is the starting point to interact with [MarketDataClient] when using environment variables.
+// GetClient is only needed if you need to change some parameter of the client, like the timeout or
+// you wish to access the Rate Limit information. If you just want to make requests, you can use the
+// request initialization functions directly.
 //
 // # Returns
 //

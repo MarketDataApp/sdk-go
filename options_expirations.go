@@ -5,7 +5,7 @@
 //
 // Utilize [OptionsExpirationsRequest] for querying the endpoint through one of the three available methods:
 //
-//	| Method     | Execution Level | Return Type                   | Description                                                                                                                      |
+//	| Method     | Execution       | Return Type                   | Description                                                                                                                      |
 //	|------------|-----------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
 //	| **Get**    | Direct          | `[]time.Time`                 | Immediately fetches and returns a slice of `[]time.Time`, allowing direct access to each expiration date.                        |
 //	| **Packed** | Intermediate    | `*OptionsExpirationsResponse` | Delivers a `*OptionsExpirationsResponse` object containing the data, which requires unpacking to access the `[]time.Time` slice. |
