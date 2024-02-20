@@ -1,5 +1,5 @@
 // Package client includes types and methods to access the Bulk Stock Quotes endpoint.
-// Retrieve real-time quotes for multiple stocks symbols in a single request or even get a full market snapshot with a quote for all symbols.
+// Retrieve live quotes for multiple stocks symbols in a single request or even get a full market snapshot with a quote for all symbols.
 //
 // # Making Requests
 //

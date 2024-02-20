@@ -1,5 +1,5 @@
 // Package client provides functionalities to interact with the Options Lookup endpoint.
-// Lookup the OCC-formatted option symbol based on user input.
+// Lookup the official option symbol based on a user's text input.
 //
 // # Making Requests
 //

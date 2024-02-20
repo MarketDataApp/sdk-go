@@ -1,5 +1,5 @@
 // Package client includes types and methods to access the Stock Quotes endpoint.
-// Retrieve real-time quotes for any supported stock symbol.
+// Retrieve live quotes for any supported stock symbol.
 //
 // # Making Requests
 //
