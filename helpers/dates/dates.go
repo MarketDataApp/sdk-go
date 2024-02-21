@@ -306,7 +306,7 @@ func (dr *DateRange) IsEarlierThan(date interface{}) (bool, error) {
 }
 
 // IsLaterThan is a method that takes a parameter of type interface.
-// It converts the parameter to a Time when necessary and compares if the end date of the DateRange is later than the end date of the paramter passed.
+// It converts the parameter to a Time when necessary and compares if the end date of the DateRange is later than the end date of the parameter passed.
 func (dr *DateRange) IsLaterThan(date interface{}) (bool, error) {
 	var compareDate time.Time
 	switch date := date.(type) {

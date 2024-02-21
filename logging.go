@@ -162,7 +162,7 @@ type LogEntry struct {
 	Request           string      // The URL of the HTTP Request
 	Status            int         // The status code of the response
 	RateLimitConsumed int         // The number of requests consumed from the rate limit
-	Delay             int64       // The time (in miliseconds) between the request and the server's response
+	Delay             int64       // The time (in milliseconds) between the request and the server's response
 	Response          string      // The server response
 	memory            int64       // The amount of memory (in bytes) used by the log entry
 }
