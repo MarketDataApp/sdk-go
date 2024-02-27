@@ -12,7 +12,7 @@ func ExampleOptionQuoteRequest_get() {
 	for _, quote := range resp {
 		fmt.Println(quote)
 	}
-	// Output: OptionQuote{OptionSymbol: "AAPL250117C00150000", Underlying: "AAPL", Expiration: 2025-01-17 16:00:00 -05:00, Side: "call", Strike: 150, FirstTraded: 2022-09-10 09:30:00 -04:00, DTE: 347, Ask: 47.7, AskSize: 17, Bid: 47.2, BidSize: 36, Mid: 47.45, Last: 48.65, Volume: 202, OpenInterest: 10768, UnderlyingPrice: 187.68, InTheMoney: true, Updated: "2024-02-05 16:00:00 -05:00", IV: nil, Delta: nil, Gamma: nil, Theta: nil, Vega: nil, Rho: nil, IntrinsicValue: 37.68, ExtrinsicValue: 9.77}
+	// OptionQuote{OptionSymbol: "AAPL250117C00150000", Underlying: "AAPL", Expiration: 2025-01-17 16:00:00 -05:00, Side: "call", Strike: 150, FirstTraded: 2022-09-12 09:30:00 -04:00, DTE: 347, Ask: 47.7, AskSize: 17, Bid: 47.2, BidSize: 36, Mid: 47.45, Last: 48.65, Volume: 202, OpenInterest: 10768, UnderlyingPrice: 187.68, InTheMoney: true, Updated: "2024-02-05 16:00:00 -05:00", IV: nil, Delta: nil, Gamma: nil, Theta: nil, Vega: nil, Rho: nil, IntrinsicValue: 37.68, ExtrinsicValue: 9.77}
 }
 
 func ExampleOptionQuoteRequest_packed() {
@@ -23,6 +23,6 @@ func ExampleOptionQuoteRequest_packed() {
 	}
 
 	fmt.Println(resp)
-	// Output: OptionQuotesResponse{OptionSymbol: ["AAPL250117P00150000"], Underlying: ["AAPL"], Expiration: [1737147600], Side: ["put"], Strike: [150], FirstTraded: [1662816600], DTE: [347], Ask: [3.65], AskSize: [292], Bid: [3.5], BidSize: [634], Mid: [3.58], Last: [3.55], Volume: [44], OpenInterest: [18027], UnderlyingPrice: [187.68], InTheMoney: [false], Updated: [1707166800], IV: [], Delta: [], Gamma: [], Theta: [], Vega: [], Rho: [], IntrinsicValue: [0], ExtrinsicValue: [3.58]}
+	// OptionQuotesResponse{OptionSymbol: ["AAPL250117P00150000"], Underlying: ["AAPL"], Expiration: [1737147600], Side: ["put"], Strike: [150], FirstTraded: [1662989400], DTE: [347], Ask: [3.65], AskSize: [292], Bid: [3.5], BidSize: [634], Mid: [3.58], Last: [3.55], Volume: [44], OpenInterest: [18027], UnderlyingPrice: [187.68], InTheMoney: [false], Updated: [1707166800], IV: [], Delta: [], Gamma: [], Theta: [], Vega: [], Rho: [], IntrinsicValue: [0], ExtrinsicValue: [3.58]}
 }
 
