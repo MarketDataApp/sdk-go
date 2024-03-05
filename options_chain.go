@@ -486,6 +486,95 @@ func (ocr *OptionChainRequest) MaxBidAskSpreadPct(maxBidAskSpreadPct float64) *O
 	return ocr
 }
 
+// MinAsk sets the MinAsk parameter for the OptionChainRequest.
+// This method is used to specify the minimum ask price for options to be included in the option chain.
+// It modifies the optionParams field of the OptionChainRequest instance to store the minimum ask price value.
+//
+// # Parameters
+//
+//   - float64: A float64 representing the minimum ask price to be included in the result.
+//
+// # Returns
+//
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+func (ocr *OptionChainRequest) MinAsk(minAsk float64) *OptionChainRequest {
+	if ocr.optionParams == nil {
+		ocr.optionParams = &parameters.OptionParams{}
+	}
+	err := ocr.optionParams.SetMinAsk(minAsk)
+	if err != nil {
+		ocr.Error = err
+	}
+	return ocr
+}
+
+// MaxAsk sets the MaxAsk parameter for the OptionChainRequest.
+// This method is used to specify the maximum ask price for options to be included in the option chain.
+// It modifies the optionParams field of the OptionChainRequest instance to store the maximum ask price value.
+//
+// # Parameters
+//
+//   - float64: A float64 representing the maximum ask price to be included in the result.
+//
+// # Returns
+//
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+func (ocr *OptionChainRequest) MaxAsk(maxAsk float64) *OptionChainRequest {
+	if ocr.optionParams == nil {
+		ocr.optionParams = &parameters.OptionParams{}
+	}
+	err := ocr.optionParams.SetMaxAsk(maxAsk)
+	if err != nil {
+		ocr.Error = err
+	}
+	return ocr
+}
+
+// MinBid sets the MinBid parameter for the OptionChainRequest.
+// This method is used to specify the minimum bid price for options to be included in the option chain.
+// It modifies the optionParams field of the OptionChainRequest instance to store the minimum bid price value.
+//
+// # Parameters
+//
+//   - float64: A float64 representing the minimum bid price to be included in the result.
+//
+// # Returns
+//
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+func (ocr *OptionChainRequest) MinBid(minBid float64) *OptionChainRequest {
+	if ocr.optionParams == nil {
+		ocr.optionParams = &parameters.OptionParams{}
+	}
+	err := ocr.optionParams.SetMinBid(minBid)
+	if err != nil {
+		ocr.Error = err
+	}
+	return ocr
+}
+
+// MaxBid sets the MaxBid parameter for the OptionChainRequest.
+// This method is used to specify the maximum bid price for options to be included in the option chain.
+// It modifies the optionParams field of the OptionChainRequest instance to store the maximum bid price value.
+//
+// # Parameters
+//
+//   - float64: A float64 representing the maximum bid price to be included in the result.
+//
+// # Returns
+//
+//   - *OptionChainRequest: This method returns a pointer to the OptionChainRequest instance it was called on. This allows for method chaining. If the receiver (*OptionChainRequest) is nil, it returns nil to prevent a panic.
+func (ocr *OptionChainRequest) MaxBid(maxBid float64) *OptionChainRequest {
+	if ocr.optionParams == nil {
+		ocr.optionParams = &parameters.OptionParams{}
+	}
+	err := ocr.optionParams.SetMaxBid(maxBid)
+	if err != nil {
+		ocr.Error = err
+	}
+	return ocr
+}
+
+
 // getParams packs the OptionChainRequest struct into a slice of interface{} and returns it.
 // This method is used to gather all the parameters set in the OptionChainRequest into a single slice
 // for easier manipulation and usage in subsequent requests.

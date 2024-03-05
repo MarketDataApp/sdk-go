@@ -25,6 +25,10 @@ type OptionParams struct {
 	StrikeLimit        int     `query:"strikeLimit" validate:"optional"`
 	MinOpenInterest    int     `query:"minOpenInterest" validate:"optional"`
 	MinVolume          int     `query:"minVolume" validate:"optional"`
+	MinAsk             float64 `query:"minAsk" validate:"optional"`
+	MaxAsk             float64 `query:"maxAsk" validate:"optional"`
+	MinBid             float64 `query:"minBid" validate:"optional"`
+	MaxBid             float64 `query:"maxBid" validate:"optional"`
 	MaxBidAskSpread    float64 `query:"maxBidAskSpread" validate:"optional"`
 	MaxBidAskSpreadPct float64 `query:"maxBidAskSpreadPct" validate:"optional"` // Percent relative to the underlying
 }
@@ -187,6 +191,46 @@ func (op *OptionParams) SetMaxBidAskSpreadPct(maxBidAskSpreadPct float64) error 
 		return fmt.Errorf("maxBidAskSpreadPct cannot be negative")
 	}
 	op.MaxBidAskSpreadPct = maxBidAskSpreadPct
+	return nil
+}
+
+// SetMinAsk sets the MinAsk parameter for the OptionParams.
+// It validates that the MinAsk is not negative.
+func (op *OptionParams) SetMinAsk(minAsk float64) error {
+	if minAsk < 0 {
+		return fmt.Errorf("minAsk cannot be negative")
+	}
+	op.MinAsk = minAsk
+	return nil
+}
+
+// SetMaxAsk sets the MaxAsk parameter for the OptionParams.
+// It validates that the MaxAsk is not negative.
+func (op *OptionParams) SetMaxAsk(maxAsk float64) error {
+	if maxAsk < 0 {
+		return fmt.Errorf("maxAsk cannot be negative")
+	}
+	op.MaxAsk = maxAsk
+	return nil
+}
+
+// SetMinBid sets the MinBid parameter for the OptionParams.
+// It validates that the MinBid is not negative.
+func (op *OptionParams) SetMinBid(minBid float64) error {
+	if minBid < 0 {
+		return fmt.Errorf("minBid cannot be negative")
+	}
+	op.MinBid = minBid
+	return nil
+}
+
+// SetMaxBid sets the MaxBid parameter for the OptionParams.
+// It validates that the MaxBid is not negative.
+func (op *OptionParams) SetMaxBid(maxBid float64) error {
+	if maxBid < 0 {
+		return fmt.Errorf("maxBid cannot be negative")
+	}
+	op.MaxBid = maxBid
 	return nil
 }
 
