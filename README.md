@@ -1,6 +1,6 @@
 <div align="center">
 
-# Go SDK for Market Data v1.1
+# Go SDK for Market Data v1.2
 ### Access Financial Data with Ease
 
 > This is the official Go SDK for [Market Data](https://www.marketdata.app/). It provides developers with a powerful, easy-to-use interface to obtain real-time and historical financial data. Ideal for building financial applications, trading bots, and investment strategies.
@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/github/license/MarketDataApp/sdk-go.svg)](https://github.com/MarketDataApp/sdk-go/blob/master/LICENSE)
 ![SDK Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/MarketDataApp/sdk-go)
-![Lines of Code](https://img.shields.io/badge/lines_of_code-8688-blue)
+![Lines of Code](https://img.shields.io/badge/lines_of_code-8710-blue)
 
 #### Connect With The Market Data Community
 
@@ -235,10 +235,14 @@ Market Data's Go SDK covers the vast majority of v1 endpoints. See our complete 
  |                      | [Candles](https://www.marketdata.app/docs/api/indices/candles)          |       ✅      |       ❌         |
  |                      | [Quotes](https://www.marketdata.app/docs/api/indices/quotes)           |       ✅      |       ❌        |
  |                      |                  |               |               |
+ | **[FUNDS](https://www.marketdata.app/docs/api/funds)**          |                  |               |               |
+ |                      | [Candles](https://www.marketdata.app/docs/api/indices/candles)          |       ✅      |       ❌         |
+ |                      |                  |               |               |
  | **[UTILITIES](https://www.marketdata.app/docs/api/utilities)**          |                  |               |               |
  |                      | [Status](https://www.marketdata.app/docs/api/utilities/status)          |       ❌      |       ❌         |
+ |                      | [Headers](https://www.marketdata.app/docs/api/utilities/headers)          |       ❌      |       ❌         |
 
-> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using v1 endpoints.
+> Note on v2: Even though some v2 endpoints are available for use in this SDK, Market Data has not yet released v2 of its API for clients and v2 usage is restricted to admins only. Clients should only use v1 endpoints at this time. Even after v2 is released, we do not plan on deprecating v1 endpoints, so please build your applications with confidence using our v1 endpoints.
 
 ### SDK License & Data Usage Terms
 

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/MarketDataApp/sdk-go/helpers/dates"
@@ -335,6 +336,10 @@ func (oqr *OptionQuotesResponse) String() string {
 
 // formatFloat64Slice is a helper function to format slices of *float64 for printing.
 func formatFloat64Slice(slice []*float64) string {
+	if len(slice) == 0 {
+		return "[nil]"
+	}
+
 	var result []string
 	for _, ptr := range slice {
 		if ptr != nil {
@@ -343,7 +348,7 @@ func formatFloat64Slice(slice []*float64) string {
 			result = append(result, "nil")
 		}
 	}
-	return fmt.Sprintf("%v", result)
+	return fmt.Sprintf("[%s]", strings.Join(result, ", "))
 }
 
 // nilIfEmpty checks if the slice is nil or empty and returns nil for the current index if so.

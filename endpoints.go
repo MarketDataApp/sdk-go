@@ -28,6 +28,9 @@ var endpoints = map[int]map[string]map[string]string{
 			"quotes":  "/v1/indices/quotes/{symbol}/",
 			"candles": "/v1/indices/candles/{resolution}/{symbol}/",
 		},
+		"funds": {
+			"candles": "/v1/funds/candles/{resolution}/{symbol}/",
+		},
 	},
 	2: {
 		"stocks": {

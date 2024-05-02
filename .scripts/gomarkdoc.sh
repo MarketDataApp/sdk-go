@@ -159,6 +159,7 @@ process_group "options_lookup"
 process_group "options_quotes"
 process_group "options_strikes"
 process_group "options_chain"
+process_group "funds_candles"
 process_group "client"
 process_group "logging"
 

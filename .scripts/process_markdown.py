@@ -19,6 +19,7 @@ URL_TO_INFO = {
     "https://www.marketdata.app/docs/api/options/strikes": {"title": "Strikes", "sidebar_position": 3},
     "https://www.marketdata.app/docs/api/options/chain": {"title": "Option Chain", "sidebar_position": 4},
     "https://www.marketdata.app/docs/api/options/quotes": {"title": "Quotes", "sidebar_position": 5},
+    "https://www.marketdata.app/docs/api/funds/candles": {"title": "Candles", "sidebar_position": 1},
     "https://www.marketdata.app/docs/sdk/go/client": {"title": "Client", "sidebar_position": 2},
     "https://www.marketdata.app/docs/sdk/go/logging": {"title": "Logging", "sidebar_position": 3},
 

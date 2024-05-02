@@ -202,6 +202,14 @@ func (br *baseRequest) getParams() ([]parameters.MarketDataParam, error) {
 		return params, nil
 	}
 
+	if fcr, ok := br.child.(*FundCandlesRequest); ok {
+		params, err := fcr.getParams()
+		if err != nil {
+			return nil, err
+		}
+		return params, nil
+	}
+
 	return []parameters.MarketDataParam{}, nil
 }
 
