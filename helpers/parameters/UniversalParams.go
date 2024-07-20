@@ -5,7 +5,7 @@ import (
 )
 
 // UniversalParams represents the universal parameters for a request.
-// It includes limit, date format, offset, format, headers, columns, human, and error.
+// It includes limit, date format, offset, format, headers, columns, human, error, and feed.
 type UniversalParams struct {
 	Limit      int    `query:"limit"`
 	DateFormat string `query:"dateformat"`
@@ -14,6 +14,7 @@ type UniversalParams struct {
 	Headers    bool   `query:"headers"`
 	Columns    string `query:"columns"`
 	Human      bool   `query:"human"`
+	Feed       string `query:"feed"`
 	Error      error
 }
 
