@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleOptionQuoteRequest_get() {
-	resp, err := OptionQuote().OptionSymbol("AAPL250117C00150000").Date("2024-02-05").Get()
+	ctx := context.TODO()
+	resp, err := OptionQuote().OptionSymbol("AAPL250117C00150000").Date("2024-02-05").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -16,7 +20,8 @@ func ExampleOptionQuoteRequest_get() {
 }
 
 func ExampleOptionQuoteRequest_packed() {
-	resp, err := OptionQuote().OptionSymbol("AAPL250117P00150000").Date("2024-02-05").Packed()
+	ctx := context.TODO()
+	resp, err := OptionQuote().OptionSymbol("AAPL250117P00150000").Date("2024-02-05").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -27,7 +32,8 @@ func ExampleOptionQuoteRequest_packed() {
 }
 
 func ExampleOptionQuoteRequest_raw() {
-	resp, err := OptionQuote().OptionSymbol("AAPL250117P00150000").Date("2024-02-05").Raw()
+	ctx := context.TODO()
+	resp, err := OptionQuote().OptionSymbol("AAPL250117P00150000").Date("2024-02-05").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

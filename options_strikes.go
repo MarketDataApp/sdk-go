@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -115,30 +116,38 @@ func (o *OptionStrikesRequest) getParams() ([]parameters.MarketDataParam, error)
 	return params, nil
 }
 
-// Raw executes the OptionStrikesRequest and returns the raw *resty.Response.
+// Raw executes the OptionStrikesRequest with the provided context and returns the raw *resty.Response.
 // This method returns the *resty.Response which can be used to directly access the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed OptionStrikesRequest.
 //   - error: An error object if the OptionStrikesRequest is nil or if an error occurs during the request execution.
-func (osr *OptionStrikesRequest) Raw() (*resty.Response, error) {
-	return osr.baseRequest.Raw()
+func (osr *OptionStrikesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return osr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the OptionStrikesRequest and returns the OptionStrikesResponse.
+// Packed sends the OptionStrikesRequest with the provided context and returns the OptionStrikesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.OptionStrikesResponse: A pointer to the OptionStrikesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (osr *OptionStrikesRequest) Packed() (*models.OptionStrikesResponse, error) {
+func (osr *OptionStrikesRequest) Packed(ctx context.Context) (*models.OptionStrikesResponse, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionStrikesRequest is nil")
 	}
 
 	var osrResp models.OptionStrikesResponse
-	_, err := osr.baseRequest.client.getFromRequest(osr.baseRequest, &osrResp)
+	_, err := osr.baseRequest.client.getFromRequest(ctx, osr.baseRequest, &osrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -146,20 +155,24 @@ func (osr *OptionStrikesRequest) Packed() (*models.OptionStrikesResponse, error)
 	return &osrResp, nil
 }
 
-// Get sends the OptionStrikesRequest, unpacks the OptionStrikesResponse, and returns a slice of OptionStrikes.
+// Get sends the OptionStrikesRequest with the provided context, unpacks the OptionStrikesResponse, and returns a slice of OptionStrikes.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.OptionStrikes: A slice of OptionStrikes containing the unpacked options strikes data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (osr *OptionStrikesRequest) Get() ([]models.OptionStrikes, error) {
+func (osr *OptionStrikesRequest) Get(ctx context.Context) ([]models.OptionStrikes, error) {
 	if osr == nil {
 		return nil, fmt.Errorf("OptionStrikesRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	osrResp, err := osr.Packed()
+	osrResp, err := osr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

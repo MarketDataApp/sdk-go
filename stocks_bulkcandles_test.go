@@ -1,10 +1,14 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleBulkStockCandlesRequest_packed() {
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Packed()
+	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -14,8 +18,9 @@ func ExampleBulkStockCandlesRequest_packed() {
 }
 
 func ExampleBulkStockCandlesRequest_get() {
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Get()
+	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -30,8 +35,9 @@ func ExampleBulkStockCandlesRequest_get() {
 }
 
 func ExampleBulkStockCandlesRequest_raw() {
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Raw()
+	bscr, err := BulkStockCandles().Resolution("D").Symbols(symbols).Date("2024-02-06").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

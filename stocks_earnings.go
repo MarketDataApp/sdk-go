@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -177,30 +178,38 @@ func (ser *StockEarningsRequest) getParams() ([]parameters.MarketDataParam, erro
 	return params, nil
 }
 
-// Raw executes the StockEarningsRequest and returns the raw *resty.Response.
+// Raw executes the StockEarningsRequest with the provided context and returns the raw *resty.Response.
 // The *resty.Response can be used to access the raw JSON or *http.Response directly.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw response from the executed StockEarningsRequest.
 //   - error: An error object if the StockEarningsRequest is nil, the MarketDataClient is nil, or if an error occurs during the request execution.
-func (ser *StockEarningsRequest) Raw() (*resty.Response, error) {
-	return ser.baseRequest.Raw()
+func (ser *StockEarningsRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return ser.baseRequest.Raw(ctx)
 }
 
-// Packed sends the StockEarningsRequest and returns the StockEarningsResponse.
+// Packed sends the StockEarningsRequest with the provided context and returns the StockEarningsResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.StockEarningsResponse: A pointer to the StockEarningsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (ser *StockEarningsRequest) Packed() (*models.StockEarningsResponse, error) {
+func (ser *StockEarningsRequest) Packed(ctx context.Context) (*models.StockEarningsResponse, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
 
 	var serResp models.StockEarningsResponse
-	_, err := ser.baseRequest.client.getFromRequest(ser.baseRequest, &serResp)
+	_, err := ser.baseRequest.client.getFromRequest(ctx, ser.baseRequest, &serResp)
 	if err != nil {
 		return nil, err
 	}
@@ -208,19 +217,23 @@ func (ser *StockEarningsRequest) Packed() (*models.StockEarningsResponse, error)
 	return &serResp, nil
 }
 
-// Get sends the StockEarningsRequest, unpacks the StockEarningsResponse, and returns a slice of StockEarningsReport.
+// Get sends the StockEarningsRequest with the provided context, unpacks the StockEarningsResponse, and returns a slice of StockEarningsReport.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.StockEarningsReport: A slice of StockEarningsReport containing the unpacked earnings data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (ser *StockEarningsRequest) Get() ([]models.StockEarningsReport, error) {
+func (ser *StockEarningsRequest) Get(ctx context.Context) ([]models.StockEarningsReport, error) {
 	if ser == nil {
 		return nil, fmt.Errorf("StockEarningsRequest is nil")
 	}
 
-	serResp, err := ser.Packed()
+	serResp, err := ser.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

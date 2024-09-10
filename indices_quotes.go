@@ -12,6 +12,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -112,21 +113,25 @@ func (iqr *IndexQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Packed sends the IndexQuoteRequest and returns the IndexQuotesResponse.
+// Packed sends the IndexQuoteRequest with the provided context and returns the IndexQuotesResponse.
 // This method checks if the IndexQuoteRequest receiver is nil, returning an error if true.
 // It proceeds to send the request using the default client and returns the IndexQuotesResponse along with any error encountered during the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.IndexQuotesResponse: A pointer to the IndexQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (iqr *IndexQuoteRequest) Packed() (*models.IndexQuotesResponse, error) {
+func (iqr *IndexQuoteRequest) Packed(ctx context.Context) (*models.IndexQuotesResponse, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
 
 	var iqrResp models.IndexQuotesResponse
-	_, err := iqr.baseRequest.client.getFromRequest(iqr.baseRequest, &iqrResp)
+	_, err := iqr.baseRequest.client.getFromRequest(ctx, iqr.baseRequest, &iqrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -134,33 +139,41 @@ func (iqr *IndexQuoteRequest) Packed() (*models.IndexQuotesResponse, error) {
 	return &iqrResp, nil
 }
 
-// Raw executes the IndexQuoteRequest and returns the raw *resty.Response.
+// Raw executes the IndexQuoteRequest with the provided context and returns the raw *resty.Response.
 // The *resty.Response can be directly used to access the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed IndexQuoteRequest.
 //   - error: An error object if the IndexQuoteRequest is nil or if an error occurs during the request execution.
-func (iqr *IndexQuoteRequest) Raw() (*resty.Response, error) {
-	return iqr.baseRequest.Raw()
+func (iqr *IndexQuoteRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return iqr.baseRequest.Raw(ctx)
 }
 
-// Get sends the IndexQuoteRequest, unpacks the IndexQuotesResponse, and returns a slice of IndexQuote.
+// Get sends the IndexQuoteRequest with the provided context, unpacks the IndexQuotesResponse, and returns a slice of IndexQuote.
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual quote data
 // from the index quote request. The method first checks if the IndexQuoteRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the default client with the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of IndexQuote using the Unpack method from the response.
 //
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - []models.IndexQuote: A slice of IndexQuote containing the unpacked quote data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (iqr *IndexQuoteRequest) Get() ([]models.IndexQuote, error) {
+func (iqr *IndexQuoteRequest) Get(ctx context.Context) ([]models.IndexQuote, error) {
 	if iqr == nil {
 		return nil, fmt.Errorf("IndexQuoteRequest is nil")
 	}
 
-	iqrResp, err := iqr.Packed()
+	iqrResp, err := iqr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

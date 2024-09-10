@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
@@ -13,7 +14,8 @@ func ExampleStockQuoteRequest_get() {
 	// and perform an actual request to fetch stock quotes for the "AAPL" symbol.
 
 	// Initialize a new StockQuoteRequest and fetch a stock quote.
-	sqr, err := StockQuote().Symbol("AAPL").Get()
+	ctx := context.TODO()
+	sqr, err := StockQuote().Symbol("AAPL").Get(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get stock quotes: %v", err)
 	}
@@ -30,7 +32,8 @@ func ExampleStockQuoteRequest_packed() {
 	// and perform an actual request to fetch stock quotes for the "AAPL" symbol.
 
 	// Initialize a new StockQuoteRequest and fetch a stock quote.
-	sqr, err := StockQuote().Symbol("AAPL").Packed()
+	ctx := context.TODO()
+	sqr, err := StockQuote().Symbol("AAPL").Packed(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get stock quotes: %v", err)
 	}
@@ -48,7 +51,8 @@ func ExampleStockQuoteRequest_raw() {
 	// The response is converted to a raw string and we print out the string at the end of the test.
 
 	// Initialize a new StockQuoteRequest and fetch a stock quote.
-	sqr, err := StockQuote().Symbol("AAPL").Raw()
+	ctx := context.TODO()
+	sqr, err := StockQuote().Symbol("AAPL").Raw(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get stock quotes: %v", err)
 	}
@@ -70,7 +74,8 @@ func ExampleStockQuoteRequest_raw() {
 }
 
 func TestStockQuoteRequest(t *testing.T) {
-	sqr, err := StockQuote().Symbol("AAPL").FiftyTwoWeek(true).Get()
+	ctx := context.TODO()
+	sqr, err := StockQuote().Symbol("AAPL").FiftyTwoWeek(true).Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

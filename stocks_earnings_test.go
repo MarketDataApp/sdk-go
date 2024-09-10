@@ -1,13 +1,15 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"time"
 )
 
 func ExampleStockEarningsRequest_raw() {
-	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Raw()
+	ctx := context.TODO()
+	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -25,7 +27,8 @@ func ExampleStockEarningsRequest_raw() {
 }
 
 func ExampleStockEarningsRequest_packed() {
-	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Packed()
+	ctx := context.TODO()
+	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -38,7 +41,8 @@ func ExampleStockEarningsRequest_packed() {
 }
 
 func ExampleStockEarningsRequest_get() {
-	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Get()
+	ctx := context.TODO()
+	ser, err := StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-01-31").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

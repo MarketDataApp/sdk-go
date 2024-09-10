@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -42,6 +43,7 @@ import (
 //   - Get() ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //   - Packed() (*OptionQuotesResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//
 // [/v1/options/quotes/]: https://www.marketdata.app/docs/api/options/quotes
 type OptionQuoteRequest struct {
 	*baseRequest
@@ -151,31 +153,39 @@ func (oqr *OptionQuoteRequest) getParams() ([]parameters.MarketDataParam, error)
 	return params, nil
 }
 
-// Raw executes the OptionQuoteRequest and returns the raw *resty.Response.
+// Raw executes the OptionQuoteRequest with the provided context and returns the raw *resty.Response.
 // This method uses the default client for the request. The *resty.Response can be used to access the raw JSON or *http.Response directly.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
 //   - error: An error object if the OptionQuoteRequest is nil or if an error occurs during the request execution.
-func (oqr *OptionQuoteRequest) Raw() (*resty.Response, error) {
-	return oqr.baseRequest.Raw()
+func (oqr *OptionQuoteRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return oqr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the OptionQuoteRequest and returns the OptionQuotesResponse.
+// Packed sends the OptionQuoteRequest with the provided context and returns the OptionQuotesResponse.
 // This method uses the default client for the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (oqr *OptionQuoteRequest) Packed() (*models.OptionQuotesResponse, error) {
+func (oqr *OptionQuoteRequest) Packed(ctx context.Context) (*models.OptionQuotesResponse, error) {
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
 
 	var oqrResp models.OptionQuotesResponse
-	_, err := oqr.baseRequest.client.getFromRequest(oqr.baseRequest, &oqrResp)
+	_, err := oqr.baseRequest.client.getFromRequest(ctx, oqr.baseRequest, &oqrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -183,21 +193,24 @@ func (oqr *OptionQuoteRequest) Packed() (*models.OptionQuotesResponse, error) {
 	return &oqrResp, nil
 }
 
-// Get sends the OptionQuoteRequest, unpacks the OptionQuotesResponse, and returns a slice of OptionQuote.
-// It returns an error if the request or unpacking fails.
-// This method uses the default client for the request.
+// Get sends the OptionQuoteRequest with the provided context, unpacks the OptionQuotesResponse, and returns a slice of OptionQuote.
+// It returns an error if the request or unpacking fails. This method uses the default client for the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.OptionQuote: A slice of OptionQuote containing the unpacked options quotes data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (oqr *OptionQuoteRequest) Get() ([]models.OptionQuote, error) {
+func (oqr *OptionQuoteRequest) Get(ctx context.Context) ([]models.OptionQuote, error) {
 	if oqr == nil {
 		return nil, fmt.Errorf("OptionQuoteRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	oqrResp, err := oqr.Packed()
+	oqrResp, err := oqr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

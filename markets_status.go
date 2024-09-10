@@ -12,6 +12,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -43,6 +44,7 @@ import (
 //   - Get() ([]MarketStatusReport, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //   - Packed() (*MarketStatusResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//
 // [/v1/markets/status/]: https://www.marketdata.app/docs/api/markets/status
 type MarketStatusRequest struct {
 	*baseRequest
@@ -166,32 +168,40 @@ func (msr *MarketStatusRequest) Countback(q int) *MarketStatusRequest {
 	return msr
 }
 
-// Raw executes the MarketStatusRequest and returns the raw *resty.Response.
+// Raw executes the MarketStatusRequest with the provided context and returns the raw *resty.Response.
 // The *resty.Response can be directly used to access the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed MarketStatusRequest.
 //   - error: An error object if the MarketStatusRequest is nil or if an error occurs during the request execution.
-func (msr *MarketStatusRequest) Raw() (*resty.Response, error) {
-	return msr.baseRequest.Raw()
+func (msr *MarketStatusRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return msr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the MarketStatusRequest and returns the MarketStatusResponse.
+// Packed sends the MarketStatusRequest with the provided context and returns the MarketStatusResponse.
 // This method checks if the MarketStatusRequest receiver is nil, returning an error if true.
 // It proceeds to send the request and returns the MarketStatusResponse along with any error encountered during the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.MarketStatusResponse: A pointer to the *MarketStatusResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (msr *MarketStatusRequest) Packed() (*models.MarketStatusResponse, error) {
+func (msr *MarketStatusRequest) Packed(ctx context.Context) (*models.MarketStatusResponse, error) {
 	if msr == nil {
 		return nil, fmt.Errorf("MarketStatusRequest is nil")
 	}
 
 	var msrResp models.MarketStatusResponse
-	_, err := msr.baseRequest.client.getFromRequest(msr.baseRequest, &msrResp)
+	_, err := msr.baseRequest.client.getFromRequest(ctx, msr.baseRequest, &msrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -199,23 +209,27 @@ func (msr *MarketStatusRequest) Packed() (*models.MarketStatusResponse, error) {
 	return &msrResp, nil
 }
 
-// Get sends the MarketStatusRequest, unpacks the MarketStatusResponse, and returns a slice of MarketStatusReport.
+// Get sends the MarketStatusRequest with the provided context, unpacks the MarketStatusResponse, and returns a slice of MarketStatusReport.
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual market status data
 // from the market status request. The method first checks if the MarketStatusRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of MarketStatusReport using the Unpack method from the response.
 //
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - []models.MarketStatusReport: A slice of MarketStatusReport containing the unpacked market status data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (msr *MarketStatusRequest) Get() ([]models.MarketStatusReport, error) {
+func (msr *MarketStatusRequest) Get(ctx context.Context) ([]models.MarketStatusReport, error) {
 	if msr == nil {
 		return nil, fmt.Errorf("MarketStatusRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	msrResp, err := msr.Packed()
+	msrResp, err := msr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

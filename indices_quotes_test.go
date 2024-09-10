@@ -1,11 +1,13 @@
 package client
 
 import (
+	"context"
 	"testing"
 )
 
 func TestIndexQuoteRequest_Packed(t *testing.T) {
-	iqPacked, err := IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Packed()
+	ctx := context.TODO()
+	iqPacked, err := IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Packed(ctx)
 	if err != nil {
 		t.Errorf("Failed to get index quotes: %v", err)
 		return
@@ -33,7 +35,8 @@ func TestIndexQuoteRequest_Packed(t *testing.T) {
 }
 
 func TestIndexQuoteRequest_Get(t *testing.T) {
-	iq, err := IndexQuotes().Symbol("VIX").FiftyTwoWeek(false).Get()
+	ctx := context.TODO()
+	iq, err := IndexQuotes().Symbol("VIX").FiftyTwoWeek(false).Get(ctx)
 	if err != nil {
 		t.Errorf("Failed to get index quotes: %v", err)
 		return

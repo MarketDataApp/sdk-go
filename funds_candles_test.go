@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleFundCandlesRequest_raw() {
-	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Raw()
+	ctx := context.TODO()
+	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -14,7 +18,8 @@ func ExampleFundCandlesRequest_raw() {
 }
 
 func ExampleFundCandlesRequest_packed() {
-	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Packed()
+	ctx := context.TODO()
+	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -25,7 +30,8 @@ func ExampleFundCandlesRequest_packed() {
 }
 
 func ExampleFundCandlesRequest_get() {
-	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Get()
+	ctx := context.TODO()
+	fcr, err := FundCandles().Resolution("D").Symbol("VFINX").From("2023-01-01").To("2023-01-06").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

@@ -1,12 +1,14 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
 
 func TestOptionChainRequest(t *testing.T) {
-	resp, err := OptionChain().UnderlyingSymbol("AAPL").Side("call").DTE(60).StrikeLimit(2).Range("itm").Get()
+	ctx := context.TODO()
+	resp, err := OptionChain().UnderlyingSymbol("AAPL").Side("call").DTE(60).StrikeLimit(2).Range("itm").Get(ctx)
 	if err != nil {
 		t.Fatalf("Failed to get option chain: %v", err)
 	}
@@ -26,8 +28,9 @@ func TestOptionChainRequest(t *testing.T) {
 }
 
 func ExampleOptionChainRequest_packed() {
+	ctx := context.TODO()
 	resp, err := OptionChain().UnderlyingSymbol("AAPL").Side("call").Date("2022-01-03").
-		Month(2).Year(2022).Range("itm").Strike(150).Weekly(false).Monthly(true).Quarterly(false).Nonstandard(false).Packed()
+		Month(2).Year(2022).Range("itm").Strike(150).Weekly(false).Monthly(true).Nonstandard(false).Packed(ctx)
 	if err != nil {
 		fmt.Println("Error fetching packed option chain:", err)
 		return
@@ -36,9 +39,9 @@ func ExampleOptionChainRequest_packed() {
 	// Output: OptionQuotesResponse{OptionSymbol: ["AAPL220121C00150000"], Underlying: ["AAPL"], Expiration: [1642798800], Side: ["call"], Strike: [150], FirstTraded: [1568640600], DTE: [18], Ask: [32.15], AskSize: [2], Bid: [31.8], BidSize: [359], Mid: [31.98], Last: [32], Volume: [3763], OpenInterest: [98804], UnderlyingPrice: [182.01], InTheMoney: [true], Updated: [1641243600], IV: [nil], Delta: [nil], Gamma: [nil], Theta: [nil], Vega: [nil], Rho: [nil], IntrinsicValue: [32.01], ExtrinsicValue: [0.03]}
 }
 
-
 func ExampleOptionChainRequest_get() {
-	resp, err := OptionChain().UnderlyingSymbol("AAPL").Side("call").Date("2022-01-03").DTE(60).StrikeLimit(2).Range("itm").Get()
+	ctx := context.TODO()
+	resp, err := OptionChain().UnderlyingSymbol("AAPL").Side("call").Date("2022-01-03").DTE(60).StrikeLimit(2).Range("itm").Get(ctx)
 	if err != nil {
 		fmt.Println("Error fetching option chain:", err)
 		return

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,8 +14,9 @@ func ExampleBulkStockQuotesRequest_get() {
 	// and perform an actual request to fetch stock quotes for multiple symbols.
 
 	// Initialize a new BulkStockQuotesRequest and fetch stock quotes for "AAPL", "META", and "MSFT".
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bsqr, err := BulkStockQuotes().Symbols(symbols).Get()
+	bsqr, err := BulkStockQuotes().Symbols(symbols).Get(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get bulk stock quotes: %v", err)
 	}
@@ -33,8 +35,9 @@ func ExampleBulkStockQuotesRequest_packed() {
 	// and perform an actual request to fetch stock quotes for multiple symbols: "AAPL", "META", and "MSFT".
 
 	// Initialize a new BulkStockQuotesRequest and fetch stock quotes for the specified symbols.
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bsqr, err := BulkStockQuotes().Symbols(symbols).Packed()
+	bsqr, err := BulkStockQuotes().Symbols(symbols).Packed(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get bulk stock quotes: %v", err)
 	}
@@ -54,8 +57,9 @@ func ExampleBulkStockQuotesRequest_raw() {
 	// The response is converted to a raw string and we print out the string at the end of the test.
 
 	// Initialize a new BulkStockQuotesRequest and fetch stock quotes for "AAPL", "META", and "MSFT".
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bsqr, err := BulkStockQuotes().Symbols(symbols).Raw()
+	bsqr, err := BulkStockQuotes().Symbols(symbols).Raw(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get bulk stock quotes: %v", err)
 	}
@@ -87,9 +91,9 @@ func ExampleBulkStockQuotesRequest_raw() {
 func TestBulkStockQuotesRequest_packed(t *testing.T) {
 	//client, _ := GetClient()
 	//client.Debug(true)
-
+	ctx := context.TODO()
 	symbols := []string{"AAPL", "META", "MSFT"}
-	bsqr, err := BulkStockQuotes().Symbols(symbols).Get()
+	bsqr, err := BulkStockQuotes().Symbols(symbols).Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

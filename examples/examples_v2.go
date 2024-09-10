@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
@@ -11,8 +12,8 @@ import (
 )
 
 func StockCandlesV2Example() {
-
-	sce, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Packed()
+	ctx := context.TODO()
+	sce, err := api.StockCandlesV2().Resolution("1").Symbol("AAPL").DateKey("2023-01").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -30,7 +31,8 @@ func StockCandlesV2Example() {
 }
 
 func StocksTickersV2Example() {
-	tickers, err := api.StockTickers().DateKey("2023-01-05").Packed()
+	ctx := context.TODO()
+	tickers, err := api.StockTickers().DateKey("2023-01-05").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -41,8 +43,8 @@ func StocksTickersV2Example() {
 
 func SaveTickersToCSV(startDate, endDate string, filename string) error {
 	// Initialize the markets client
-
-	marketStatusResp, err := api.MarketStatus().From(startDate).To(endDate).Packed()
+	ctx := context.TODO()
+	marketStatusResp, err := api.MarketStatus().From(startDate).To(endDate).Packed(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get market status: %v", err)
 	}
@@ -74,7 +76,7 @@ func SaveTickersToCSV(startDate, endDate string, filename string) error {
 		dateStr := date.Format("2006-01-02")
 
 		// Get the TickersResponse for the date
-		response, err := tickers.DateKey(dateStr).Packed()
+		response, err := tickers.DateKey(dateStr).Packed(ctx)
 		if err != nil {
 			return err
 		}
@@ -125,7 +127,8 @@ func SaveSingleDayTickersToCSV(date time.Time, filename string) error {
 	dateStr := date.Format("2006-01-02")
 
 	// Get the TickersResponse for the date
-	response, err := tickers.DateKey(dateStr).Packed()
+	ctx := context.TODO()
+	response, err := tickers.DateKey(dateStr).Packed(ctx)
 	if err != nil {
 		return err
 	}

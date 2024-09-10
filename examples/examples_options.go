@@ -1,13 +1,15 @@
 package examples
 
 import (
+	"context"
 	"fmt"
 
 	api "github.com/MarketDataApp/sdk-go"
 )
 
 func OptionsChainExample() {
-	resp, err := api.OptionChain().UnderlyingSymbol("AAPL").Side("call").DTE(60).StrikeLimit(2).Get()
+	ctx := context.TODO()
+	resp, err := api.OptionChain().UnderlyingSymbol("AAPL").Side("call").DTE(60).StrikeLimit(2).Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -20,7 +22,8 @@ func OptionsChainExample() {
 }
 
 func OptionsQuotesExample() {
-	resp, err := api.OptionQuote().OptionSymbol("AAPL250117C00150000").Get()
+	ctx := context.TODO()
+	resp, err := api.OptionQuote().OptionSymbol("AAPL250117C00150000").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -31,7 +34,8 @@ func OptionsQuotesExample() {
 }
 
 func OptionStrikesExample() {
-	resp, err := api.OptionStrikes().UnderlyingSymbol("AAPL").Get()
+	ctx := context.TODO()
+	resp, err := api.OptionStrikes().UnderlyingSymbol("AAPL").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -43,7 +47,8 @@ func OptionStrikesExample() {
 }
 
 func OptionsLookupExample() {
-	resp, err := api.OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Get()
+	ctx := context.TODO()
+	resp, err := api.OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -53,7 +58,8 @@ func OptionsLookupExample() {
 }
 
 func OptionsExpirationsExample() {
-	resp, err := api.OptionsExpirations().UnderlyingSymbol("AAPL").Strike(200).Get()
+	ctx := context.TODO()
+	resp, err := api.OptionsExpirations().UnderlyingSymbol("AAPL").Strike(200).Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

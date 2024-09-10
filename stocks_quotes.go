@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -93,30 +94,38 @@ func (sqr *StockQuoteRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Raw executes the StockQuoteRequest and returns the raw *resty.Response.
+// Raw executes the StockQuoteRequest with the provided context and returns the raw *resty.Response.
 // This method returns the raw HTTP response from the executed request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
 //   - error: An error object if the request fails due to being nil, or other execution errors.
-func (sqr *StockQuoteRequest) Raw() (*resty.Response, error) {
-	return sqr.baseRequest.Raw()
+func (sqr *StockQuoteRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return sqr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the StockQuoteRequest and returns the StockQuotesResponse.
+// Packed sends the StockQuoteRequest with the provided context and returns the StockQuotesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.StockQuotesResponse: A pointer to the StockQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (sqr *StockQuoteRequest) Packed() (*models.StockQuotesResponse, error) {
+func (sqr *StockQuoteRequest) Packed(ctx context.Context) (*models.StockQuotesResponse, error) {
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
 
 	var sqrResp models.StockQuotesResponse
-	_, err := sqr.baseRequest.client.getFromRequest(sqr.baseRequest, &sqrResp)
+	_, err := sqr.baseRequest.client.getFromRequest(ctx, sqr.baseRequest, &sqrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -124,20 +133,24 @@ func (sqr *StockQuoteRequest) Packed() (*models.StockQuotesResponse, error) {
 	return &sqrResp, nil
 }
 
-// Get sends the StockQuoteRequest, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
+// Get sends the StockQuoteRequest with the provided context, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.StockQuote: A slice of StockQuote containing the unpacked quote data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (sqr *StockQuoteRequest) Get() ([]models.StockQuote, error) {
+func (sqr *StockQuoteRequest) Get(ctx context.Context) ([]models.StockQuote, error) {
 	if sqr == nil {
 		return nil, fmt.Errorf("StockQuoteRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	sqrResp, err := sqr.Packed()
+	sqrResp, err := sqr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -160,30 +161,38 @@ func (bscr *BulkStockCandlesRequest) getParams() ([]parameters.MarketDataParam, 
 	return params, nil
 }
 
-// Raw executes the request and returns the raw *resty.Response.
+// Raw executes the request with the provided context and returns the raw *resty.Response.
 // This method allows for obtaining the raw JSON or *http.Response directly from the executed request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw response from the executed request.
 //   - error: An error object if the request is nil or if an error occurs during the request execution.
-func (bscr *BulkStockCandlesRequest) Raw() (*resty.Response, error) {
-	return bscr.baseRequest.Raw()
+func (bscr *BulkStockCandlesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return bscr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the BulkStockCandlesRequest and returns the StockCandlesResponse.
+// Packed sends the BulkStockCandlesRequest with the provided context and returns the StockCandlesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.BulkStockCandlesResponse: A pointer to the BulkStockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (bscr *BulkStockCandlesRequest) Packed() (*models.BulkStockCandlesResponse, error) {
+func (bscr *BulkStockCandlesRequest) Packed(ctx context.Context) (*models.BulkStockCandlesResponse, error) {
 	if bscr == nil {
 		return nil, fmt.Errorf("BulkStockCandlesRequest is nil")
 	}
 
 	var scrResp models.BulkStockCandlesResponse
-	_, err := bscr.baseRequest.client.getFromRequest(bscr.baseRequest, &scrResp)
+	_, err := bscr.baseRequest.client.getFromRequest(ctx, bscr.baseRequest, &scrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -191,20 +200,24 @@ func (bscr *BulkStockCandlesRequest) Packed() (*models.BulkStockCandlesResponse,
 	return &scrResp, nil
 }
 
-// Get sends the BulkStockCandlesRequest, unpacks the StockCandlesResponse, and returns a slice of []Candle.
+// Get sends the BulkStockCandlesRequest with the provided context, unpacks the StockCandlesResponse, and returns a slice of []Candle.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.Candle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (bscr *BulkStockCandlesRequest) Get() ([]models.Candle, error) {
+func (bscr *BulkStockCandlesRequest) Get(ctx context.Context) ([]models.Candle, error) {
 	if bscr == nil {
 		return nil, fmt.Errorf("BulkStockCandlesRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	scrResp, err := bscr.Packed()
+	scrResp, err := bscr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -217,6 +230,7 @@ func (bscr *BulkStockCandlesRequest) Get() ([]models.Candle, error) {
 
 	return data, nil
 }
+
 // BulkStockCandles initializes a new BulkStockCandlesRequest with default parameters.
 // This function prepares a request to fetch bulk stock candles data. It sets up all necessary parameters
 // and configurations to make the request ready to be sent. The function accepts a variadic parameter
@@ -249,4 +263,3 @@ func BulkStockCandles(client ...*MarketDataClient) *BulkStockCandlesRequest {
 
 	return bscr
 }
-

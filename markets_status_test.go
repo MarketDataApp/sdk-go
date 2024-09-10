@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
@@ -47,8 +48,8 @@ func TestMarketStatusRequestSetters(t *testing.T) {
 }
 
 func ExampleMarketStatus_packed() {
-
-	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Packed()
+	ctx := context.TODO()
+	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -59,8 +60,8 @@ func ExampleMarketStatus_packed() {
 }
 
 func ExampleMarketStatus_get() {
-
-	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Get()
+	ctx := context.TODO()
+	msr, err := MarketStatus().From("2022-01-01").To("2022-01-10").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

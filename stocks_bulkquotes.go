@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -96,30 +97,38 @@ func (bs *BulkStockQuotesRequest) getParams() ([]parameters.MarketDataParam, err
 	return params, nil
 }
 
-// Raw executes the request for BulkStockQuotesRequest and returns the raw *resty.Response.
+// Raw executes the request for BulkStockQuotesRequest with the provided context and returns the raw *resty.Response.
 // This method does not allow for an optional MarketDataClient to be passed.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw response from the executed BulkStockQuotesRequest.
 //   - error: An error object if the BulkStockQuotesRequest is nil or if an error occurs during the request execution.
-func (bsqr *BulkStockQuotesRequest) Raw() (*resty.Response, error) {
-	return bsqr.baseRequest.Raw()
+func (bsqr *BulkStockQuotesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return bsqr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the BulkStockQuotesRequest and returns the StockQuotesResponse.
+// Packed sends the BulkStockQuotesRequest with the provided context and returns the StockQuotesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.StockQuotesResponse: A pointer to the StockQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (bs *BulkStockQuotesRequest) Packed() (*models.StockQuotesResponse, error) {
+func (bs *BulkStockQuotesRequest) Packed(ctx context.Context) (*models.StockQuotesResponse, error) {
 	if bs == nil {
 		return nil, fmt.Errorf("BulkStockQuotesRequest is nil")
 	}
 
 	var bsResp models.StockQuotesResponse
-	_, err := bs.baseRequest.client.getFromRequest(bs.baseRequest, &bsResp)
+	_, err := bs.baseRequest.client.getFromRequest(ctx, bs.baseRequest, &bsResp)
 	if err != nil {
 		return nil, err
 	}
@@ -127,19 +136,23 @@ func (bs *BulkStockQuotesRequest) Packed() (*models.StockQuotesResponse, error) 
 	return &bsResp, nil
 }
 
-// Get sends the BulkStockQuotesRequest, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
+// Get sends the BulkStockQuotesRequest with the provided context, unpacks the StockQuotesResponse, and returns a slice of StockQuote.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.StockQuote: A slice of StockQuote containing the unpacked quote data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (bs *BulkStockQuotesRequest) Get() ([]models.StockQuote, error) {
+func (bs *BulkStockQuotesRequest) Get(ctx context.Context) ([]models.StockQuote, error) {
 	if bs == nil {
 		return nil, fmt.Errorf("BulkStockQuotesRequest is nil")
 	}
 
-	bsResp, err := bs.Packed()
+	bsResp, err := bs.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

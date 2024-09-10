@@ -12,6 +12,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -256,30 +257,38 @@ func (scr *StockCandlesRequest) getParams() ([]parameters.MarketDataParam, error
 	return params, nil
 }
 
-// Raw executes the StockCandlesRequest and returns the raw *resty.Response.
+// Raw executes the StockCandlesRequest with the provided context and returns the raw *resty.Response.
 // This method returns the raw JSON or *http.Response for further processing without accepting an alternative MarketDataClient.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
 //   - error: An error object if the request fails due to execution errors.
-func (scr *StockCandlesRequest) Raw() (*resty.Response, error) {
-	return scr.baseRequest.Raw()
+func (scr *StockCandlesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return scr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the StockCandlesRequest and returns the StockCandlesResponse.
-////
+// Packed sends the StockCandlesRequest with the provided context and returns the StockCandlesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - *StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (scr *StockCandlesRequest) Packed() (*models.StockCandlesResponse, error) {
+func (scr *StockCandlesRequest) Packed(ctx context.Context) (*models.StockCandlesResponse, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
 
 	var scrResp models.StockCandlesResponse
-	_, err := scr.baseRequest.client.getFromRequest(scr.baseRequest, &scrResp)
+	_, err := scr.baseRequest.client.getFromRequest(ctx, scr.baseRequest, &scrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -287,20 +296,24 @@ func (scr *StockCandlesRequest) Packed() (*models.StockCandlesResponse, error) {
 	return &scrResp, nil
 }
 
-// Get sends the StockCandlesRequest, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
+// Get sends the StockCandlesRequest with the provided context, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []Candle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (scr *StockCandlesRequest) Get() ([]models.Candle, error) {
+func (scr *StockCandlesRequest) Get(ctx context.Context) ([]models.Candle, error) {
 	if scr == nil {
 		return nil, fmt.Errorf("StockCandlesRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	scrResp, err := scr.Packed()
+	scrResp, err := scr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +329,7 @@ func (scr *StockCandlesRequest) Get() ([]models.Candle, error) {
 
 // StockCandles initializes a new StockCandlesRequest with default parameters.
 // This function prepares a request to fetch stock candle data. It sets up all necessary parameters
-// and configurations to make the request ready to be sent. 
+// and configurations to make the request ready to be sent.
 //
 // # Returns
 //

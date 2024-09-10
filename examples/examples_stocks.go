@@ -1,13 +1,15 @@
 package examples
 
 import (
+	"context"
 	"fmt"
 
 	api "github.com/MarketDataApp/sdk-go"
 )
 
 func StockQuoteExample() {
-	sqe, err := api.StockQuote().Symbol("AAPL").FiftyTwoWeek(true).Packed()
+	ctx := context.TODO()
+	sqe, err := api.StockQuote().Symbol("AAPL").FiftyTwoWeek(true).Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -29,8 +31,8 @@ func StockQuoteExample() {
 }
 
 func StockCandlesExample() {
-
-	sce, err := api.StockCandles().Resolution("1").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Packed()
+	ctx := context.TODO()
+	sce, err := api.StockCandles().Resolution("1").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -49,7 +51,8 @@ func StockCandlesExample() {
 }
 
 func StockEarningsExample() {
-	see, err := api.StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-12-31").Packed()
+	ctx := context.TODO()
+	see, err := api.StockEarnings().Symbol("AAPL").From("2022-01-01").To("2022-12-31").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -71,7 +74,8 @@ func StockEarningsExample() {
 }
 
 func StockNewsExample() {
-	resp, err := api.StockNews().Symbol("AAPL").Get()
+	ctx := context.TODO()
+	resp, err := api.StockNews().Symbol("AAPL").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

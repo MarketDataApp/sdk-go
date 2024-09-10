@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -61,6 +62,7 @@ import (
 //   - Get() ([]OptionQuote, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //   - Packed() (*OptionQuotesResponse, error): Packs the request parameters and sends the request, returning a *OptionQuotesResponse response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//
 // [/v1/options/chain/]: https://www.marketdata.app/docs/api/options/chain
 type OptionChainRequest struct {
 	*baseRequest
@@ -574,7 +576,6 @@ func (ocr *OptionChainRequest) MaxBid(maxBid float64) *OptionChainRequest {
 	return ocr
 }
 
-
 // getParams packs the OptionChainRequest struct into a slice of interface{} and returns it.
 // This method is used to gather all the parameters set in the OptionChainRequest into a single slice
 // for easier manipulation and usage in subsequent requests.
@@ -591,32 +592,40 @@ func (ocr *OptionChainRequest) getParams() ([]parameters.MarketDataParam, error)
 	return params, nil
 }
 
-// Raw executes the OptionChainRequest and returns the raw *resty.Response.
+// Raw executes the OptionChainRequest with the provided context and returns the raw *resty.Response.
 // This method uses the default client for this request. The *resty.Response can be directly used to access the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed OptionChainRequest.
 //   - error: An error object if the OptionChainRequest is nil or if an error occurs during the request execution.
-func (ocr *OptionChainRequest) Raw() (*resty.Response, error) {
-	return ocr.baseRequest.Raw()
+func (ocr *OptionChainRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return ocr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the OptionChainRequest and returns the OptionChainResponse.
+// Packed sends the OptionChainRequest with the provided context and returns the OptionChainResponse.
 // This method checks if the OptionChainRequest receiver is nil, returning an error if true.
 // It proceeds to send the request using the default client and returns the OptionChainResponse along with any error encountered during the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.OptionQuotesResponse: A pointer to the OptionQuotesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (ocr *OptionChainRequest) Packed() (*models.OptionQuotesResponse, error) {
+func (ocr *OptionChainRequest) Packed(ctx context.Context) (*models.OptionQuotesResponse, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
 	}
 
 	var ocrResp models.OptionQuotesResponse
-	_, err := ocr.baseRequest.client.getFromRequest(ocr.baseRequest, &ocrResp)
+	_, err := ocr.baseRequest.client.getFromRequest(ctx, ocr.baseRequest, &ocrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -624,23 +633,27 @@ func (ocr *OptionChainRequest) Packed() (*models.OptionQuotesResponse, error) {
 	return &ocrResp, nil
 }
 
-// Get sends the OptionChainRequest, unpacks the OptionChainResponse, and returns a slice of OptionQuote.
+// Get sends the OptionChainRequest with the provided context, unpacks the OptionChainResponse, and returns a slice of OptionQuote.
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual option chain data
 // from the option chain request. The method first checks if the OptionChainRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the default client.
 // Upon receiving the response, it unpacks the data into a slice of OptionQuote using the Unpack method from the response.
 //
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - []models.OptionQuote: A slice of OptionQuote containing the unpacked option chain data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (ocr *OptionChainRequest) Get() ([]models.OptionQuote, error) {
+func (ocr *OptionChainRequest) Get(ctx context.Context) ([]models.OptionQuote, error) {
 	if ocr == nil {
 		return nil, fmt.Errorf("OptionChainRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	ocrResp, err := ocr.Packed()
+	ocrResp, err := ocr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

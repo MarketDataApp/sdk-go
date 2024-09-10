@@ -41,6 +41,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -265,7 +266,7 @@ func (br *baseRequest) getError() error {
 //
 //   - *resty.Response: The raw response from the executed request.
 //   - error: An error object if the baseRequest is nil, or if an error occurs during the request execution.
-func (request *baseRequest) Raw() (*resty.Response, error) {
+func (request *baseRequest) Raw(ctx context.Context) (*resty.Response, error) {
 	if request == nil {
 		return nil, fmt.Errorf("baseRequest is nil")
 	}
@@ -274,6 +275,6 @@ func (request *baseRequest) Raw() (*resty.Response, error) {
 		return nil, fmt.Errorf("MarketDataClient is nil")
 	}
 
-	response, err := request.client.getRawResponse(request)
+	response, err := request.client.getRawResponse(ctx, request)
 	return response, err
 }

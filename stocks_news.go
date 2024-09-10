@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -162,30 +163,38 @@ func (snr *StockNewsRequest) getParams() ([]parameters.MarketDataParam, error) {
 	return params, nil
 }
 
-// Raw executes the StockNewsRequest and returns the raw *resty.Response.
+// Raw executes the StockNewsRequest with the provided context and returns the raw *resty.Response.
 // This method retrieves the raw HTTP response for further processing.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
 //   - error: An error object if the request fails due to being nil or other execution errors.
-func (snr *StockNewsRequest) Raw() (*resty.Response, error) {
-	return snr.baseRequest.Raw()
+func (snr *StockNewsRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return snr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the StockNewsRequest and returns the StockNewsResponse.
+// Packed sends the StockNewsRequest with the provided context and returns the StockNewsResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.StockNewsResponse: A pointer to the StockNewsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (snr *StockNewsRequest) Packed() (*models.StockNewsResponse, error) {
+func (snr *StockNewsRequest) Packed(ctx context.Context) (*models.StockNewsResponse, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
 
 	var snrResp models.StockNewsResponse
-	_, err := snr.baseRequest.client.getFromRequest(snr.baseRequest, &snrResp)
+	_, err := snr.baseRequest.client.getFromRequest(ctx, snr.baseRequest, &snrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -193,20 +202,24 @@ func (snr *StockNewsRequest) Packed() (*models.StockNewsResponse, error) {
 	return &snrResp, nil
 }
 
-// Get sends the StockNewsRequest, unpacks the StockNewsResponse, and returns a slice of StockNews.
+// Get sends the StockNewsRequest with the provided context, unpacks the StockNewsResponse, and returns a slice of StockNews.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.StockNews: A slice of StockNews containing the unpacked news data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (snr *StockNewsRequest) Get() ([]models.StockNews, error) {
+func (snr *StockNewsRequest) Get(ctx context.Context) ([]models.StockNews, error) {
 	if snr == nil {
 		return nil, fmt.Errorf("StockNewsRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	snrResp, err := snr.Packed()
+	snrResp, err := snr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

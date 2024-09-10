@@ -12,6 +12,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -199,30 +200,38 @@ func (fcr *FundCandlesRequest) getParams() ([]parameters.MarketDataParam, error)
 	return params, nil
 }
 
-// Raw executes the FundCandlesRequest and returns the raw *resty.Response.
+// Raw executes the FundCandlesRequest with the provided context and returns the raw *resty.Response.
 // This method returns the raw JSON or *http.Response for further processing without accepting an alternative MarketDataClient.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed request.
 //   - error: An error object if the request fails due to execution errors.
-func (fcr *FundCandlesRequest) Raw() (*resty.Response, error) {
-	return fcr.baseRequest.Raw()
+func (fcr *FundCandlesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return fcr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the FundCandlesRequest and returns the FundCandlesResponse.
-////
+// Packed sends the FundCandlesRequest with the provided context and returns the FundCandlesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - *FundCandlesResponse: A pointer to the FundCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (fcr *FundCandlesRequest) Packed() (*models.FundCandlesResponse, error) {
+func (fcr *FundCandlesRequest) Packed(ctx context.Context) (*models.FundCandlesResponse, error) {
 	if fcr == nil {
 		return nil, fmt.Errorf("FundCandlesRequest is nil")
 	}
 
 	var fcrResp models.FundCandlesResponse
-	_, err := fcr.baseRequest.client.getFromRequest(fcr.baseRequest, &fcrResp)
+	_, err := fcr.baseRequest.client.getFromRequest(ctx, fcr.baseRequest, &fcrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -230,20 +239,24 @@ func (fcr *FundCandlesRequest) Packed() (*models.FundCandlesResponse, error) {
 	return &fcrResp, nil
 }
 
-// Get sends the FundCandlesRequest, unpacks the FundCandlesResponse, and returns a slice of StockCandle.
+// Get sends the FundCandlesRequest with the provided context, unpacks the FundCandlesResponse, and returns a slice of StockCandle.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []Candle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (fcr *FundCandlesRequest) Get() ([]models.Candle, error) {
+func (fcr *FundCandlesRequest) Get(ctx context.Context) ([]models.Candle, error) {
 	if fcr == nil {
 		return nil, fmt.Errorf("FundCandlesRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	fcrResp, err := fcr.Packed()
+	fcrResp, err := fcr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +272,7 @@ func (fcr *FundCandlesRequest) Get() ([]models.Candle, error) {
 
 // FundCandles initializes a new FundCandlesRequest with default parameters.
 // This function prepares a request to fetch stock candle data. It sets up all necessary parameters
-// and configurations to make the request ready to be sent. 
+// and configurations to make the request ready to be sent.
 //
 // # Returns
 //
@@ -269,10 +282,10 @@ func FundCandles() *FundCandlesRequest {
 	baseReq.path = endpoints[1]["funds"]["candles"]
 
 	fcr := &FundCandlesRequest{
-		baseRequest:       baseReq,
-		dateParams:        &parameters.DateParams{},
-		resolutionParams:  &parameters.ResolutionParams{},
-		symbolParams:      &parameters.SymbolParams{},
+		baseRequest:      baseReq,
+		dateParams:       &parameters.DateParams{},
+		resolutionParams: &parameters.ResolutionParams{},
+		symbolParams:     &parameters.SymbolParams{},
 	}
 
 	// Set the date to the current time

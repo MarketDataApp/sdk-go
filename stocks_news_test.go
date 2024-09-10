@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleStockNewsRequest_get() {
-	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Get()
+	ctx := context.TODO()
+	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -22,7 +26,8 @@ func ExampleStockNewsRequest_get() {
 }
 
 func ExampleStockNewsRequest_packed() {
-	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Packed()
+	ctx := context.TODO()
+	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -33,7 +38,8 @@ func ExampleStockNewsRequest_packed() {
 }
 
 func ExampleStockNewsRequest_raw() {
-	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Raw()
+	ctx := context.TODO()
+	resp, err := StockNews().Symbol("AAPL").Date("2023-01-01").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

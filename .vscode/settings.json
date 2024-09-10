@@ -2,6 +2,8 @@
     "cSpell.words": [
         "bulkcandles",
         "bulkquotes",
-        "datekey"
+        "datekey",
+        "Ratelimit",
+        "resty"
     ]
 }

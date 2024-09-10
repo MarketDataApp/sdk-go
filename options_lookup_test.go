@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleOptionLookupRequest_get() {
-	resp, err := OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Get()
+	ctx := context.TODO()
+	resp, err := OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -14,7 +18,8 @@ func ExampleOptionLookupRequest_get() {
 }
 
 func ExampleOptionLookupRequest_packed() {
-	resp, err := OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Packed()
+	ctx := context.TODO()
+	resp, err := OptionLookup().UserInput("AAPL 7/28/2023 200 Call").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

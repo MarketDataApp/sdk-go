@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -42,6 +43,7 @@ import (
 //   - Get() ([]time.Time, error): Sends the request, unpacks the response, and returns []time.Time allowing direct-access to the data.
 //   - Packed() (*OptionsExpirationsResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//
 // [/v1/options/expirations/]: https://www.marketdata.app/docs/api/options/expirations
 type OptionsExpirationsRequest struct {
 	*baseRequest
@@ -124,31 +126,39 @@ func (o *OptionsExpirationsRequest) getParams() ([]parameters.MarketDataParam, e
 	return params, nil
 }
 
-// Raw executes the OptionsExpirationsRequest and returns the raw *resty.Response.
+// Raw executes the OptionsExpirationsRequest with the provided context and returns the raw *resty.Response.
 // This method uses the default client for the request. The *resty.Response can be used to directly access the raw JSON or *http.Response.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed OptionsExpirationsRequest.
 //   - error: An error object if the OptionsExpirationsRequest is nil or if an error occurs during the request execution.
-func (oer *OptionsExpirationsRequest) Raw() (*resty.Response, error) {
-	return oer.baseRequest.Raw()
+func (oer *OptionsExpirationsRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return oer.baseRequest.Raw(ctx)
 }
 
-// Packed sends the OptionsExpirationsRequest and returns the OptionsExpirationsResponse.
+// Packed sends the OptionsExpirationsRequest with the provided context and returns the OptionsExpirationsResponse.
 // This method uses the default client for the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.OptionsExpirationsResponse: A pointer to the OptionsExpirationsResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (o *OptionsExpirationsRequest) Packed() (*models.OptionsExpirationsResponse, error) {
+func (o *OptionsExpirationsRequest) Packed(ctx context.Context) (*models.OptionsExpirationsResponse, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
 
 	var oResp models.OptionsExpirationsResponse
-	_, err := o.baseRequest.client.getFromRequest(o.baseRequest, &oResp)
+	_, err := o.baseRequest.client.getFromRequest(ctx, o.baseRequest, &oResp)
 	if err != nil {
 		return nil, err
 	}
@@ -156,20 +166,23 @@ func (o *OptionsExpirationsRequest) Packed() (*models.OptionsExpirationsResponse
 	return &oResp, nil
 }
 
-// Get sends the OptionsExpirationsRequest, unpacks the OptionsExpirationsResponse, and returns a slice of time.Time.
-// It returns an error if the request or unpacking fails.
-// This method uses the default client for the request.
+// Get sends the OptionsExpirationsRequest with the provided context, unpacks the OptionsExpirationsResponse, and returns a slice of time.Time.
+// It returns an error if the request or unpacking fails. This method uses the default client for the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []time.Time: A slice of time.Time containing the unpacked options expirations data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (o *OptionsExpirationsRequest) Get() ([]time.Time, error) {
+func (o *OptionsExpirationsRequest) Get(ctx context.Context) ([]time.Time, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsExpirationsRequest is nil")
 	}
 
-	oResp, err := o.Packed()
+	oResp, err := o.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

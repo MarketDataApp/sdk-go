@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,7 +18,8 @@ func TestLogging(t *testing.T) {
 	}
 	client.Debug(false)
 
-	sc, err := StockCandles().Resolution("D").Symbol("AAPL").Date("2023-01-03").Raw()
+	ctx := context.TODO()
+	sc, err := StockCandles().Resolution("D").Symbol("AAPL").Date("2023-01-03").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		fmt.Print(client)

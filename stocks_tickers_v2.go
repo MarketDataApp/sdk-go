@@ -2,6 +2,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -50,20 +51,24 @@ func (str *StockTickersRequestV2) getParams() ([]parameters.MarketDataParam, err
 	return params, nil
 }
 
-// Packed sends the StockTickersRequestV2 and returns the TickersResponse.
+// Packed sends the StockTickersRequestV2 with the provided context and returns the TickersResponse.
 // This method checks if the StockTickersRequestV2 receiver is nil, returning an error if true.
 // Otherwise, it proceeds to send the request and returns the TickersResponse along with any error encountered during the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.TickersResponse: A pointer to the TickersResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (str *StockTickersRequestV2) Packed() (*models.TickersResponse, error) {
+func (str *StockTickersRequestV2) Packed(ctx context.Context) (*models.TickersResponse, error) {
 	if str == nil {
 		return nil, fmt.Errorf("StockTickersRequestV2 is nil")
 	}
 	var trResp models.TickersResponse
-	_, err := str.baseRequest.client.getFromRequest(str.baseRequest, &trResp)
+	_, err := str.baseRequest.client.getFromRequest(ctx, str.baseRequest, &trResp)
 	if err != nil {
 		return nil, err
 	}
@@ -71,23 +76,27 @@ func (str *StockTickersRequestV2) Packed() (*models.TickersResponse, error) {
 	return &trResp, nil
 }
 
-// Get sends the StockTickersRequestV2, unpacks the TickersResponse, and returns a slice of Ticker.
+// Get sends the StockTickersRequestV2 with the provided context, unpacks the TickersResponse, and returns a slice of Ticker.
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual stock tickers data
 // from the stock tickers request. The method first checks if the StockTickersRequestV2 receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of Ticker using the Unpack method from the response.
 //
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - []models.Ticker: A slice of Ticker containing the unpacked tickers data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (str *StockTickersRequestV2) Get() ([]models.Ticker, error) {
+func (str *StockTickersRequestV2) Get(ctx context.Context) ([]models.Ticker, error) {
 	if str == nil {
 		return nil, fmt.Errorf("StockTickersRequestV2 is nil")
 	}
 
 	// Use the Packed method to make the request
-	trResp, err := str.Packed()
+	trResp, err := str.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

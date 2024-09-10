@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -60,19 +61,23 @@ func (cr *StockCandlesRequestV2) getParams() ([]parameters.MarketDataParam, erro
 	return params, nil
 }
 
-// Packed sends the StockCandlesRequestV2 and returns the StockCandlesResponse.
+// Packed sends the StockCandlesRequestV2 with the provided context and returns the StockCandlesResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.StockCandlesResponse: A pointer to the StockCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (scrV2 *StockCandlesRequestV2) Packed() (*models.StockCandlesResponse, error) {
+func (scrV2 *StockCandlesRequestV2) Packed(ctx context.Context) (*models.StockCandlesResponse, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
 
 	var scrResp models.StockCandlesResponse
-	_, err := scrV2.baseRequest.client.getFromRequest(scrV2.baseRequest, &scrResp)
+	_, err := scrV2.baseRequest.client.getFromRequest(ctx, scrV2.baseRequest, &scrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -80,20 +85,24 @@ func (scrV2 *StockCandlesRequestV2) Packed() (*models.StockCandlesResponse, erro
 	return &scrResp, nil
 }
 
-// Get sends the StockCandlesRequestV2, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
+// Get sends the StockCandlesRequestV2 with the provided context, unpacks the StockCandlesResponse, and returns a slice of StockCandle.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - []models.StockCandle: A slice of []Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (scrV2 *StockCandlesRequestV2) Get() ([]models.Candle, error) {
+func (scrV2 *StockCandlesRequestV2) Get(ctx context.Context) ([]models.Candle, error) {
 	if scrV2 == nil {
 		return nil, fmt.Errorf("StockCandlesRequestV2 is nil")
 	}
 
 	// Use the Packed method to make the request
-	scrResp, err := scrV2.Packed()
+	scrResp, err := scrV2.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

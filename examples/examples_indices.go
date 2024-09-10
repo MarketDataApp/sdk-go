@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -8,7 +9,8 @@ import (
 )
 
 func IndexQuoteExample() {
-	iqe, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Packed()
+	ctx := context.TODO()
+	iqe, err := api.IndexQuotes().Symbol("VIX").FiftyTwoWeek(true).Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -32,7 +34,8 @@ func IndexQuoteExample() {
 
 func IndexCandlesExample() {
 	oneWeekAgo := time.Now().AddDate(0, 0, -7)
-	ice, err := api.IndexCandles().Resolution("D").Symbol("VIX").From(oneWeekAgo).To("today").Packed()
+	ctx := context.TODO()
+	ice, err := api.IndexCandles().Resolution("D").Symbol("VIX").From(oneWeekAgo).To("today").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

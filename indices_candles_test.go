@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleIndicesCandlesRequest_get() {
-	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Get()
+	ctx := context.TODO()
+	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Get(ctx)
 	if err != nil {
 		println("Error retrieving VIX index candles:", err.Error())
 		return
@@ -19,7 +23,8 @@ func ExampleIndicesCandlesRequest_get() {
 }
 
 func ExampleIndicesCandlesRequest_packed() {
-	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Packed()
+	ctx := context.TODO()
+	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Packed(ctx)
 	if err != nil {
 		println("Error retrieving VIX index candles:", err.Error())
 		return
@@ -29,13 +34,13 @@ func ExampleIndicesCandlesRequest_packed() {
 }
 
 func ExampleIndicesCandlesRequest_raw() {
-	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Raw()
+	ctx := context.TODO()
+	vix, err := IndexCandles().Symbol("VIX").Resolution("D").From("2024-01-01").To("2024-01-05").Raw(ctx)
 	if err != nil {
 		println("Error retrieving VIX index candles:", err.Error())
 		return
 	}
 	fmt.Println(vix)
 	// Output: {"s":"ok","t":[1704171600,1704258000,1704344400,1704430800],"o":[13.21,13.38,13.97,14.24],"h":[14.23,14.22,14.2,14.58],"l":[13.1,13.36,13.64,13.29],"c":[13.2,14.04,14.13,13.35]}
-
 
 }

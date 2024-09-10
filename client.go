@@ -34,6 +34,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"context"
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/joho/godotenv/autoload"
@@ -349,7 +350,7 @@ func (c *MarketDataClient) updateRateLimit(resp *resty.Response) {
 
 // prepareAndExecuteRequest prepares the request based on the provided baseRequest and executes it.
 // It returns the response from the server or an error if the request preparation or execution fails.
-func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
+func (c *MarketDataClient) prepareAndExecuteRequest(ctx context.Context, br *baseRequest, result interface{}) (*resty.Response, error) {
 
 	// Check for any errors in the base request.
 	if err := br.getError(); err != nil {
@@ -385,6 +386,9 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 		return nil, err
 	}
 
+	// Use the provided context for the request
+	req = req.SetContext(ctx)
+
 	// Execute the GET request to the specified path.
 	resp, err := req.Get(path)
 	if err != nil {
@@ -419,9 +423,9 @@ func (c *MarketDataClient) prepareAndExecuteRequest(br *baseRequest, result inte
 //
 //   - A pointer to a resty.Response object containing the response from the server.
 //   - An error object if an error occurred during the request execution or if the response contains an error.
-func (c *MarketDataClient) getFromRequest(br *baseRequest, result interface{}) (*resty.Response, error) {
+func (c *MarketDataClient) getFromRequest(ctx context.Context, br *baseRequest, result interface{}) (*resty.Response, error) {
 	// Execute the prepared request and capture the response and any error.
-	resp, err := c.prepareAndExecuteRequest(br, result)
+	resp, err := c.prepareAndExecuteRequest(ctx, br, result)
 	if err != nil {
 		// Return the response and the error if an error occurred during request execution.
 		return resp, err
@@ -442,14 +446,15 @@ func (c *MarketDataClient) getFromRequest(br *baseRequest, result interface{}) (
 //
 // # Parameters
 //
+//   - ctx: A context.Context object to control the request's lifecycle.
 //   - br: A pointer to a baseRequest object containing the request details.
 //
 // # Returns
 //
 //   - A pointer to a resty.Response object containing the raw response from the server.
 //   - An error object if an error occurred during the request execution.
-func (c *MarketDataClient) getRawResponse(br *baseRequest) (*resty.Response, error) {
-	return c.prepareAndExecuteRequest(br, nil)
+func (c *MarketDataClient) getRawResponse(ctx context.Context, br *baseRequest) (*resty.Response, error) {
+	return c.prepareAndExecuteRequest(ctx, br, nil)
 }
 
 // GetClient checks for an existing instance of MarketDataClient and returns it.

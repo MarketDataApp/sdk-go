@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleOptionStrikesRequest_get() {
-	resp, err := OptionStrikes().UnderlyingSymbol("AAPL").Date("2009-02-09").Get()
+	ctx := context.TODO()
+	resp, err := OptionStrikes().UnderlyingSymbol("AAPL").Date("2009-02-09").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -21,7 +25,8 @@ func ExampleOptionStrikesRequest_get() {
 }
 
 func ExampleOptionStrikesRequest_packed() {
-	resp, err := OptionStrikes().UnderlyingSymbol("AAPL").Date("2009-02-09").Packed()
+	ctx := context.TODO()
+	resp, err := OptionStrikes().UnderlyingSymbol("AAPL").Date("2009-02-09").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

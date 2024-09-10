@@ -1,10 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleStockCandlesRequestV2_get() {
-
-	scr2, err := StockCandlesV2().Resolution("D").Symbol("AAPL").DateKey("2023-01").Get()
+	ctx := context.TODO()
+	scr2, err := StockCandlesV2().Resolution("D").Symbol("AAPL").DateKey("2023-01").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -36,8 +39,8 @@ func ExampleStockCandlesRequestV2_get() {
 }
 
 func ExampleStockCandlesRequestV2_packed() {
-
-	scr2, err := StockCandlesV2().Resolution("D").Symbol("AAPL").DateKey("2023-01").Packed()
+	ctx := context.TODO()
+	scr2, err := StockCandlesV2().Resolution("D").Symbol("AAPL").DateKey("2023-01").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

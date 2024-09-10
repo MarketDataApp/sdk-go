@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleStockCandlesRequest_raw() {
-	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Raw()
+	ctx := context.TODO()
+	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Raw(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -14,7 +18,8 @@ func ExampleStockCandlesRequest_raw() {
 }
 
 func ExampleStockCandlesRequest_packed() {
-	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Packed()
+	ctx := context.TODO()
+	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -25,7 +30,8 @@ func ExampleStockCandlesRequest_packed() {
 }
 
 func ExampleStockCandlesRequest_get() {
-	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Get()
+	ctx := context.TODO()
+	scr, err := StockCandles().Resolution("4H").Symbol("AAPL").From("2023-01-01").To("2023-01-04").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return

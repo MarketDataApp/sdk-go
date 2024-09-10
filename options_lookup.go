@@ -13,6 +13,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -39,6 +40,7 @@ import (
 //   - Get() (string, error): Sends the request, unpacks the response, and returns the data in a user-friendly format.
 //   - Packed() (*OptionLookupResponse, error): Returns a struct that contains equal-length slices of primitives. This packed response mirrors Market Data's JSON response.
 //   - Raw() (*resty.Response, error): Sends the request as is and returns the raw HTTP response.
+//
 // [/v1/options/lookup/]: https://www.marketdata.app/docs/api/options/lookup
 type OptionLookupRequest struct {
 	*baseRequest
@@ -80,30 +82,38 @@ func (o *OptionLookupRequest) getParams() ([]parameters.MarketDataParam, error) 
 	return params, nil
 }
 
-// Raw executes the OptionLookupRequest and returns the raw *resty.Response.
+// Raw executes the OptionLookupRequest with the provided context and returns the raw *resty.Response.
 // The *resty.Response allows access to the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed OptionLookupRequest.
 //   - error: An error object if the request fails due to being nil, or other execution errors.
-func (olr *OptionLookupRequest) Raw() (*resty.Response, error) {
-	return olr.baseRequest.Raw()
+func (olr *OptionLookupRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return olr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the OptionLookupRequest and returns the OptionsLookupResponse.
+// Packed sends the OptionLookupRequest with the provided context and returns the OptionsLookupResponse.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.OptionsLookupResponse: A pointer to the OptionsLookupResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (o *OptionLookupRequest) Packed() (*models.OptionLookupResponse, error) {
+func (o *OptionLookupRequest) Packed(ctx context.Context) (*models.OptionLookupResponse, error) {
 	if o == nil {
 		return nil, fmt.Errorf("OptionsLookupRequest is nil")
 	}
 
 	var oResp models.OptionLookupResponse
-	_, err := o.baseRequest.client.getFromRequest(o.baseRequest, &oResp)
+	_, err := o.baseRequest.client.getFromRequest(ctx, o.baseRequest, &oResp)
 	if err != nil {
 		return nil, err
 	}
@@ -111,20 +121,24 @@ func (o *OptionLookupRequest) Packed() (*models.OptionLookupResponse, error) {
 	return &oResp, nil
 }
 
-// Get sends the OptionLookupRequest, unpacks the OptionsLookupResponse, and returns the unpacked data as a string.
+// Get sends the OptionLookupRequest with the provided context, unpacks the OptionsLookupResponse, and returns the unpacked data as a string.
 // It returns an error if the request or unpacking fails.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - string: A string containing the unpacked options data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (o *OptionLookupRequest) Get() (string, error) {
+func (o *OptionLookupRequest) Get(ctx context.Context) (string, error) {
 	if o == nil {
 		return "", fmt.Errorf("OptionsLookupRequest is nil")
 	}
 
 	// Use the Packed method to make the request
-	oResp, err := o.Packed()
+	oResp, err := o.Packed(ctx)
 	if err != nil {
 		return "", err
 	}

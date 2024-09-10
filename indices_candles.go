@@ -12,6 +12,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MarketDataApp/sdk-go/helpers/parameters"
@@ -194,32 +195,40 @@ func (icr *IndicesCandlesRequest) getParams() ([]parameters.MarketDataParam, err
 	return params, nil
 }
 
-// Raw executes the IndicesCandlesRequest and returns the raw *resty.Response.
+// Raw executes the IndicesCandlesRequest with the provided context and returns the raw *resty.Response.
 // The *resty.Response can be directly used to access the raw JSON or *http.Response for further processing.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *resty.Response: The raw HTTP response from the executed IndicesCandlesRequest.
 //   - error: An error object if the IndicesCandlesRequest is nil or if an error occurs during the request execution.
-func (icr *IndicesCandlesRequest) Raw() (*resty.Response, error) {
-	return icr.baseRequest.Raw()
+func (icr *IndicesCandlesRequest) Raw(ctx context.Context) (*resty.Response, error) {
+	return icr.baseRequest.Raw(ctx)
 }
 
-// Packed sends the IndicesCandlesRequest and returns the IndicesCandlesResponse.
+// Packed sends the IndicesCandlesRequest with the provided context and returns the IndicesCandlesResponse.
 // This method checks if the IndicesCandlesRequest receiver is nil, returning an error if true.
 // It proceeds to send the request and returns the IndicesCandlesResponse along with any error encountered during the request.
+//
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
 //
 // # Returns
 //
 //   - *models.IndicesCandlesResponse: A pointer to the *IndicesCandlesResponse obtained from the request.
 //   - error: An error object that indicates a failure in sending the request.
-func (icr *IndicesCandlesRequest) Packed() (*models.IndicesCandlesResponse, error) {
+func (icr *IndicesCandlesRequest) Packed(ctx context.Context) (*models.IndicesCandlesResponse, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
 
 	var icrResp models.IndicesCandlesResponse
-	_, err := icr.baseRequest.client.getFromRequest(icr.baseRequest, &icrResp)
+	_, err := icr.baseRequest.client.getFromRequest(ctx, icr.baseRequest, &icrResp)
 	if err != nil {
 		return nil, err
 	}
@@ -227,22 +236,26 @@ func (icr *IndicesCandlesRequest) Packed() (*models.IndicesCandlesResponse, erro
 	return &icrResp, nil
 }
 
-// Get sends the IndicesCandlesRequest, unpacks the IndicesCandlesResponse, and returns a slice of IndexCandle.
+// Get sends the IndicesCandlesRequest with the provided context, unpacks the IndicesCandlesResponse, and returns a slice of IndexCandle.
 // It returns an error if the request or unpacking fails. This method is crucial for obtaining the actual candle data
 // from the indices candles request. The method first checks if the IndicesCandlesRequest receiver is nil, which would
 // result in an error as the request cannot be sent. It then proceeds to send the request using the Packed method.
 // Upon receiving the response, it unpacks the data into a slice of IndexCandle using the Unpack method from the response.
 //
+// # Parameters
+//
+//   - ctx context.Context: The context to use for the request execution.
+//
 // # Returns
 //
 //   - []models.Candle: A slice of []models.Candle containing the unpacked candle data from the response.
 //   - error: An error object that indicates a failure in sending the request or unpacking the response.
-func (icr *IndicesCandlesRequest) Get() ([]models.Candle, error) {
+func (icr *IndicesCandlesRequest) Get(ctx context.Context) ([]models.Candle, error) {
 	if icr == nil {
 		return nil, fmt.Errorf("IndicesCandlesRequest is nil")
 	}
 
-	icrResp, err := icr.Packed()
+	icrResp, err := icr.Packed(ctx)
 	if err != nil {
 		return nil, err
 	}

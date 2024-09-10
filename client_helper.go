@@ -50,7 +50,7 @@ const (
 )
 
 // getRateLimitConsumed extracts the rate limit consumed value from the response headers.
-// It specifically looks for the "X-Api-RateLimit-Consumed" header and attempts to convert its value to an integer.
+// It specifically looks for the "X-Api-Ratelimit-Consumed" header and attempts to convert its value to an integer.
 //
 // # Parameters
 //
@@ -58,12 +58,12 @@ const (
 //
 // # Returns
 //
-//   - int: The integer value of the "X-Api-RateLimit-Consumed" header if present and successfully converted.
+//   - int: The integer value of the "X-Api-Ratelimit-Consumed" header if present and successfully converted.
 //   - error: An error if the header is missing or if the conversion to an integer fails.
 func getRateLimitConsumed(resp *resty.Response) (int, error) {
-	rateLimitConsumedStr := resp.Header().Get("X-Api-RateLimit-Consumed")
+	rateLimitConsumedStr := resp.Header().Get("X-Api-Ratelimit-Consumed")
 	if rateLimitConsumedStr == "" {
-		return 0, errors.New("error: missing 'x-Api-RateLimit-Consumed' header")
+		return 0, errors.New("error: missing 'x-Api-Ratelimit-Consumed' header")
 	}
 	rateLimitConsumed, err := strconv.Atoi(rateLimitConsumedStr)
 	if err != nil {

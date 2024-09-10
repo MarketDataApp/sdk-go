@@ -1,9 +1,13 @@
 package client
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func ExampleOptionsExpirationsResponse_get() {
-	resp, err := OptionsExpirations().UnderlyingSymbol("AAPL").Date("2009-02-04").Get()
+	ctx := context.TODO()
+	resp, err := OptionsExpirations().UnderlyingSymbol("AAPL").Date("2009-02-04").Get(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -21,7 +25,8 @@ func ExampleOptionsExpirationsResponse_get() {
 }
 
 func ExampleOptionsExpirationsResponse_packed() {
-	resp, err := OptionsExpirations().UnderlyingSymbol("AAPL").Date("2009-02-04").Packed()
+	ctx := context.TODO()
+	resp, err := OptionsExpirations().UnderlyingSymbol("AAPL").Date("2009-02-04").Packed(ctx)
 	if err != nil {
 		fmt.Print(err)
 		return
