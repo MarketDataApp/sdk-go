@@ -417,7 +417,6 @@ patterns; see docs/MIGRATION.md for migrating from v1.
 
 ### Added (2026-07-28, spec conformance)
 - The default logger now emits the canonical cross-SDK log format (`{timestamp} - marketdata.client - {LEVEL} - {message} key=value ...`, requirements §7) instead of slog's stock text format, and `WithDebug(true)` / `Client.Debug(true)` now actually raise the default logger to DEBUG at runtime (previously debug records were filtered unless `MARKETDATA_LOGGING_LEVEL=DEBUG` was also set). Loggers injected with `WithLogger` keep their own handler, format, and level
-- `docs/MIGRATION.md` now states explicitly that the v1 Indices resource (`IndexQuotes`/`IndexCandles`) and the admin-restricted v2-API endpoints were deliberately not carried over
 - `MARKETDATA_BASE_URL`, `MARKETDATA_API_VERSION`, and `MARKETDATA_MODE` environment variables are now honored (requirements §4); previously documented but not implemented. The full cascade is tested: `.env` < environment < client options
 - CI now tests the declared minimum Go version (1.22) and current stable (requirements §13); the `toolchain` pin was removed from go.mod and the `go` directive relaxed to `1.22`
 - CI runs on pushes and pull requests to the `development` integration branch

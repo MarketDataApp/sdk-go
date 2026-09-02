@@ -148,17 +148,13 @@ if err != nil {
 | N/A | `client.Stocks.Prices(ctx, syms)` | New in v2 |
 | N/A | `client.Markets.StatusHistory(ctx)` | New in v2 |
 | N/A | `client.Utilities.Status/Headers/User(ctx)` | New in v2 (v1 had no Utilities resource) |
-| `api.IndexQuotes()` / `api.IndexCandles()` | — | **Not supported in v2.** The Indices resource is not part of the required SDK surface and was deliberately not carried over; keep using v1 (or the REST API directly) if you need index data |
-| `api.StockCandlesV2()` / `api.StockTickers()` | — | Not carried over: admin-restricted v2-API endpoints that v1 itself marked as not for client use |
 | N/A | `client.Utilities.Status(ctx)` | New in v2 |
 | N/A | `client.Utilities.Headers(ctx)` | New in v2 |
 | N/A | `client.Utilities.User(ctx)` | New in v2 |
-| `api.StockTickers()` | Removed | |
 
 ### Removed from v2
 
 The following v1 features have been removed:
-- **`StockTickers()`** — No longer available
 - **`Packed()` / `Raw()` execution methods** — Replaced by the `*Response` return value (see "Execution Methods" above)
 - **In-memory request logging** (`GetLogs()`) — Replaced by standard `slog` integration via `WithLogger()`
 
