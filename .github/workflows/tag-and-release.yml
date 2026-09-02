@@ -1,0 +1,369 @@
+name: Tag and Release
+
+# Cuts the git tag and the GitHub Release for a version, then proves the module
+# actually installs from the public proxy. Mirrors the Java and C# SDKs'
+# tag-and-release.yml, minus their publish stage.
+#
+# WHY THERE IS NO PUBLISH STAGE:
+# the other five SDKs push to a package registry — npm, PyPI, Maven Central,
+# NuGet, Packagist. Go has no registry. proxy.golang.org fetches straight from
+# the git tag the first time somebody asks for the version, so **the tag is the
+# publication**. There is nothing to upload, which is why this workflow ends
+# with a verification job instead of a publish job.
+#
+# Nothing here fires on its own: the only trigger is a manual workflow_dispatch
+# that also requires `confirm: RELEASE`. Pushing commits, merging PRs and
+# pushing branches never reach this workflow.
+#
+# Each stage gates the next:
+#   validate -> cheap input and repository checks, seconds, before any runner cost
+#   gate     -> the entire tests.yml suite, integration included, on the exact ref
+#   release  -> tag + GitHub Release, pointing at a resolved SHA
+#   verify   -> proxy serves the version and a scratch module installs it
+#
+# THE POINT OF NO RETURN IS THE `release` JOB. proxy.golang.org is an
+# append-only mirror and sum.golang.org records the hash in a transparency log.
+# Once a version is fetched it can be neither modified nor withdrawn — deleting
+# the tag on GitHub does not retract it. The only remedy is a later version that
+# retracts the bad one. Everything before `release` is reversible; nothing after
+# it is. That is why `validate` and `gate` are exhaustive and run first.
+#
+# CHANGELOG.md is the single source of truth for release notes. The `validate`
+# job requires a `## [X.Y.Z]` section and fails without one, so promote
+# `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD` in a normal PR BEFORE running
+# this. See .github/RELEASE_PROCESS.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without the v prefix (example: 2.0.1)"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to release (branch, tag, or commit SHA)"
+        required: false
+        default: "main"
+        type: string
+      prerelease:
+        description: "Mark the GitHub Release as a prerelease"
+        required: false
+        default: false
+        type: boolean
+      confirm:
+        description: "Type RELEASE to confirm"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Never cancel a release mid-flight: a cancelled run could leave a tag whose
+# version the proxy has already cached.
+concurrency:
+  group: release-${{ github.event.inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Check the confirmation and the version string
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          test "$CONFIRM" = "RELEASE" || {
+            echo "::error::confirm input must be exactly RELEASE"
+            exit 1
+          }
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || {
+            echo "::error::version must be semver-like without a v prefix (example: 2.0.1)"
+            exit 1
+          }
+
+      # Go encodes the major version in the module path from v2 onward, so a
+      # mismatch here would publish a version the import path cannot serve:
+      # module .../sdk-go/v2 can only ever produce v2.x.y. Nothing downstream
+      # catches this — the tag would be cut and the proxy would reject or
+      # mis-serve it — so it is checked before anything else runs.
+      - name: Check the version agrees with the module path
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          MODULE=$(go mod edit -json | sed -n 's/.*"Path": "\([^"]*\)".*/\1/p' | head -1)
+          MAJOR="${VERSION%%.*}"
+
+          if [ "$MAJOR" -ge 2 ]; then
+            WANT_SUFFIX="/v${MAJOR}"
+          else
+            WANT_SUFFIX=""
+          fi
+
+          case "$MODULE" in
+            */v[0-9]*) GOT_SUFFIX="/${MODULE##*/}" ;;
+            *)         GOT_SUFFIX="" ;;
+          esac
+
+          if [ "$GOT_SUFFIX" != "$WANT_SUFFIX" ]; then
+            echo "::error::go.mod declares module '${MODULE}', which cannot publish v${VERSION}. A v${MAJOR} release needs the module path to end in '${WANT_SUFFIX}'."
+            exit 1
+          fi
+          echo "module ${MODULE} can publish v${VERSION}"
+
+      - name: Verify the tag does not already exist
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "::error::Tag ${TAG} already exists on origin. Module versions are immutable once the proxy has served them; pick the next patch version instead."
+            exit 1
+          fi
+          echo "${TAG} is free"
+
+      # Checked here, before the expensive gate, so a missing CHANGELOG section
+      # costs seconds rather than a full matrix run. The release job extracts it
+      # again from the resolved SHA when it actually writes the notes.
+      - name: Verify CHANGELOG has a section for this version
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found && /^\[[^]]+\]: / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No '## [${VERSION}]' section in CHANGELOG.md. Promote '## [Unreleased]' to '## [${VERSION}] - YYYY-MM-DD' first (see .github/RELEASE_PROCESS.md)."
+            exit 1
+          fi
+
+          echo "=== Release notes that will be published ==="
+          cat release-notes.md
+
+  # The release gate is the ordinary CI suite, called rather than copied: unit
+  # tests on Go 1.22 and stable, the 100% coverage gate, lint, govulncheck, the
+  # negative-compile corpus, the three example apps, and the live integration
+  # suite against the real API.
+  #
+  # run_integration is forced true. On a normal push tests.yml skips
+  # integration; a release is exactly the moment it must not be skipped.
+  gate:
+    name: Gate
+    needs: validate
+    uses: ./.github/workflows/tests.yml
+    with:
+      ref: ${{ inputs.ref }}
+      run_integration: true
+    secrets: inherit
+
+  release:
+    name: Tag and GitHub Release
+    needs: [validate, gate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the tag and the GitHub Release
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      # Resolve the ref to a concrete SHA so the tag and the GitHub Release
+      # describe the SAME commit even if `main` moves during the run.
+      - name: Resolve commit SHA
+        id: resolve
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Re-checked because `validate` ran minutes ago and someone could have
+      # pushed the tag by hand in between. This is the last gate before the
+      # irreversible step.
+      - name: Verify the tag still does not exist
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "::error::Tag ${TAG} appeared on origin while this run was in flight. Refusing to continue."
+            exit 1
+          fi
+
+      - name: Extract release notes from CHANGELOG
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found && /^\[[^]]+\]: / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No '## [${VERSION}]' section in CHANGELOG.md at ${GITHUB_SHA}."
+            exit 1
+          fi
+
+      # `gh release create` makes the tag and the Release in one call, both
+      # pointing at the resolved SHA.
+      - name: Create the tag and the GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          TARGET_REF: ${{ steps.resolve.outputs.sha }}
+          IS_PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          TAG="v${VERSION}"
+          FLAGS=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            FLAGS="${FLAGS} --prerelease"
+          else
+            FLAGS="${FLAGS} --latest"
+          fi
+
+          gh release create "${TAG}" \
+            --target "${TARGET_REF}" \
+            --title "v${VERSION}" \
+            --notes-file release-notes.md \
+            ${FLAGS}
+
+      # tests.yml has a `release: published` trigger, and it will NOT fire for
+      # this release: GitHub suppresses workflow runs raised by events that the
+      # default GITHUB_TOKEN created, to prevent recursive triggering. That is
+      # deliberate and harmless here — the `gate` job above already ran the same
+      # suite, integration included, against this exact commit. Do not "fix" the
+      # silent trigger by re-running tests after the tag; the gate is the check.
+      - name: Note that the release-triggered run stays silent
+        run: |
+          echo "::notice::v${{ inputs.version }} released at ${{ steps.resolve.outputs.sha }}. The 'release published' trigger in tests.yml does not fire for a GITHUB_TOKEN-created release; the gate job already ran that suite against this commit."
+
+  verify:
+    name: Verify the module publishes
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Checked out only to read the module path out of go.mod, so nothing here
+      # hardcodes "/v2" and a future major version needs no edit.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.sha }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "stable"
+          cache: false
+
+      - name: Read the module path
+        id: mod
+        shell: bash
+        run: |
+          MODULE=$(go mod edit -json | sed -n 's/.*"Path": "\([^"]*\)".*/\1/p' | head -1)
+
+          # The proxy lower-cases capitals and prefixes them with "!", so
+          # MarketDataApp becomes !market!data!app.
+          ESCAPED=$(printf '%s' "$MODULE" | sed 's/\([A-Z]\)/!\l\1/g')
+
+          echo "module=${MODULE}"   >> "$GITHUB_OUTPUT"
+          echo "escaped=${ESCAPED}" >> "$GITHUB_OUTPUT"
+          echo "module=${MODULE} escaped=${ESCAPED}"
+
+      # proxy.golang.org fetches a version lazily, on the first request for it.
+      # Until something asks, @v/list keeps omitting it, so this both triggers
+      # the fetch and waits for it to land.
+      - name: Wait for proxy.golang.org to serve the version
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+          ESCAPED: ${{ steps.mod.outputs.escaped }}
+        run: |
+          TAG="v${VERSION}"
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS "https://proxy.golang.org/${ESCAPED}/@v/list" | grep -qx "${TAG}"; then
+              echo "proxy is serving ${TAG} (attempt ${attempt})"
+              exit 0
+            fi
+            echo "attempt ${attempt}: ${TAG} not on the proxy yet, waiting 10s"
+            sleep 10
+          done
+
+          echo "::error::proxy.golang.org did not serve ${TAG} within 5 minutes. The tag exists, so the release is real; the proxy may simply be slow. Re-run this job before assuming a failure."
+          exit 1
+
+      # The real proof: a module that has never seen this SDK resolves it from
+      # the public proxy and reports the version it was built from. Before the
+      # tag existed, Version() returned "unknown".
+      - name: Install from scratch and assert the reported version
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE: ${{ steps.mod.outputs.module }}
+        run: |
+          WORK="$(mktemp -d)"
+          cd "$WORK"
+          go mod init releasecheck
+
+          go get "${MODULE}@v${VERSION}"
+
+          cat > main.go <<EOF
+          package main
+
+          import (
+          	"fmt"
+          	"os"
+
+          	"${MODULE}/marketdata"
+          )
+
+          func main() {
+          	want := os.Args[1]
+          	got := marketdata.Version()
+          	if got != want {
+          		fmt.Printf("Version() = %q, want %q\n", got, want)
+          		os.Exit(1)
+          	}
+          	fmt.Printf("Version() = %s\n", got)
+          }
+          EOF
+
+          go run . "v${VERSION}"
+
+      - name: Summarise
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE: ${{ steps.mod.outputs.module }}
+        run: |
+          {
+            echo "### v${VERSION} published"
+            echo
+            echo '```'
+            echo "go get ${MODULE}@v${VERSION}"
+            echo '```'
+            echo
+            echo "- Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${VERSION}"
+            echo "- Docs: https://pkg.go.dev/${MODULE}@v${VERSION}"
+            echo
+            echo "pkg.go.dev indexes asynchronously and can lag the proxy by up to an hour."
+          } >> "$GITHUB_STEP_SUMMARY"
