@@ -1,0 +1,180 @@
+name: Bug Report
+description: Report a bug in the Market Data Go SDK
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill out all required fields so we can reproduce and fix it quickly.
+
+        **Note:** This SDK returns data exactly as the API provides it. Before reporting, please confirm the behavior differs from what the [API documentation](https://www.marketdata.app/docs/api) describes (not just something unexpected to you).
+
+        Known differences between the API and its documentation are tracked in `integration/discrepancy_test.go`; it is worth a look before filing.
+
+  - type: checkboxes
+    id: api-docs-verified
+    attributes:
+      label: API documentation verification
+      options:
+        - label: I have reviewed the [API documentation](https://www.marketdata.app/docs/api) for this endpoint
+          required: true
+        - label: The behavior I'm reporting differs from what the API documentation describes
+          required: true
+
+  - type: dropdown
+    id: resource
+    attributes:
+      label: SDK resource
+      description: Which part of the SDK is affected?
+      options:
+        - stocks
+        - options
+        - funds
+        - markets
+        - utilities
+        - Client / configuration options
+        - Errors / error types
+        - Response formats (CSV, JSON, SaveToFile)
+        - Logging / diagnostics
+        - Rate limiting / retries
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: method
+    attributes:
+      label: Method
+      description: Which method are you calling? (for example Stocks.Candles, Options.Chain, Markets.StatusHistory)
+      placeholder: Stocks.Candles
+    validations:
+      required: true
+
+  - type: dropdown
+    id: call-style
+    attributes:
+      label: Which call style?
+      description: The SDK offers both for every endpoint.
+      options:
+        - "Context-first: client.Stocks.Quote(ctx, \"AAPL\") returning (T, *Response, error)"
+        - "Convenience wrapper: client.Stocks.GetQuote(\"AAPL\") returning (T, error)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction code
+      description: Complete, self-contained Go that demonstrates the bug. Ideally a `main.go` we can `go run`.
+      render: go
+      placeholder: |
+        package main
+
+        import (
+        	"context"
+        	"fmt"
+        	"log"
+
+        	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+        )
+
+        func main() {
+        	client, err := marketdata.NewClient(marketdata.WithToken("..."))
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer client.Close()
+
+        	candles, resp, err := client.Stocks.Candles(context.Background(), "AAPL")
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	fmt.Println(len(candles), resp.StatusCode)
+        	// Bug: ...
+        }
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happens? Include exact values, and the full error text or panic stack trace.
+      placeholder: |
+        marketdata: bad request: countback must be positive (request_id=...)
+    validations:
+      required: true
+
+  - type: textarea
+    id: support-info
+    attributes:
+      label: Support info (if the SDK returned an error)
+      description: |
+        API-produced errors carry a support block. Print it with `fmt.Println(apiErr.SupportInfo())` after an `errors.As` into the error type you got. It contains the request id, URL, status code and timestamp we need for triage. Your API token is never included.
+      render: text
+      placeholder: |
+        --- MARKET DATA SUPPORT INFO ---
+        request_id:     8a1b2c3d4e5f6g7h-SJC
+        request_url:    https://api.marketdata.app/v1/stocks/candles/daily/AAPL/
+        status_code:    422
+        timestamp:      2026-09-02 12:00:00
+        message:        ...
+        exception_type: BadRequestError
+        --------------------------------
+    validations:
+      required: false
+
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK version
+      description: |
+        The version in your `go.mod`, or run `fmt.Println(marketdata.Version())`. For example `v2.0.0`.
+      placeholder: "v2.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: go-version
+    attributes:
+      label: Go version
+      description: Run `go version`. The SDK requires Go 1.22 or later.
+      placeholder: "go1.24.4"
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: GOOS / GOARCH
+      description: Run `go env GOOS GOARCH`
+      placeholder: "linux amd64"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: sanity
+    attributes:
+      label: Before you file
+      options:
+        - label: I am using the `/v2` import path (`github.com/MarketDataApp/sdk-go/v2`), not the v1 module
+          required: false
+        - label: I can still reproduce this on the latest released version
+          required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Any other relevant information (client options in use, workarounds tried, whether it is intermittent, etc.)
+    validations:
+      required: false
