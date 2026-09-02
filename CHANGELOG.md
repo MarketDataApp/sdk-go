@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
 ## [2.0.0] - 2026-09-02
 
 Initial v2 release. A complete rewrite of the SDK following idiomatic Go
@@ -459,4 +461,5 @@ patterns; see docs/MIGRATION.md for migrating from v1.
 - Dead exports that no SDK path used: the `UniversalParams` struct (universal parameters are client options), `stocks.formatInt`, and the internal `Tracker.Exceeded`
 - The v1 strikes endpoint has no v2 equivalent (dropped from the required SDK surface); use Chain with strike filters instead
 
+[Unreleased]: https://github.com/MarketDataApp/sdk-go/compare/v2.0.0...HEAD
 [2.0.0]: https://github.com/MarketDataApp/sdk-go/releases/tag/v2.0.0

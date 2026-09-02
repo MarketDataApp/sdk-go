@@ -7,6 +7,21 @@ on:
     branches: [main, master, development]
   release:
     types: [published]
+  # Reusable entry point. tag-and-release.yml calls this so the release gate
+  # and ordinary CI are literally the same jobs — there is no second copy of
+  # the suite to drift out of sync.
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref to test. Empty means the triggering commit."
+        required: false
+        type: string
+        default: ""
+      run_integration:
+        description: "Run the live integration suite (needs MARKETDATA_TOKEN)."
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   unit-tests:
@@ -21,6 +36,8 @@ jobs:
         go-version: ['1.22.x', 'stable']
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -83,6 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -108,6 +127,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -126,12 +147,16 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    # Run on releases and all PRs
+    # Run on releases, on all PRs, and whenever a calling workflow asks
+    # (tag-and-release.yml does, so a release is gated on the live API).
     if: |
       github.event_name == 'release' ||
-      github.event_name == 'pull_request'
+      github.event_name == 'pull_request' ||
+      inputs.run_integration
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -154,6 +179,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -188,6 +215,8 @@ jobs:
         dir: [examples/tuitest, examples/stockterm, examples/optionterm]
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
