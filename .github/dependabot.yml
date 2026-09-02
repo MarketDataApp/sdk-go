@@ -1,0 +1,57 @@
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Everything here is grouped. Ungrouped, a single bubbletea bump would open one
+# PR per example module (three of them share the same charmbracelet and
+# golang.org/x dependency set), and each transitive bump would open three more.
+# One PR per ecosystem per week is the whole point.
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "gomod"
+    # The published SDK module is standard-library only, so "/" has nothing to
+    # update today — it is listed so that a dependency added later is managed
+    # from the start rather than silently unmanaged. The example apps are
+    # separate modules with real dependencies; the glob picks up new ones.
+    directories:
+      - "/"
+      - "/examples/*"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+    groups:
+      # Routine bumps land as one reviewable PR.
+      go-modules:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Majors are batched separately: they need reading, and they should not
+      # hold up the safe bumps above.
+      go-modules-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    ignore:
+      # Both are satisfied by a `replace` directive pointing at a local path, so
+      # the version recorded in the example go.mod files is inert. A Dependabot
+      # PR bumping them would change nothing and never be mergeable.
+      - dependency-name: "github.com/MarketDataApp/sdk-go/v2"
+      - dependency-name: "github.com/MarketDataApp/sdk-go/v2/examples/tuitest"

@@ -119,7 +119,16 @@ body:
     attributes:
       label: Support info (if the SDK returned an error)
       description: |
-        API-produced errors carry a support block. Print it with `fmt.Println(apiErr.SupportInfo())` after an `errors.As` into the error type you got. It contains the request id, URL, status code and timestamp we need for triage. Your API token is never included.
+        SDK errors carry a support block. Print it with:
+
+        ```go
+        var mdErr marketdata.Error
+        if errors.As(err, &mdErr) {
+            fmt.Println(mdErr.SupportInfo())
+        }
+        ```
+
+        It contains the request id, URL, status code and timestamp we need for triage. Your API token is never included.
       render: text
       placeholder: |
         --- MARKET DATA SUPPORT INFO ---
