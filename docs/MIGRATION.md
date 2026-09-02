@@ -148,9 +148,6 @@ if err != nil {
 | N/A | `client.Stocks.Prices(ctx, syms)` | New in v2 |
 | N/A | `client.Markets.StatusHistory(ctx)` | New in v2 |
 | N/A | `client.Utilities.Status/Headers/User(ctx)` | New in v2 (v1 had no Utilities resource) |
-| N/A | `client.Utilities.Status(ctx)` | New in v2 |
-| N/A | `client.Utilities.Headers(ctx)` | New in v2 |
-| N/A | `client.Utilities.User(ctx)` | New in v2 |
 
 ### Removed from v2
 
