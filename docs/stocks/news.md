@@ -1,0 +1,202 @@
+# News
+
+Retrieve news articles for a stock symbol.
+
+> [!CAUTION]
+> **Beta Endpoint**
+>
+> The news endpoint is currently in beta. Features and response formats may change.
+
+## Making Requests
+
+Both call styles live on the `Stocks` service (`client.Stocks`). Use `GetNews` for the simplest call, or `News` when you also need the raw response and rate-limit metadata.
+
+| Method                           | Return                                       | Description                                                                          |
+|----------------------------------|----------------------------------------------|--------------------------------------------------------------------------------------|
+| **`GetNews(symbol, opts...)`**   | `([]NewsArticle, error)`                     | Convenience wrapper; uses `context.Background()` and discards the response metadata. |
+| **`News(ctx, symbol, opts...)`** | `([]NewsArticle, *response.Response, error)` | Context-aware; also returns the raw response + rate-limit metadata.                  |
+
+## News
+
+```go
+func (s *Service) News(ctx context.Context, symbol string, opts ...NewsOption) ([]NewsArticle, *response.Response, error)
+func (s *Service) GetNews(symbol string, opts ...NewsOption) ([]NewsArticle, error)
+```
+
+Fetch news articles for one symbol. With no options the API returns its default set of recent articles.
+
+#### Parameters
+
+- `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
+- `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
+- Options (`stocks.NewsOption`):
+  - `stocks.WithNewsWindow(w DateWindow)` — set the publication date range as a single `DateWindow` value. Build the window with any of the shared [date-window constructors](#date-windows), for example `stocks.OnDate(d)` or `stocks.Between(from, to)`.
+
+#### Returns
+
+- `[]NewsArticle` — the matching articles.
+- `*response.Response` — raw response + rate-limit metadata (context method only).
+- `error` — non-nil on request/validation failure.
+
+#### Notes
+
+- Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
+- If the API responds with 404 because no data is available, `News` returns a `nil` slice, a `nil` error, and a non-nil `*response.Response` whose `NoData` field is `true`.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	articles, err := client.Stocks.GetNews("AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, a := range articles {
+		fmt.Printf("%s  %s\n", a.PublicationDate.Format("2006-01-02"), a.Headline)
+		fmt.Printf("  %s\n", a.Source)
+	}
+}
+```
+
+#### Output
+
+```
+2024-01-25  Apple Reports Record Q1 Earnings
+  https://www.reuters.com/technology/...
+2024-01-24  Apple Unveils New Product Lineup
+  https://www.bloomberg.com/...
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	articles, resp, err := client.Stocks.News(ctx, "AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NoData {
+		fmt.Println("no news available")
+		return
+	}
+
+	fmt.Printf("Found %d articles\n", len(articles))
+	for _, a := range articles {
+		fmt.Println(a) // NewsArticle implements Stringer
+	}
+	fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+}
+```
+
+### With options
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/stocks"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	from := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2024, 1, 31, 0, 0, 0, 0, time.UTC)
+
+	articles, _, err := client.Stocks.News(ctx, "AAPL",
+		stocks.WithNewsWindow(stocks.Between(from, to)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, a := range articles {
+		fmt.Printf("- %s (%s)\n", a.Headline, a.PublicationDate.Format("2006-01-02"))
+	}
+}
+```
+
+## Date Windows {#date-windows}
+
+`stocks.WithNewsWindow` takes a `DateWindow` — the same sealed-union value used by [Candles](./candles.md) and [Earnings](./earnings.md). Build one with exactly one constructor:
+
+| Constructor                | Selects                              | API parameters      |
+|----------------------------|--------------------------------------|---------------------|
+| `stocks.OnDate(d)`         | a single calendar day                | `date=d`            |
+| `stocks.Between(from, to)` | an explicit closed range (inclusive) | `from=from&to=to`   |
+| `stocks.Since(from)`       | everything from a day onward         | `from=from`         |
+| `stocks.Until(to)`         | up to and including a day            | `to=to`             |
+| `stocks.LastN(n)`          | the `n` most recent articles         | `countback=n`       |
+| `stocks.LastNUntil(n, to)` | the `n` articles ending at a day     | `countback=n&to=to` |
+
+## NewsArticle
+
+```go
+type NewsArticle struct {
+	Symbol          string    `json:"symbol"`          // Stock ticker symbol
+	Headline        string    `json:"headline"`        // Article headline
+	Content         string    `json:"content"`         // Article content (may be partial)
+	Source          string    `json:"source"`          // URL where the article was published
+	PublicationDate time.Time `json:"publicationDate"` // When the article was published (US Eastern)
+}
+```
+
+Represents a single news article about a stock. Timestamps are normalized to US Eastern time.
+
+#### Fields
+
+- `Symbol` — the stock ticker symbol the article relates to.
+- `Headline` — the article headline/title.
+- `Content` — the article content, which may be partial and may include captions or copyright notices.
+- `Source` — the URL where the article was published.
+- `PublicationDate` — when the article was published.
+
+#### Helper Methods
+
+- `String() string` — a one-line summary of the article.

@@ -1,0 +1,129 @@
+# Expirations
+
+Get the list of expiration dates that have listed option contracts for an
+underlying symbol, returned in Eastern time.
+
+## Making Requests
+
+`Expirations` returns a `[]time.Time` of expiration dates. Two optional,
+independent filters narrow the list. Choose the call style that fits your code:
+
+| Method                                  | Return                                     | Description                                                           |
+|-----------------------------------------|--------------------------------------------|-----------------------------------------------------------------------|
+| **`GetExpirations(symbol, ...opts)`**   | `([]time.Time, error)`                     | Convenience; uses a background context.                               |
+| **`Expirations(ctx, symbol, ...opts)`** | `([]time.Time, *response.Response, error)` | Context-aware; also returns the raw response and rate-limit metadata. |
+
+## Expirations
+
+```go
+func (s *Service) Expirations(ctx context.Context, symbol string, opts ...ExpirationOption) ([]time.Time, *response.Response, error)
+func (s *Service) GetExpirations(symbol string, opts ...ExpirationOption) ([]time.Time, error)
+```
+
+`Expirations` fetches the dates on which the underlying has listed option
+contracts. The symbol is required; without any options the endpoint returns
+every expiration in the chain. The dates are normalized to Eastern time (the
+exchange time zone).
+
+#### Parameters
+
+- `symbol` (`string`) — the underlying stock symbol (for example `"AAPL"`). Required; an empty string is rejected with a `marketdata.ValidationError` before any request is made.
+- Options (independent — may be combined):
+  - `options.WithExpirationStrike(strike float64)` — limit the list to expirations that offer a contract at the given strike price. The value must be greater than zero to take effect.
+  - `options.WithExpirationDate(d time.Time)` — return the expirations that were available on the given historical date instead of today's list. Only the calendar date is used; a zero time leaves the parameter unset.
+
+#### Returns
+
+- `[]time.Time` — the expiration dates, in Eastern time. Empty when there is no data.
+- `*response.Response` — the raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on a validation failure, transport error, or unexpected API status.
+
+#### Notes
+
+- The two options are independent and combine freely (unlike the chain's strike and expiry selectors).
+- If the API has no data for the request (HTTP 404), `Expirations` returns a `nil` slice, a response whose `NoData` field is `true`, and a `nil` error.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	expirations, err := client.Options.GetExpirations("AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("AAPL option expirations:")
+	for _, exp := range expirations {
+		fmt.Println(exp.Format("2006-01-02"))
+	}
+}
+```
+
+#### Output
+
+```
+AAPL option expirations:
+2026-07-17
+2026-07-24
+2026-07-31
+2026-08-21
+2026-09-18
+2026-12-18
+2027-01-15
+2027-06-17
+...
+```
+
+### Context + Response
+
+```go
+ctx := context.Background()
+
+expirations, resp, err := client.Options.Expirations(ctx, "AAPL")
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("%d expirations\n", len(expirations))
+fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+```
+
+### With options
+
+```go
+ctx := context.Background()
+
+// Only expirations that list a $200 strike, as they stood one week ago.
+expirations, _, err := client.Options.Expirations(ctx, "AAPL",
+	options.WithExpirationStrike(200),
+	options.WithExpirationDate(time.Now().AddDate(0, 0, -7)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, exp := range expirations {
+	fmt.Println(exp.Format("2006-01-02"))
+}
+```
+
+## Return Value
+
+`Expirations` returns a plain `[]time.Time`. Each element is an expiration
+date normalized to Eastern time; call `Format("2006-01-02")` to render the
+calendar date. There is no wrapper struct for this endpoint.

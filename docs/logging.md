@@ -1,0 +1,118 @@
+# Logging
+
+The Go SDK logs through the standard library's [`log/slog`](https://pkg.go.dev/log/slog) package. By default it uses `slog.Default()`, so SDK log records flow into whatever logger your application already configures. You can supply your own `*slog.Logger`, raise the verbosity for debugging, and rely on the SDK never printing your full API token.
+
+## Default Behavior
+
+Out of the box the SDK logs at `slog.Default()`'s level. Setting the `MARKETDATA_LOGGING_LEVEL` environment variable makes the SDK install its own text handler (writing to stderr) at the level you choose:
+
+```bash
+export MARKETDATA_LOGGING_LEVEL=DEBUG
+```
+
+Recognized values (case-insensitive): `DEBUG`, `INFO`, `WARNING` (or `WARN`), and `ERROR`. Setting it to `DEBUG` also turns on the SDK's verbose request/response debug logging automatically.
+
+## Enabling Debug Logging
+
+In code, enable verbose logging with the `WithDebug` option, or toggle it at runtime with `client.Debug(...)`:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"os"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
+	client, err := marketdata.NewClient(
+		marketdata.WithToken("your-token"),
+		marketdata.WithLogger(logger),
+		marketdata.WithDebug(true),
+	)
+	if err != nil {
+		logger.Error("client init failed", "err", err)
+		os.Exit(1)
+	}
+	defer client.Close()
+
+	// Turn debug logging off once you are past the section you are diagnosing.
+	client.Debug(false)
+}
+```
+
+- **`WithLogger(l *slog.Logger)`** replaces `slog.Default()` for this client.
+- **`WithDebug(true)`** enables verbose request/response logging.
+- **`client.Debug(enabled bool)`** toggles debug logging at runtime.
+
+## Log Levels
+
+The SDK emits records at standard `slog` levels:
+
+| Level             | What the SDK logs                                                                        |
+|-------------------|------------------------------------------------------------------------------------------|
+| `slog.LevelDebug` | Request URLs and parameters, response status, retry attempts, the redacted token in use. |
+| `slog.LevelInfo`  | Normal operational messages.                                                             |
+| `slog.LevelWarn`  | Demo-mode startup warning; transient-failure retries.                                    |
+| `slog.LevelError` | Errors surfaced by the SDK.                                                              |
+
+## Choosing a Handler
+
+Because the SDK uses `slog`, you have full control over formatting and destination through the handler you build.
+
+### Text (stderr)
+
+```go
+logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+	Level: slog.LevelInfo,
+}))
+
+client, err := marketdata.NewClient(marketdata.WithLogger(logger))
+```
+
+### JSON (structured)
+
+```go
+logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	Level: slog.LevelDebug,
+}))
+
+client, err := marketdata.NewClient(marketdata.WithLogger(logger))
+```
+
+## Token Redaction
+
+The SDK **never logs your full API token**. When debug logging is enabled and a token is present, the SDK logs the token redacted to its last four characters, with everything before them replaced by asterisks:
+
+```
+level=DEBUG msg="using API token" token=****************************abcd
+```
+
+This redaction applies everywhere the token would otherwise appear in output, so debug logs are safe to share in a support ticket. (The SDK additionally refuses to send the token at all over a non-HTTPS connection to a non-loopback host.)
+
+## Disabling Logging
+
+To silence the SDK, pass a logger whose handler discards records or sits at a high level:
+
+```go
+// Discard everything.
+logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+client, err := marketdata.NewClient(marketdata.WithLogger(logger))
+```
+
+## Production Recommendations
+
+- Use `slog.LevelWarn` or `slog.LevelError` in production to keep log volume down.
+- Reserve `slog.LevelDebug` for local development or active troubleshooting.
+- Prefer the JSON handler when shipping logs to an aggregation system.
+
+## Next Steps
+
+- See [Error Handling](./errors.md) for the structured error context that appears in error logs.
+- Review the [Client](./client.md) options, including `WithLogger` and `WithDebug`.

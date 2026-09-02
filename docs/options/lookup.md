@@ -1,0 +1,142 @@
+# Lookup
+
+Resolve an option contract to its standard OCC option symbol from the
+underlying symbol, expiration date, strike price, and option type.
+
+## Making Requests
+
+`Lookup` takes the four contract attributes as ordinary Go arguments and
+returns the OCC option symbol as a string, suitable for use with
+[Quote and Quotes](./quotes.md). Choose the call style that fits
+your code:
+
+| Method                                                        | Return                                | Description                                                           |
+|---------------------------------------------------------------|---------------------------------------|-----------------------------------------------------------------------|
+| **`GetLookup(underlying, expiration, strike, optionType)`**   | `(string, error)`                     | Convenience; uses a background context.                               |
+| **`Lookup(ctx, underlying, expiration, strike, optionType)`** | `(string, *response.Response, error)` | Context-aware; also returns the raw response and rate-limit metadata. |
+
+## Lookup
+
+```go
+func (s *Service) Lookup(ctx context.Context, underlying string, expiration time.Time, strike float64, optionType OptionType) (string, *response.Response, error)
+func (s *Service) GetLookup(underlying string, expiration time.Time, strike float64, optionType OptionType) (string, error)
+```
+
+`Lookup` builds an OCC option symbol (for example `AAPL271217C00250000`) from
+a contract description. The underlying symbol, the expiration date, the strike
+price, and the option type are all required. The resolved symbol can then be
+passed to [`Quote`](./quotes.md) or
+[`Quotes`](./quotes.md).
+
+#### Parameters
+
+- `underlying` (`string`) — the underlying stock symbol (for example `"AAPL"`). Required; an empty string is rejected with a `marketdata.ValidationError` before any request is made.
+- `expiration` (`time.Time`) — the contract's expiration date. Only the calendar date is used (formatted as `2006-01-02`).
+- `strike` (`float64`) — the strike price (for example `150.0`).
+- `optionType` (`options.OptionType`) — the contract type: `options.Call` or `options.Put`.
+
+#### Returns
+
+- `string` — the OCC option symbol. Empty when the contract cannot be resolved (see Notes).
+- `*response.Response` — the raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on a validation failure, transport error, or unexpected API status.
+
+#### Notes
+
+- The OCC symbol format is `SYMBOL + YYMMDD + C/P + STRIKE (8 digits)`. For example, `AAPL271217C00250000` is an AAPL January 17, 2025 $150 call.
+- If the API cannot resolve the contract (HTTP 404), `Lookup` returns an empty string, a response whose `NoData` field is `true`, and a `nil` error. Check for an empty string before using the result.
+- The lookup query is sent as a single URL path segment; there are no query parameters and no functional options for this endpoint.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/options"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	expiration := time.Date(2025, time.January, 17, 0, 0, 0, 0, time.UTC)
+
+	symbol, err := client.Options.GetLookup("AAPL", expiration, 150.0, options.Call)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if symbol == "" {
+		fmt.Println("Contract could not be resolved.")
+		return
+	}
+
+	fmt.Printf("OCC symbol: %s\n", symbol)
+}
+```
+
+#### Output
+
+```
+OCC symbol: AAPL271217C00250000
+```
+
+### Context + Response
+
+```go
+ctx := context.Background()
+expiration := time.Date(2025, time.January, 17, 0, 0, 0, 0, time.UTC)
+
+symbol, resp, err := client.Options.Lookup(ctx, "AAPL", expiration, 150.0, options.Call)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("OCC symbol: %s\n", symbol)
+fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+```
+
+### Lookup then Quote
+
+```go
+ctx := context.Background()
+expiration := time.Date(2025, time.January, 17, 0, 0, 0, 0, time.UTC)
+
+// Resolve the OCC symbol, then fetch its quote.
+symbol, _, err := client.Options.Lookup(ctx, "AAPL", expiration, 150.0, options.Call)
+if err != nil {
+	log.Fatal(err)
+}
+
+quote, _, err := client.Options.Quote(ctx, symbol)
+if err != nil {
+	log.Fatal(err)
+}
+if quote != nil {
+	fmt.Printf("%s Bid: %.2f Ask: %.2f\n", quote.OptionSymbol, quote.Bid, quote.Ask)
+}
+```
+
+## OptionType
+
+```go
+type OptionType string
+
+const (
+	Call OptionType = "call"
+	Put  OptionType = "put"
+)
+```
+
+`OptionType` identifies a contract as a call or a put. It is the required
+contract-type argument to `Lookup` and the `Type` field of an
+[`OptionQuote`](./quotes.md). Use the `options.Call` and
+`options.Put` constants.
