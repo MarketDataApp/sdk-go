@@ -1,0 +1,15 @@
+┌ Error / Support Info ────────────────────────────────────────────────────────────────────────────┐
+│ op: quotes                                                                                       │
+│ marketdata: internal server error: unexpected server error (request_id=8f3c1e9a-ray)             │
+│                                                                                                  │
+│ --- MARKET DATA SUPPORT INFO ---                                                                 │
+│ request_id:     8f3c1e9a-ray                                                                     │
+│ request_url:    https://api.marketdata.app/v1/stocks/bulkquotes/                                 │
+│ status_code:    500                                                                              │
+│ timestamp:      2026-07-11 14:32:05                                                              │
+│ message:        unexpected server error                                                          │
+│ exception_type: InternalServerError                                                              │
+│ --------------------------------                                                                 │
+│                                                                                                  │
+│ esc to close                                                                                     │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘

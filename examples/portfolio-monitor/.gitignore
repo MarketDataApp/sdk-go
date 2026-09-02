@@ -1,0 +1,3 @@
+# go build ./... output (this is a single main package, so an unqualified
+# build writes an executable named after the directory to cwd).
+/portfolio-monitor

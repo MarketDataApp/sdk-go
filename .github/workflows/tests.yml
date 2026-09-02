@@ -1,0 +1,205 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, development]
+  pull_request:
+    branches: [main, master, development]
+  release:
+    types: [published]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Test the declared minimum (go.mod's `go 1.22`) and the current
+        # stable release, per SDK requirements §13 ("test multiple runtime
+        # versions"). The go.mod toolchain pin was removed for the public
+        # release, so each leg genuinely runs its own toolchain.
+        go-version: ['1.22.x', 'stable']
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run full test suite
+        # Plain, uncovered run of every package in the module, including
+        # examples/coverage_test.go's cross-app SDK-method coverage guard.
+        # The coverage-gated step below intentionally narrows to the SDK
+        # packages only (see its comment), so this step is what actually
+        # keeps the example apps (and everything else outside
+        # marketdata/... and internal/...) compiling and passing in CI.
+        run: go test -v -race ./...
+
+      - name: Run unit tests
+        # Coverage is scoped to the SDK packages only. examples/* holds
+        # runnable reference apps (stockterm, optionterm, tuitest, ...),
+        # several of which are main packages with no meaningful unit-test
+        # surface of their own (they're exercised via the step above and
+        # their own per-app test suites) — including them here would drag
+        # total coverage down for reasons that have nothing to do with SDK
+        # quality.
+        run: go test -v -race -coverprofile=coverage.out ./marketdata/... ./internal/...
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${COVERAGE}%"
+          # ADR-010's 100% gate, restored 2026-07-27 after the QA coverage
+          # pass closed every remaining gap (branch tests, detectVersion and
+          # timezone loader refactors for testability, status-cache
+          # placeholder removal). Every statement in marketdata/... and
+          # internal/... is executed by the unit suite.
+          if [ "$(echo "$COVERAGE < 100.0" | bc -l)" -eq 1 ]; then
+            echo "::error::Coverage ${COVERAGE}% is below the 100% gate"
+            go tool cover -func=coverage.out | grep -v "100.0%"
+            exit 1
+          fi
+
+      - name: Upload coverage to Codecov
+        # Mirrors the other Market Data SDKs (sdk-js/-java/-py/-php): upload the
+        # coverage.out profile from the step above so the README Coverage badge
+        # populates. fail_ci_if_error:false keeps CI green if CODECOV_TOKEN is
+        # unset; this repo is public, so tokenless upload works either way.
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          fail_ci_if_error: false
+
+  govulncheck:
+    name: Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          # govulncheck must analyze the newest patched stdlib: an older
+          # toolchain re-flags stdlib CVEs that are fixed only in the latest
+          # patch releases.
+          go-version: 'stable'
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: Run govulncheck
+        # The latest stable toolchain provides a patched standard library, so
+        # this scan must be clean (zero reachable vulnerabilities in SDK code;
+        # zero third-party runtime dependencies).
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          "$(go env GOPATH)/bin/govulncheck" ./...
+
+  negative-compile:
+    name: Negative-Compile Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: Assert illegal parameter combinations do not compile
+        # internal/negcompile builds a corpus of snippets combining
+        # mutually-exclusive parameters and asserts each FAILS to build, while
+        # the legal counterparts DO build.
+        run: go test -v ./internal/negcompile/...
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    # Run on releases and all PRs
+    if: |
+      github.event_name == 'release' ||
+      github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run integration tests
+        env:
+          MARKETDATA_TOKEN: ${{ secrets.MARKETDATA_TOKEN }}
+        run: go test -v -race ./integration/... -tags=integration
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          # Pin a golangci-lint v2.x built with a current Go toolchain. The
+          # v4 action's `version: latest` used to resolve to golangci-lint
+          # v1.64.8 (the final v1 release), which cannot type-check modern
+          # toolchain output; keep this roughly current with Go stable.
+          #
+          # This pin goes stale on its own whenever `go-version: stable`
+          # advances: v2.12.2 was built with go1.25.12 and started failing the
+          # moment Go 1.27.0 became stable, reporting typecheck errors inside
+          # the runner's own stdlib (`could not import math/rand/v2`) rather
+          # than in this repository. v2.13.1 is built with go1.27.0. If Lint
+          # fails with errors whose paths point at hostedtoolcache rather than
+          # at our files, this pin is what needs bumping.
+          version: v2.13.1
+
+  example-apps:
+    name: Example Apps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [examples/tuitest, examples/stockterm, examples/optionterm]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          # Stdlib-only module (no go.sum) — nothing to cache; disabling also
+          # avoids setup-go's "Dependencies file is not found ... go.sum" warning.
+          cache: false
+
+      - name: Build and test
+        working-directory: ${{ matrix.dir }}
+        run: |
+          go build ./...
+          go vet ./...
+          go test ./...

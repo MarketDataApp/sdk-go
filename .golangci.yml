@@ -1,0 +1,39 @@
+# golangci-lint v2 config. Requires golangci-lint built with the module's
+# go1.25 toolchain (see .github/workflows/tests.yml and go.mod). Migrated from
+# the v1 schema; the strict policy below is deliberate (a "harden" branch): the
+# standard error-handling exclusion presets are NOT enabled, so every ignored
+# error must be made explicit in code (e.g. `_ = f.Close()`).
+version: "2"
+run:
+  # Lint the integration package too. Its files are behind the `integration`
+  # build tag, so without this golangci-lint silently skipped 3,700+ lines —
+  # which is how five unused helpers and eight unchecked Close() errors sat
+  # there while the repo's stated policy (below) is that every ignored error
+  # must be explicit.
+  build-tags:
+    - integration
+linters:
+  # Default set (errcheck, govet, ineffassign, staticcheck, unused) plus misspell.
+  enable:
+    - misspell
+  settings:
+    errcheck:
+      # Flag unchecked type assertions (x := v.(T)) as well as unchecked errors.
+      check-type-assertions: true
+  exclusions:
+    generated: lax
+    paths:
+      # examples/ holds standalone reference apps built/vetted/tested by their
+      # own CI job (example-apps); they were also skipped by golangci-lint v1's
+      # default skip-dirs, so keep them out of the SDK lint scope.
+      - ^examples/
+formatters:
+  enable:
+    - gofmt
+issues:
+  # Report every finding rather than golangci-lint's default caps (50 per linter,
+  # 3 per identical message). At the enforced zero-issue baseline these have no
+  # effect on pass/fail, but they ensure a future regression surfaces in full
+  # instead of being silently truncated.
+  max-issues-per-linter: 0
+  max-same-issues: 0
