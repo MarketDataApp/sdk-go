@@ -1,0 +1,262 @@
+# Option Quotes
+
+Fetch current or historical end-of-day quotes for one option contract with
+`Quote`, or for many contracts at once with `Quotes`.
+
+## Making Requests
+
+Both methods work with OCC option symbols (resolve one with
+[`Lookup`](./lookup.md) or read them off a
+[`Chain`](./chain.md)). Each has a context-aware form and a
+convenience `Get*` wrapper:
+
+| Method                                     | Return                                       | Description                                                                |
+|--------------------------------------------|----------------------------------------------|----------------------------------------------------------------------------|
+| **`GetQuote(optionSymbol, ...opts)`**      | `(*OptionQuote, error)`                      | Single contract; convenience, background context.                          |
+| **`Quote(ctx, optionSymbol, ...opts)`**    | `(*OptionQuote, *response.Response, error)`  | Single contract; context-aware, plus raw response and rate-limit metadata. |
+| **`GetQuotes(optionSymbols ...string)`**   | `([]OptionQuote, error)`                     | Multiple contracts; convenience, background context.                       |
+| **`Quotes(ctx, optionSymbols ...string)`** | `([]OptionQuote, *response.Response, error)` | Multiple contracts; context-aware, fetched concurrently.                   |
+
+## Quote
+
+```go
+func (s *Service) Quote(ctx context.Context, optionSymbol string, opts ...OptionQuoteOption) (*OptionQuote, *response.Response, error)
+func (s *Service) GetQuote(optionSymbol string, opts ...OptionQuoteOption) (*OptionQuote, error)
+```
+
+`Quote` fetches a real-time or historical quote for a single option contract,
+identified by its OCC option symbol (for example `AAPL271217C00250000`). The
+option symbol is required.
+
+#### Parameters
+
+- `optionSymbol` (`string`) — the OCC option symbol. Required; an empty string is rejected with a `marketdata.ValidationError` before any request is made.
+- Options:
+  - `options.WithOptionQuoteWindow(w OptionQuoteWindow)` — request a historical quote from a single [`OptionQuoteWindow`](#optionquotewindow) value. Omitting it returns the current quote. Build the window with exactly one of:
+    - `options.QuoteOnDate(t time.Time)` — the contract's quote on a single historical date (`date=YYYY-MM-DD`).
+    - `options.QuoteRange(from, to time.Time)` — the contract's quotes across an explicit date range (`from=...&to=...`).
+
+#### Returns
+
+- `*OptionQuote` — the contract quote. `nil` when there is no data (see Notes).
+- `*response.Response` — the raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on a validation failure, transport error, or unexpected API status.
+
+#### Notes
+
+- **The date window is compile-time exclusive.** Because `OptionQuoteWindow` is a single sealed-union value, the API's mutually-exclusive `date` and `from`/`to` parameters can never be combined by mistake (sending both returns HTTP 400).
+- **Validation happens before the network call.** A zero date, or a `from` after its `to`, is rejected with a `marketdata.ValidationError` before any request is made.
+- **No-data behavior.** If the API has no data for the request (HTTP 404), `Quote` returns a `nil` quote, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` quote before use.
+
+## Quotes
+
+```go
+func (s *Service) Quotes(ctx context.Context, optionSymbols ...string) ([]OptionQuote, *response.Response, error)
+func (s *Service) GetQuotes(optionSymbols ...string) ([]OptionQuote, error)
+```
+
+`Quotes` fetches quotes for multiple contracts. It fans out one concurrent
+`Quote` request per symbol, drawing slots from the client's shared concurrency
+pool (at most 50 in-flight requests per client across all services), and merges
+the results into a single slice in the order the symbols were given.
+
+#### Parameters
+
+- `optionSymbols` (`...string`) — one or more OCC option symbols (variadic). At least one is required; passing none is rejected with a `marketdata.ValidationError`.
+
+#### Returns
+
+- `[]OptionQuote` — one quote per contract that returned data, in input order.
+- `*response.Response` — the raw response for one of the individual requests, not an aggregate (context method only).
+- `error` — non-nil if any request fails with a real error; in that case no quotes are returned.
+
+#### Notes
+
+- **Symbols with no data are omitted.** A contract that returns HTTP 404 is dropped from the result rather than producing an error, so the returned slice may be shorter than the input.
+- **`Quotes` does not accept a quote window.** The multi-symbol method fetches current quotes only; use `Quote` with `WithOptionQuoteWindow` for historical data on a single contract.
+
+### Get (single)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	quote, err := client.Options.GetQuote("AAPL271217C00250000")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if quote == nil {
+		fmt.Println("No data for the requested contract.")
+		return
+	}
+
+	fmt.Printf("Symbol:        %s\n", quote.OptionSymbol)
+	fmt.Printf("Underlying:    %s @ %.2f\n", quote.Underlying, quote.UnderlyingPrice)
+	fmt.Printf("Strike:        $%.2f %s\n", quote.Strike, quote.Type)
+	fmt.Printf("Bid/Ask:       %.2f x %d  /  %.2f x %d\n", quote.Bid, quote.BidSize, quote.Ask, quote.AskSize)
+	fmt.Printf("Last:          %.2f\n", quote.Last)
+	fmt.Printf("Volume / OI:   %d / %d\n", quote.Volume, quote.OpenInterest)
+	fmt.Printf("IV / Delta:    %.4f / %.4f\n", quote.IV, quote.Delta)
+}
+```
+
+#### Output
+
+```
+Symbol:        AAPL271217C00250000
+Underlying:    AAPL @ 195.20
+Strike:        $150.00 call
+Bid/Ask:       45.30 x 45  /  45.65 x 30
+Last:          45.50
+Volume / OI:   1234 / 15678
+IV / Delta:    0.2841 / 0.9210
+```
+
+### Context + Response
+
+```go
+ctx := context.Background()
+
+quote, resp, err := client.Options.Quote(ctx, "AAPL271217C00250000")
+if err != nil {
+	log.Fatal(err)
+}
+if quote == nil {
+	fmt.Println("No data for the requested contract.")
+	return
+}
+
+fmt.Println(quote) // OptionQuote.String() summary
+fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+```
+
+### Historical (single)
+
+```go
+ctx := context.Background()
+
+// Quote on one historical date.
+onDate, _, err := client.Options.Quote(ctx, "AAPL271217C00250000",
+	options.WithOptionQuoteWindow(options.QuoteOnDate(
+		time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC))))
+if err != nil {
+	log.Fatal(err)
+}
+if onDate != nil {
+	fmt.Printf("Last: %.2f  IV: %.4f\n", onDate.Last, onDate.IV)
+}
+
+// A series of end-of-day quotes across a range.
+series, _, err := client.Options.Quote(ctx, "AAPL271217C00250000",
+	options.WithOptionQuoteWindow(options.QuoteRange(
+		time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2025, time.January, 31, 0, 0, 0, 0, time.UTC))))
+if err != nil {
+	log.Fatal(err)
+}
+_ = series
+```
+
+### Multiple symbols
+
+```go
+ctx := context.Background()
+
+// Variadic list of OCC symbols, fetched concurrently.
+quotes, _, err := client.Options.Quotes(ctx,
+	"AAPL271217C00280000",
+	"AAPL271217C00290000",
+	"AAPL271217C00300000",
+	"AAPL271217P00280000",
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, q := range quotes {
+	fmt.Printf("%s $%.0f %s  Bid: %.2f  Ask: %.2f  Vol: %d\n",
+		q.OptionSymbol, q.Strike, q.Type, q.Bid, q.Ask, q.Volume)
+}
+```
+
+## OptionQuoteWindow
+
+```go
+type OptionQuoteWindow interface {
+	// contains filtered or unexported methods
+}
+
+func QuoteOnDate(t time.Time) OptionQuoteWindow
+func QuoteRange(from, to time.Time) OptionQuoteWindow
+```
+
+`OptionQuoteWindow` is the sealed-union date selector for a single-contract
+`Quote` request, passed via `options.WithOptionQuoteWindow`. Build it with
+exactly one of `options.QuoteOnDate` (a single day) or `options.QuoteRange` (an
+explicit range). Only the calendar date of each `time.Time` is used. Because it
+is one value, the API's mutually-exclusive `date` and `from`/`to` parameters
+cannot be combined.
+
+## OptionQuote
+
+```go
+type OptionQuote struct {
+	OptionSymbol    string     `json:"optionSymbol"`    // OCC option symbol
+	Underlying      string     `json:"underlying"`      // underlying stock symbol
+	Expiration      time.Time  `json:"expiration"`      // expiration date
+	Strike          float64    `json:"strike"`          // strike price
+	Type            OptionType `json:"side"`            // "call" or "put"
+	Bid             float64    `json:"bid"`             // bid price
+	BidSize         int        `json:"bidSize"`         // bid size
+	Ask             float64    `json:"ask"`             // ask price
+	AskSize         int        `json:"askSize"`         // ask size
+	Last            float64    `json:"last"`            // last trade price
+	Volume          int64      `json:"volume"`          // trading volume
+	OpenInterest    int64      `json:"openInterest"`    // open interest
+	IV              float64    `json:"iv"`              // implied volatility
+	Delta           float64    `json:"delta"`           // delta greek
+	Gamma           float64    `json:"gamma"`           // gamma greek
+	Theta           float64    `json:"theta"`           // theta greek
+	Vega            float64    `json:"vega"`            // vega greek
+	Mid             float64    `json:"mid"`             // midpoint price from the API
+	UnderlyingPrice float64    `json:"underlyingPrice"` // current price of the underlying
+	IntrinsicValue  float64    `json:"intrinsicValue"`  // intrinsic value
+	ExtrinsicValue  float64    `json:"extrinsicValue"`  // extrinsic (time) value
+	FirstTraded     time.Time  `json:"firstTraded"`     // date the option was first traded
+	DTE             int        `json:"dte"`             // days to expiration
+	InTheMoney      bool       `json:"inTheMoney"`      // whether the option is ITM
+	Updated         time.Time  `json:"updated"`         // when this contract was last updated
+}
+```
+
+`OptionQuote` is the quote for a single option contract, returned by both
+`Quote` (as `*OptionQuote`) and `Quotes` (as elements of `[]OptionQuote`), and
+also used for the entries of an [`OptionsChain`](./chain.md).
+Timestamps are normalized to Eastern time.
+
+#### Methods
+
+- `String() string` — a one-line summary of the contract.
+- `Spread() float64` — the bid-ask spread (`Ask` minus `Bid`).
+- `CalcMid() float64` — the bid-ask midpoint computed locally from `Bid` and `Ask`, unlike the `Mid` field, which is the midpoint reported by the API.
+
+> [!NOTE]
+> **Zero values and null data**
+>
+> Numeric fields use Go value types (`float64`, `int64`), not pointers. When the
+> API returns null for a field it is decoded as the zero value (`0` or `0.0`). For
+> `IV` and the Greeks (`Delta`, `Gamma`, `Theta`, `Vega`), a zero value may mean
+> the figure was not calculable rather than a true zero.

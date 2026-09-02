@@ -1,0 +1,203 @@
+# Candles
+
+Retrieve historical OHLC candles for a mutual fund. Each candle reports the fund's net asset value (NAV) for one period, with its `Time` normalized to US Eastern.
+
+## Making Requests
+
+Fetch fund candles with the `Candles` method on the `client.Funds` service. It comes in two call styles:
+
+| Method                              | Return                                        | Description                                                            |
+|-------------------------------------|-----------------------------------------------|------------------------------------------------------------------------|
+| **`GetCandles(symbol, ...opts)`**   | `([]funds.Candle, error)`                     | Convenience; uses a background context and discards response metadata. |
+| **`Candles(ctx, symbol, ...opts)`** | `([]funds.Candle, *response.Response, error)` | Context-aware; also returns the raw response plus rate-limit metadata. |
+
+## Candles
+
+```go
+func (s *Service) Candles(ctx context.Context, symbol string, opts ...funds.CandleOption) ([]funds.Candle, *response.Response, error)
+func (s *Service) GetCandles(symbol string, opts ...funds.CandleOption) ([]funds.Candle, error)
+```
+
+Get historical OHLC candles for a mutual fund from the `/v1/funds/candles/{resolution}/{symbol}/` endpoint. Dates are sent to the API in `YYYY-MM-DD` form, so any time-of-day component is ignored.
+
+#### Parameters
+
+- `ctx` (`context.Context`) — request context for cancellation and deadlines (context method only).
+- `symbol` (`string`) — the fund's ticker, for example `"VFINX"`. Required; an empty symbol returns a validation error without making a request.
+- Options:
+  - `funds.WithResolution(r funds.Resolution)` — the candle timeframe. Defaults to `funds.ResolutionDaily`. The funds endpoint supports `funds.ResolutionDaily` (`"D"`), `funds.ResolutionWeekly` (`"W"`), `funds.ResolutionMonthly` (`"M"`), and `funds.ResolutionYearly` (`"Y"`) only. The resolution becomes part of the request path, so an unsupported value causes the API to reject the request.
+  - `funds.WithCandleWindow(w funds.DateWindow)` — the date range, expressed as a single [`DateWindow`](#datewindow) value. Omitting it lets the API return its default recent window.
+
+#### Returns
+
+- `[]funds.Candle` — one [`Candle`](#candle) per period, oldest first.
+- `*response.Response` — raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on request or decoding failure. A missing symbol returns a `*marketdata.ValidationError`.
+
+#### Notes
+
+- Mutual funds price once per day at market close, so daily resolution is the most common choice.
+- When the API responds `404` because no data exists for the requested symbol or range, both call styles return a `nil` slice and a `nil` error. With the context method, the returned `*response.Response` has its `NoData` field set to `true`.
+- The date parameters (`date`, `from`, `to`, `countback`) are mutually exclusive by construction: a `DateWindow` is a single sealed value, so an illegal pairing such as "from plus countback" cannot be expressed.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/funds"
+)
+
+func main() {
+	client, err := marketdata.NewClient() // reads MARKETDATA_TOKEN from env / .env
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// The 5 most recent daily candles for the Vanguard 500 Index Fund.
+	candles, err := client.Funds.GetCandles("VFINX",
+		funds.WithCandleWindow(funds.LastN(5)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, candle := range candles {
+		fmt.Println(candle)
+	}
+}
+```
+
+#### Output
+
+```
+2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76
+2023-01-04 O: 355.43 H: 355.43 L: 355.43 C: 355.43
+2023-01-05 O: 351.35 H: 351.35 L: 351.35 C: 351.35
+2023-01-06 O: 359.38 H: 359.38 L: 359.38 C: 359.38
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/funds"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	from := time.Date(2023, time.January, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2023, time.January, 6, 0, 0, 0, 0, time.UTC)
+
+	candles, resp, err := client.Funds.Candles(context.Background(), "VFINX",
+		funds.WithResolution(funds.ResolutionDaily),
+		funds.WithCandleWindow(funds.Between(from, to)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NoData {
+		fmt.Println("No data for the requested range.")
+		return
+	}
+	for _, candle := range candles {
+		fmt.Println(candle)
+	}
+	// The Response exposes request-scoped rate-limit metadata.
+	fmt.Printf("Credits remaining: %d\n", resp.RateLimit.Remaining)
+}
+```
+
+#### Output
+
+```
+2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76
+2023-01-04 O: 355.43 H: 355.43 L: 355.43 C: 355.43
+2023-01-05 O: 351.35 H: 351.35 L: 351.35 C: 351.35
+2023-01-06 O: 359.38 H: 359.38 L: 359.38 C: 359.38
+Credits remaining: 99847
+```
+
+### Date windows
+
+```go
+// Every DateWindow constructor is a sealed value; pass exactly one to WithCandleWindow.
+
+funds.OnDate(day)            // a single calendar day        -> date=day
+funds.Between(from, to)      // an explicit closed range     -> from=from&to=to
+funds.Since(from)            // everything since a day        -> from=from
+funds.Until(to)              // up to and including a day     -> to=to
+funds.LastN(n)               // the n most recent periods     -> countback=n
+funds.LastNUntil(n, to)      // the n periods ending at a day -> countback=n&to=to
+
+// Example: the 12 most recent monthly candles.
+candles, err := client.Funds.GetCandles("VFINX",
+	funds.WithResolution(funds.ResolutionMonthly),
+	funds.WithCandleWindow(funds.LastN(12)),
+)
+```
+
+## Candle
+
+```go
+type Candle struct {
+	Time  time.Time `json:"t"` // Time is the candle timestamp (US Eastern).
+	Open  float64   `json:"o"` // Open is the opening price (NAV).
+	High  float64   `json:"h"` // High is the highest price.
+	Low   float64   `json:"l"` // Low is the lowest price.
+	Close float64   `json:"c"` // Close is the closing price (NAV).
+}
+```
+
+`Candle` represents an OHLC candle for a fund. Because mutual funds report a single NAV per period, the open, high, low, and close are typically identical.
+
+#### Fields
+
+- `Time` (`time.Time`) — the candle timestamp, normalized to US Eastern.
+- `Open` (`float64`) — the opening NAV.
+- `High` (`float64`) — the highest price during the period.
+- `Low` (`float64`) — the lowest price during the period.
+- `Close` (`float64`) — the closing NAV.
+
+#### Methods
+
+- `String() string` — a concise one-line summary, e.g. `2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76`.
+- `Range() float64` — the high-low range (`High - Low`).
+
+> [!NOTE]
+> **Zero values and null data**
+>
+> Numeric fields are value types, not pointers. When the API returns `null` for a field, it decodes as the zero value, so a `0` may represent either an actual zero or the absence of data.
+
+## Resolution
+
+```go
+type Resolution string
+
+const (
+	ResolutionDaily   Resolution = "D"
+	ResolutionWeekly  Resolution = "W"
+	ResolutionMonthly Resolution = "M"
+	ResolutionYearly  Resolution = "Y"
+)
+```
+
+`Resolution` selects the candle timeframe passed to [`WithResolution`](#candles). The funds candles endpoint supports daily, weekly, monthly, and yearly only (quarterly is not accepted). `Resolution` has a `String()` method that returns the underlying code.

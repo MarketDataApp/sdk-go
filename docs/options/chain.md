@@ -1,0 +1,311 @@
+# Option Chain
+
+Fetch a current or historical option chain for an underlying symbol, with a
+rich set of composable filters for expiration, strike, side, moneyness, and
+liquidity.
+
+## Making Requests
+
+`Chain` returns an `*OptionsChain` holding one `OptionQuote` per contract. The
+symbol is required; every filter is an optional `ChainOption`.
+Choose the call style that fits your code:
+
+| Method                            | Return                                       | Description                                                           |
+|-----------------------------------|----------------------------------------------|-----------------------------------------------------------------------|
+| **`GetChain(symbol, ...opts)`**   | `(*OptionsChain, error)`                     | Convenience; uses a background context.                               |
+| **`Chain(ctx, symbol, ...opts)`** | `(*OptionsChain, *response.Response, error)` | Context-aware; also returns the raw response and rate-limit metadata. |
+
+## Chain
+
+```go
+func (s *Service) Chain(ctx context.Context, symbol string, opts ...ChainOption) (*OptionsChain, *response.Response, error)
+func (s *Service) GetChain(symbol string, opts ...ChainOption) (*OptionsChain, error)
+```
+
+`Chain` fetches the options chain for an underlying stock symbol. Without any
+options the API returns every active contract across all expirations, so most
+callers narrow the result with filters. The two groups of mutually-exclusive
+API parameters — contract selection and expiration selection — are each
+collapsed into a single sealed-union option ([`WithStrike`](#strike-filters)
+and [`WithExpiry`](#expiration-filters)), so the API's silently-conflicting
+combinations cannot be written.
+
+#### Parameters
+
+- `symbol` (`string`) — the underlying stock or index symbol (for example `"AAPL"`, `"SPY"`, `"SPX"`). Required; an empty string is rejected with a `marketdata.ValidationError` before any request is made.
+
+##### Expiration filters
+
+- `options.WithExpiry(f ExpiryFilter)` — sets the expiration selector from a single `ExpiryFilter`. Replaces the API's mutually-exclusive `expiration`, `dte`, `month`, and `year` parameters with one value so they can never conflict. Build the filter with exactly one of:
+  - `options.OnExpiration(t time.Time)` — a single expiration date (`expiration=YYYY-MM-DD`). Only the calendar date is used; must not be zero.
+  - `options.InDTE(days int)` — the expiration closest to `days` days to expiry, counted from today (`dte=days`). `days` must be zero or greater.
+  - `options.InMonth(month int)` — contracts expiring in the given calendar month across all years (`month=month`); `month` is 1 through 12.
+  - `options.InYear(year int)` — contracts expiring in the given four-digit year across all months (`year=year`); `year` is at least 1900.
+  - `options.InMonthOfYear(month, year int)` — a specific month of a specific year (`month=month&year=year`).
+  - `options.ExpirationBetween(from, to time.Time)` — contracts expiring within an inclusive date range (`from=YYYY-MM-DD&to=YYYY-MM-DD`). Both dates are required and `from` must not be after `to`. This filters which expirations are returned, so it is an expiry mode, not a historical snapshot.
+- `options.WithChainDate(t time.Time)` — request the chain as it stood on a single historical trading day (`date=YYYY-MM-DD`). Only the calendar date is used; a zero time returns the current chain. Independent of the expiration selector, so a historical chain can still be narrowed by expiration or strike.
+
+##### Strike filters
+
+- `options.WithStrike(f StrikeFilter)` — sets the contract selector from a single `StrikeFilter`. Replaces the API's mutually-exclusive `strike` and `delta` parameters with one value. Build the filter with exactly one of:
+  - `options.Strike(x float64)` — an exact strike (`strike=x`); `x` must be greater than zero.
+  - `options.StrikeRange(lo, hi float64)` — an inclusive strike range (`strike=lo-hi`); both bounds greater than zero and `lo` must not exceed `hi`.
+  - `options.MinStrike(x float64)` — strikes at or above `x` (`strike=>=x`).
+  - `options.MaxStrike(x float64)` — strikes at or below `x` (`strike=<=x`).
+  - `options.StrikeExpr(expr string)` — the API's raw strike expression, passed verbatim (`strike=expr`), such as `"150"`, `"140-160"`, `">=140"`, or `"<=160"`. An escape hatch for expressions the typed constructors do not cover; must not be empty.
+  - `options.ByDelta(d float64)` — the strikes nearest delta `d` (`delta=d`). The API filters on the **absolute value** of delta and always returns **both sides** (calls and puts), so `ByDelta` does not choose a side — combine it with `WithSide` to keep only calls or puts. `d` must be non-zero and within `[-1, 1]` (puts have negative delta; a negative value behaves the same as its positive counterpart).
+- `options.WithStrikeLimit(limit int)` — cap the number of strikes returned, excluding the strikes furthest from the money. Values less than or equal to zero leave the limit unset.
+
+##### Side, moneyness, and contract type
+
+- `options.WithSide(side OptionSide)` — limit the chain to one side: `options.SideCall` (calls only) or `options.SidePut` (puts only). `options.SideBoth` (the default) leaves the parameter unset and returns both sides.
+- `options.WithRange(r string)` — filter by moneyness using the API's range keywords, such as `"itm"` (in the money), `"otm"` (out of the money), or `"all"`. An empty string leaves the filter unset.
+- `options.WithNonstandard(nonstandard bool)` — include (`true`) or exclude (`false`) nonstandard contracts, such as adjusted contracts created by splits or mergers. When the option is not used, the API default applies.
+- `options.WithExpirationTypes(f ExpirationTypeFilter)` — include or exclude expiration cadences via a single `ExpirationTypeFilter`. Build it with exactly one of:
+  - `options.IncludeExpirationTypes(types ...ExpirationType)` — limit the chain to only the given cadences (for example `weekly=true&monthly=true`).
+  - `options.ExcludeExpirationTypes(types ...ExpirationType)` — exclude the given cadences (for example `quarterly=false`).
+
+  The cadence constants are `options.Weekly`, `options.Monthly`, and `options.Quarterly`. The API forbids mixing inclusion and exclusion in one request; because the choice is a single value, that illegal mix cannot be expressed.
+
+##### Settlement (index options only)
+
+- `options.WithAM(am bool)` — limit the chain to AM-settled contracts (`true`) or exclude them (`false`). Settlement style is meaningful only for **index options** (for example SPX, NDX); on single-stock and ETF options the API tolerates the parameter but it has no effect. When the option is not used, settlement is not filtered.
+- `options.WithPM(pm bool)` — the PM-settled counterpart of `WithAM`, with the same index-only semantics.
+
+##### Price and liquidity filters
+
+- `options.WithMinBid(min float64)` / `options.WithMaxBid(max float64)` — limit the chain to contracts whose bid price is at least `min` / at most `max`.
+- `options.WithMinAsk(min float64)` / `options.WithMaxAsk(max float64)` — limit the chain to contracts whose ask price is at least `min` / at most `max`.
+- `options.WithMaxBidAskSpread(max float64)` — maximum bid-ask spread in dollars.
+- `options.WithMaxBidAskSpreadPct(max float64)` — maximum bid-ask spread as a percentage of the midpoint price.
+- `options.WithMinOpenInterest(min int)` — minimum open interest, filtering out thinly held contracts.
+- `options.WithMinVolume(min int)` — minimum trading volume, filtering out thinly traded contracts.
+
+#### Returns
+
+- `*OptionsChain` — the chain and its contracts. `nil` when there is no data (see Notes).
+- `*response.Response` — the raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on a validation failure, transport error, or unexpected API status.
+
+#### Notes
+
+- **Mutually-exclusive selectors are compile-time exclusive by design.** `WithStrike` and `WithExpiry` each take a single sealed-union value, so the API's silently-conflicting combinations (strike vs. delta; expiration vs. dte/month/year) cannot be written. Delta is a **mode of the strike filter** (`options.ByDelta`), not a separate option, because the API silently honors strike over delta when both are sent.
+- **Include vs. exclude expiration types is also compile-time exclusive.** A single `ExpirationTypeFilter` is either an include set or an exclude set, so the API's forbidden `weekly=true&monthly=false` mix cannot be produced.
+- **`am`/`pm` are index-only.** They filter settlement style only for index options; on stocks and ETFs the API tolerates them without effect.
+- **Historical snapshot vs. expiration range.** `WithChainDate` requests the chain *as of* a single day and is independent of the expiration selector. A `from`/`to` date range filters *expirations*, not history — use `options.ExpirationBetween` via `WithExpiry` for that.
+- **Validation happens before the network call.** A strike or delta out of range, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made.
+- **No-data behavior.** If the API has no data for the request (HTTP 404), `Chain` returns a `nil` chain, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` chain before use.
+- Requesting a full chain for a large underlying (SPX, SPY, QQQ) can return tens of thousands of contracts; narrow with filters to control credit usage.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/options"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// Calls expiring nearest 45 days out.
+	chain, err := client.Options.GetChain("AAPL",
+		options.WithExpiry(options.InDTE(45)),
+		options.WithSide(options.SideCall),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if chain == nil {
+		fmt.Println("No data for the requested chain.")
+		return
+	}
+
+	fmt.Printf("%s: %d contracts\n", chain.Underlying, len(chain.Options))
+	for _, o := range chain.Options {
+		fmt.Printf("%s $%.2f  Bid: %.2f  Ask: %.2f  OI: %d\n",
+			o.OptionSymbol, o.Strike, o.Bid, o.Ask, o.OpenInterest)
+	}
+}
+```
+
+#### Output
+
+```
+AAPL: 3 contracts
+AAPL271217C00280000 $180.00  Bid: 16.10  Ask: 16.35  OI: 4210
+AAPL271217C00285000 $185.00  Bid: 12.30  Ask: 12.55  OI: 5678
+AAPL271217C00290000 $190.00  Bid:  9.05  Ask:  9.25  OI: 3120
+```
+
+### Context + Response
+
+```go
+ctx := context.Background()
+
+chain, resp, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.InDTE(45)),
+	options.WithStrike(options.StrikeRange(150, 200)),
+	options.WithSide(options.SideCall),
+	options.WithMinOpenInterest(100),
+)
+if err != nil {
+	log.Fatal(err)
+}
+if chain == nil {
+	fmt.Println("No data for the requested chain.")
+	return
+}
+
+fmt.Println(chain) // OptionsChain{Underlying: AAPL, Contracts: 3, Updated: ...}
+for _, o := range chain.Options {
+	fmt.Println(o)
+}
+
+// Rate-limit metadata from the raw response.
+fmt.Printf("Requests remaining: %d (resets %s)\n",
+	resp.RateLimit.Remaining, resp.RateLimit.ResetAt.Format("2006-01-02 15:04:05"))
+```
+
+### By delta
+
+```go
+ctx := context.Background()
+
+// The ~30-delta calls near a target expiration.
+// ByDelta returns both sides, so pair it with WithSide to keep only calls.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.OnExpiration(time.Date(2026, time.January, 16, 0, 0, 0, 0, time.UTC))),
+	options.WithStrike(options.ByDelta(0.30)),
+	options.WithSide(options.SideCall),
+)
+if err != nil {
+	log.Fatal(err)
+}
+for _, o := range chain.Options {
+	fmt.Printf("$%.2f  Delta: %.4f  Mid: %.2f\n", o.Strike, o.Delta, o.Mid)
+}
+```
+
+### Liquid contracts
+
+```go
+ctx := context.Background()
+
+// Liquid, tight-spread contracts in a specific month, weeklies excluded.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.InMonthOfYear(1, 2026)),
+	options.WithExpirationTypes(options.ExcludeExpirationTypes(options.Weekly)),
+	options.WithMinVolume(100),
+	options.WithMinOpenInterest(1000),
+	options.WithMaxBidAskSpread(0.10),
+	options.WithStrikeLimit(20),
+)
+if err != nil {
+	log.Fatal(err)
+}
+for _, o := range chain.Options {
+	fmt.Printf("%s  Vol: %d  OI: %d  Spread: %.2f\n",
+		o.OptionSymbol, o.Volume, o.OpenInterest, o.Spread())
+}
+```
+
+### Historical snapshot
+
+```go
+ctx := context.Background()
+
+// The chain as it stood 30 days ago, narrowed to a strike range.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithChainDate(time.Now().AddDate(0, 0, -30)),
+	options.WithStrike(options.StrikeRange(150, 200)),
+	options.WithSide(options.SideCall),
+)
+if err != nil {
+	log.Fatal(err)
+}
+if chain != nil {
+	fmt.Printf("%d contracts as of the snapshot date\n", len(chain.Options))
+}
+```
+
+## OptionsChain
+
+```go
+type OptionsChain struct {
+	Underlying string        // the underlying stock symbol
+	Options    []OptionQuote // one quote per contract in the chain
+	Updated    time.Time     // when the chain was last updated
+}
+```
+
+`OptionsChain` is the result of a `Chain` request: the set of contracts listed
+for a single underlying after any server-side filters have been applied.
+
+- `Underlying` (`string`) — the underlying stock symbol.
+- `Options` (`[]OptionQuote`) — the contracts in the chain, each an [`OptionQuote`](#optionquote).
+- `Updated` (`time.Time`) — when the chain was last updated (Eastern time).
+
+`OptionsChain` also provides `String() string`, which returns a summary such as
+`OptionsChain{Underlying: AAPL, Contracts: 3, Updated: 2026-07-11 16:00:00}`.
+
+## OptionQuote
+
+```go
+type OptionQuote struct {
+	OptionSymbol    string     `json:"optionSymbol"`    // OCC option symbol
+	Underlying      string     `json:"underlying"`      // underlying stock symbol
+	Expiration      time.Time  `json:"expiration"`      // expiration date
+	Strike          float64    `json:"strike"`          // strike price
+	Type            OptionType `json:"side"`            // "call" or "put"
+	Bid             float64    `json:"bid"`             // bid price
+	BidSize         int        `json:"bidSize"`         // bid size
+	Ask             float64    `json:"ask"`             // ask price
+	AskSize         int        `json:"askSize"`         // ask size
+	Last            float64    `json:"last"`            // last trade price
+	Volume          int64      `json:"volume"`          // trading volume
+	OpenInterest    int64      `json:"openInterest"`    // open interest
+	IV              float64    `json:"iv"`              // implied volatility
+	Delta           float64    `json:"delta"`           // delta greek
+	Gamma           float64    `json:"gamma"`           // gamma greek
+	Theta           float64    `json:"theta"`           // theta greek
+	Vega            float64    `json:"vega"`            // vega greek
+	Mid             float64    `json:"mid"`             // midpoint price from the API
+	UnderlyingPrice float64    `json:"underlyingPrice"` // current price of the underlying
+	IntrinsicValue  float64    `json:"intrinsicValue"`  // intrinsic value
+	ExtrinsicValue  float64    `json:"extrinsicValue"`  // extrinsic (time) value
+	FirstTraded     time.Time  `json:"firstTraded"`     // date the option was first traded
+	DTE             int        `json:"dte"`             // days to expiration
+	InTheMoney      bool       `json:"inTheMoney"`      // whether the option is ITM
+	Updated         time.Time  `json:"updated"`         // when this contract was last updated
+}
+```
+
+`OptionQuote` is a quote for a single option contract, including pricing,
+volume, open interest, implied volatility, and the Greeks. It is used both for
+the entries of an `OptionsChain` and for the responses of
+[`Quote` and `Quotes`](./quotes.md). Timestamps are normalized to
+Eastern time.
+
+#### Methods
+
+- `String() string` — a one-line summary of the contract.
+- `Spread() float64` — the bid-ask spread (`Ask` minus `Bid`).
+- `CalcMid() float64` — the bid-ask midpoint computed locally from `Bid` and `Ask`, unlike the `Mid` field, which is the midpoint reported by the API.
+
+> [!NOTE]
+> **Zero values and null data**
+>
+> Numeric fields use Go value types (`float64`, `int64`), not pointers. When the
+> API returns null for a field it is decoded as the zero value (`0` or `0.0`). For
+> `IV` and the Greeks (`Delta`, `Gamma`, `Theta`, `Vega`), a zero value may mean
+> the figure was not calculable rather than a true zero.

@@ -1,0 +1,158 @@
+# Authentication
+
+The Market Data API authenticates every request with a **Bearer token**. You can obtain a token from the [Market Data Dashboard](https://www.marketdata.app/dashboard/).
+
+The Go SDK resolves your token from several sources so you never have to hard-code it in production. If no token is found, the client starts in **demo mode** with access limited to unauthenticated endpoints and free sample symbols (such as `AAPL`).
+
+## Token Priority
+
+The SDK resolves the token in the following order, highest priority first:
+
+1. **`WithToken(...)`** — an explicit token passed to `NewClient`
+2. **`MARKETDATA_TOKEN`** — the process environment variable
+3. **`.env` file** — a `MARKETDATA_TOKEN` entry loaded from a `.env` file in the working directory
+
+An explicit `WithToken` always wins over the environment, and a real environment variable always wins over a value loaded from `.env` (loading a `.env` file never overwrites variables already set in the process).
+
+> [!TIP]
+> In production, prefer the environment variable so your token is never committed with your source code. Reserve `WithToken` for local experiments and tests.
+
+## Setting the Environment Variable (recommended)
+
+### Mac / Linux
+
+Set the variable for the current shell session:
+
+```bash
+export MARKETDATA_TOKEN="your_api_token"
+```
+
+To make it persistent, add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.), then reload it:
+
+```bash
+source ~/.zshrc
+```
+
+Verify it is set:
+
+```bash
+echo $MARKETDATA_TOKEN
+```
+
+### Windows
+
+Using Command Prompt (persists for future sessions, not the current one):
+
+```cmd
+setx MARKETDATA_TOKEN "your_api_token"
+```
+
+Open a **new** Command Prompt and verify:
+
+```cmd
+echo %MARKETDATA_TOKEN%
+```
+
+With the variable set, create the client with no arguments and it picks up the token automatically:
+
+```go
+client, err := marketdata.NewClient()
+```
+
+## Using a `.env` File
+
+`NewClient` automatically loads a `.env` file from the current working directory. Create one in your project root:
+
+```env
+MARKETDATA_TOKEN=your_api_token
+```
+
+Values in `.env` are only applied when the corresponding variable is **not** already set in the real environment, so an exported `MARKETDATA_TOKEN` takes precedence.
+
+> [!WARNING]
+> Add `.env` to your `.gitignore` so your token never lands in version control.
+
+## Passing the Token Explicitly
+
+You can supply the token directly with the `WithToken` option. This overrides both the environment variable and any `.env` value:
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(
+		marketdata.WithToken("your_api_token"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+}
+```
+
+## Startup Validation
+
+When a token is present, `NewClient` validates it with a single synchronous request to the `/user/` endpoint. If the token is rejected, `NewClient` returns an error that wraps an [`AuthenticationError`](./errors.md):
+
+```go
+client, err := marketdata.NewClient(marketdata.WithToken("invalid-token"))
+if err != nil {
+	var authErr *marketdata.AuthenticationError
+	if errors.As(err, &authErr) {
+		log.Fatalf("invalid API token: %v", authErr)
+	}
+	log.Fatal(err)
+}
+```
+
+If you want to skip this round trip (for example to shave startup latency), pass [`WithoutStartupValidation`](./client.md). An invalid token then goes undetected until your first API call fails with an `AuthenticationError`.
+
+## Testing Your Token
+
+Confirm your token works and inspect your current API credit usage with the Utilities service:
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	user, err := client.Utilities.GetUser()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Credits remaining: %d / %d\n", user.CreditsRemaining, user.CreditLimit)
+	fmt.Printf("Window resets at:  %s\n", user.ResetAt)
+	fmt.Printf("Options data:      %s\n", user.OptionsDataPermissions)
+}
+```
+
+> [!TIP]
+> When you test authentication, use a symbol that requires it — such as `SPY` — rather than `AAPL`. `AAPL` is a free sample symbol and returns data even when your token is missing or invalid, so it will not reveal an auth problem.
+
+## Security Notes
+
+- The SDK **never logs your full token**. In debug output it is redacted to its last four characters. See [Logging](./logging.md).
+- The SDK **refuses to transmit your token over an insecure (non-HTTPS) connection** unless the host is a loopback address, guarding against accidental cleartext exposure.
+
+## Next Steps
+
+With authentication configured, read the [Client](./client.md) guide to learn how to construct clients and make requests.

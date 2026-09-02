@@ -1,0 +1,226 @@
+# Client
+
+The `marketdata.Client` is the entry point to the SDK. You create one with `NewClient`, configure it with functional options, and reach every endpoint through its five resource services. A `Client` is safe for concurrent use and caps itself at 50 in-flight requests; additional calls block until a slot frees.
+
+## Creating a Client
+
+```go
+func NewClient(opts ...Option) (*Client, error)
+```
+
+`NewClient` first loads a `.env` file from the working directory (without overriding real environment variables), resolves your token, and — when a token is present — validates it against the API. Always release the client with `Close` when you are done, typically via `defer`:
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	// Simplest form: reads MARKETDATA_TOKEN from the environment / .env.
+	client, err := marketdata.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+}
+```
+
+## Functional Options
+
+Pass any number of `Option` values to `NewClient`. Options are applied in order after defaults and environment variables, so a later option overrides an earlier one and any explicit option overrides the environment.
+
+| Option                                 | Description                                                                                                                                                      |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`WithToken(token string)`**          | Sets the API token. Highest-priority token source; overrides `MARKETDATA_TOKEN` and `.env`.                                                                      |
+| **`WithEnvironment(env Environment)`** | Selects the API environment: `marketdata.Production` (default), `marketdata.Test`, or `marketdata.Development`, each mapped to a base URL.                       |
+| **`WithBaseURL(url string)`**          | Points the client at an arbitrary base URL (a proxy or mock server). Must be a valid `http`/`https` URL with a host, or `NewClient` returns a `ValidationError`. |
+| **`WithHTTPClient(c *http.Client)`**   | Supplies a custom `*http.Client` (custom transport, proxy, instrumentation). The SDK's fixed timeouts still apply.                                               |
+| **`WithLogger(l *slog.Logger)`**       | Replaces `slog.Default()` as the logger. See [Logging](./logging.md).                                                                                         |
+| **`WithDebug(enabled bool)`**          | Enables verbose request/response debug logging.                                                                                                                  |
+| **`WithoutStartupValidation()`**       | Skips the synchronous token-validation request during `NewClient`.                                                                                               |
+| **`WithMaxRetries(n int)`**            | Sets the maximum retry attempts for failed requests (default 3; `0` disables retries).                                                                           |
+| **`WithMode(m Mode)`**                 | Sets the universal `mode` parameter (`ModeLive`, `ModeCached`, `ModeDelayed`) on every request.                                                                  |
+| **`WithMaxAge(maxAge string)`**        | Sets the universal `maxage` parameter for cached mode (e.g. `"5min"`, `"1h"`).                                                                                   |
+| **`WithColumns(cols ...string)`**      | Sets the universal `columns` parameter to trim the response.                                                                                                     |
+| **`WithLimit(n int)`**                 | Sets the universal `limit` parameter (values ≤ 0 ignored).                                                                                                       |
+| **`WithOffset(n int)`**                | Sets the universal `offset` parameter for pagination (values ≤ 0 ignored).                                                                                       |
+| **`WithDateFormat(format string)`**    | Sets the universal `dateformat` parameter. Advanced use — see [Parameters](./parameters.md).                                                                  |
+| **`WithHumanReadable(enabled bool)`**  | Sets the universal `human` parameter. Advanced use — see [Parameters](./parameters.md).                                                                       |
+| **`WithAddHeaders(enabled bool)`**     | Sets the universal `headers` parameter (affects CSV output only).                                                                                                |
+
+The universal-parameter options (`WithMode`, `WithMaxAge`, `WithColumns`, `WithLimit`, `WithOffset`, `WithDateFormat`, `WithHumanReadable`, `WithAddHeaders`) are documented in depth on the [Parameters](./parameters.md) page.
+
+> [!NOTE]
+> **Fixed timeouts and retry behavior**
+>
+> Per-request timeout (99s) and connection dial timeout (2s) are **fixed and cannot be changed**. Only the retry *count* is configurable, via `WithMaxRetries`. Requests are retried only on 501–599 status codes and transient network errors, with exponential backoff starting at 1s and doubling each attempt.
+
+### Example: a fully configured client
+
+```go
+package main
+
+import (
+	"log"
+	"log/slog"
+	"os"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+
+	client, err := marketdata.NewClient(
+		marketdata.WithToken("your-token"),
+		marketdata.WithEnvironment(marketdata.Production),
+		marketdata.WithLogger(logger),
+		marketdata.WithMaxRetries(5),
+		marketdata.WithMode(marketdata.ModeCached),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+}
+```
+
+## Resource Services
+
+The client exposes five services, one per API resource:
+
+| Field              | Type                 | Description                                                      |
+|--------------------|----------------------|------------------------------------------------------------------|
+| `client.Stocks`    | `*stocks.Service`    | Stock quotes, candles, bulk candles, prices, earnings, and news. |
+| `client.Options`   | `*options.Service`   | Option chains, expirations, quotes, and symbol lookup.           |
+| `client.Funds`     | `*funds.Service`     | Mutual fund candles.                                             |
+| `client.Markets`   | `*markets.Service`   | Market status (open/closed) and status history.                  |
+| `client.Utilities` | `*utilities.Service` | API status, response-header echo, and account/user details.      |
+
+```go
+quote, err := client.Stocks.GetQuote("AAPL")
+chain, err := client.Options.GetChain("AAPL")
+status, err := client.Markets.GetStatus()
+user, err := client.Utilities.GetUser()
+```
+
+## Two Call Styles
+
+Every endpoint method comes in two forms. Choose based on whether you need a `context.Context` and the raw response metadata.
+
+| Method form            | Signature shape                    | When to use                                                                                                                         |
+|------------------------|------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| **`Get<Name>(...)`**   | `(T, error)`                       | Convenience form. Uses a background context. Best for scripts and simple calls.                                                     |
+| **`<Name>(ctx, ...)`** | `(T, *marketdata.Response, error)` | Context-aware form. Also returns the raw `*marketdata.Response` carrying HTTP status, headers, and per-request rate-limit metadata. |
+
+The `*marketdata.Response` returned by the context form embeds `*http.Response` and adds a `NoData` flag and a `RateLimit` field. (`marketdata.Response` is an exported alias for the SDK's response type, so you can name it in your own code.)
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	quote, err := client.Stocks.GetQuote("AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("AAPL last: $%.2f\n", quote.Last)
+}
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	quote, resp, err := client.Stocks.Quote(ctx, "AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("AAPL last: $%.2f\n", quote.Last)
+	fmt.Printf("HTTP status:       %s\n", resp.Status)
+	fmt.Printf("Credits remaining: %d\n", resp.RateLimit.Remaining)
+	fmt.Printf("No data:           %t\n", resp.NoData)
+}
+```
+
+## No-Data Responses
+
+A `404` (no data available for a valid request) or a `204` (a `mode=cached` cache miss) is **not** an error. The context form returns a nil result, a nil error, and a `*marketdata.Response` whose `NoData` field is `true`. Always check `NoData` (or a nil result) before dereferencing:
+
+```go
+quote, resp, err := client.Stocks.Quote(ctx, "AAPL")
+if err != nil {
+	log.Fatal(err)
+}
+if resp.NoData {
+	fmt.Println("no quote data available")
+	return
+}
+fmt.Printf("AAPL last: $%.2f\n", quote.Last)
+```
+
+## Client Methods
+
+Besides the resource services, the client provides a few helper methods:
+
+| Method                            | Description                                                                                                                                                    |
+|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Close() error`**               | Releases resources by closing idle HTTP connections. Safe to call multiple times; always returns `nil`. Do not reuse a client after `Close`.                   |
+| **`RateLimits() RateLimitState`** | Returns a client-level snapshot of rate-limit state from the most recently completed request. For exact, request-scoped values, read `resp.RateLimit` instead. |
+| **`DemoMode() bool`**             | Reports whether the client is running in demo mode because no token was provided.                                                                              |
+| **`Debug(enabled bool)`**         | Turns debug logging on or off at runtime (equivalent to `WithDebug`).                                                                                          |
+
+```go
+if client.DemoMode() {
+	fmt.Println("running with limited demo access")
+}
+
+rl := client.RateLimits()
+fmt.Printf("credits: %d/%d, resets %s\n", rl.Remaining, rl.Limit, rl.ResetAt)
+```
+
+## Next Steps
+
+- Configure [Parameters](./parameters.md) to control mode, columns, and pagination.
+- Learn the [Error](./errors.md) types and how to inspect them.
+- Set up [Logging](./logging.md) for debugging.

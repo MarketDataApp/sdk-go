@@ -1,0 +1,169 @@
+# Status
+
+Retrieve the market status (open, closed, or early close) for a single trading day — past, present, or future.
+
+## Making Requests
+
+Fetch a single day's status with the `Status` method on the `client.Markets` service. It comes in two call styles:
+
+| Method                     | Return                                               | Description                                                            |
+|----------------------------|------------------------------------------------------|------------------------------------------------------------------------|
+| **`GetStatus(...opts)`**   | `(*markets.MarketStatus, error)`                     | Convenience; uses a background context and discards response metadata. |
+| **`Status(ctx, ...opts)`** | `(*markets.MarketStatus, *response.Response, error)` | Context-aware; also returns the raw response plus rate-limit metadata. |
+
+For a range of days, use [Status History](./status-history.md) instead.
+
+## Status
+
+```go
+func (s *Service) Status(ctx context.Context, opts ...markets.StatusOption) (*markets.MarketStatus, *response.Response, error)
+func (s *Service) GetStatus(opts ...markets.StatusOption) (*markets.MarketStatus, error)
+```
+
+Get the market status for a single day from the `/v1/markets/status/` endpoint. With no options it reports today's status for the United States. The date is sent to the API in `YYYY-MM-DD` form, so any time-of-day component is ignored.
+
+#### Parameters
+
+- `ctx` (`context.Context`) — request context for cancellation and deadlines (context method only).
+- Options:
+  - `markets.WithDate(d time.Time)` — the day whose status is requested. A zero time leaves the parameter unset and the API reports today's status. This is a `Status`-only option; it cannot be passed to `StatusHistory`.
+  - `markets.WithCountry(country string)` — the market to query, as a two-letter ISO 3166-1 alpha-2 code such as `"US"`. An empty string defaults to the United States. `WithCountry` applies to both `Status` and `StatusHistory`.
+
+#### Returns
+
+- `*markets.MarketStatus` — the [`MarketStatus`](#marketstatus) for the requested day.
+- `*response.Response` — raw response plus rate-limit metadata (context method only).
+- `error` — non-nil on request or decoding failure.
+
+#### Notes
+
+- When the API responds `404` because no status exists for the requested date, both call styles return a `nil` `MarketStatus` and a `nil` error. With the context method, the returned `*response.Response` has its `NoData` field set to `true` — always guard against a `nil` result before dereferencing it.
+- `Status` accepts only single-day options. Its date parameter is a single `time.Time`, so the range parameters used by `StatusHistory` cannot be passed here by mistake.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/markets"
+)
+
+func main() {
+	client, err := marketdata.NewClient() // reads MARKETDATA_TOKEN from env / .env
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// Was the US market open on Independence Day 2024?
+	status, err := client.Markets.GetStatus(
+		markets.WithDate(time.Date(2024, time.July, 4, 0, 0, 0, 0, time.UTC)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if status == nil {
+		fmt.Println("No status available for that date.")
+		return
+	}
+	fmt.Println(status)
+}
+```
+
+#### Output
+
+```
+2024-07-04 closed Open: false
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// No options: today's status for the United States.
+	status, resp, err := client.Markets.Status(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NoData || status == nil {
+		fmt.Println("No status available.")
+		return
+	}
+	if status.Open {
+		fmt.Println("The market is open.")
+	} else {
+		fmt.Println("The market is closed.")
+	}
+	fmt.Printf("Credits remaining: %d\n", resp.RateLimit.Remaining)
+}
+```
+
+#### Output
+
+```
+The market is open.
+Credits remaining: 99846
+```
+
+### With options
+
+```go
+// Query a specific market on a specific day.
+status, _, err := client.Markets.Status(context.Background(),
+	markets.WithCountry("US"),
+	markets.WithDate(time.Date(2024, time.November, 28, 0, 0, 0, 0, time.UTC)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+if status != nil {
+	fmt.Printf("early close: %t\n", status.IsEarlyClose())
+}
+```
+
+## MarketStatus
+
+```go
+type MarketStatus struct {
+	Date   time.Time `json:"date"`   // Date is the date of this status (US Eastern).
+	Open   bool      `json:"open"`   // Open indicates if the market was/is open on this date.
+	Status string    `json:"status"` // Status is a string description.
+}
+```
+
+`MarketStatus` represents the status of the market on a given day. `Status` is the raw string from the API (`"open"`, `"closed"`, or `"early-close"`), and `Open` is derived from it.
+
+#### Fields
+
+- `Date` (`time.Time`) — the date of this status, normalized to US Eastern.
+- `Open` (`bool`) — `true` when the market was or is open on this date.
+- `Status` (`string`) — a description: `"open"`, `"closed"`, or `"early-close"`.
+
+#### Methods
+
+- `String() string` — a one-line summary, e.g. `2024-07-04 closed Open: false`.
+- `IsOpen() bool` — reports whether the market is open.
+- `IsClosed() bool` — reports whether the market is closed.
+- `IsEarlyClose() bool` — reports whether this is an early-close day (`Status == "early-close"`).

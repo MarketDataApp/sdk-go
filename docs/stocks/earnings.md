@@ -1,0 +1,221 @@
+# Earnings
+
+Get historical earnings-per-share data and the upcoming earnings calendar for a stock, one report per fiscal quarter.
+
+> [!NOTE]
+> **Premium Endpoint**
+>
+> The earnings endpoint requires a premium subscription. Free and trial accounts cannot access this data.
+
+## Making Requests
+
+Both call styles live on the `Stocks` service (`client.Stocks`). Use `GetEarnings` for the simplest call, or `Earnings` when you also need the raw response and rate-limit metadata.
+
+| Method                               | Return                                   | Description                                                                          |
+|--------------------------------------|------------------------------------------|--------------------------------------------------------------------------------------|
+| **`GetEarnings(symbol, opts...)`**   | `([]Earning, error)`                     | Convenience wrapper; uses `context.Background()` and discards the response metadata. |
+| **`Earnings(ctx, symbol, opts...)`** | `([]Earning, *response.Response, error)` | Context-aware; also returns the raw response + rate-limit metadata.                  |
+
+## Earnings
+
+```go
+func (s *Service) Earnings(ctx context.Context, symbol string, opts ...EarningsOption) ([]Earning, *response.Response, error)
+func (s *Service) GetEarnings(symbol string, opts ...EarningsOption) ([]Earning, error)
+```
+
+Fetch earnings reports for one symbol. With no options the API returns its default set of recent and upcoming reports.
+
+#### Parameters
+
+- `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
+- `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
+- Options (`stocks.EarningsOption`):
+  - `stocks.WithEarningsWindow(w DateWindow)` — set the reporting date range as a single `DateWindow` value. Build the window with any of the shared [date-window constructors](#date-windows), for example `stocks.OnDate(d)`, `stocks.Between(from, to)`, or `stocks.LastN(4)`.
+
+#### Returns
+
+- `[]Earning` — earnings reports, one per fiscal quarter.
+- `*response.Response` — raw response + rate-limit metadata (context method only).
+- `error` — non-nil on request/validation failure.
+
+#### Notes
+
+- EPS fields on the returned `Earning` values are pointers (`*float64`) and are `nil` when the API reports no value, such as for earnings not yet reported. This distinguishes a missing value from a true `$0.00`.
+- Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
+- If the API responds with 404 because no data is available, `Earnings` returns a `nil` slice, a `nil` error, and a non-nil `*response.Response` whose `NoData` field is `true`.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	earnings, err := client.Stocks.GetEarnings("AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, e := range earnings {
+		reported := "n/a"
+		if e.ReportedEPS != nil {
+			reported = fmt.Sprintf("$%.2f", *e.ReportedEPS)
+		}
+		fmt.Printf("FY%d Q%d  report %s  EPS %s\n",
+			e.FiscalYear, e.FiscalQuarter, e.ReportDate.Format("2006-01-02"), reported)
+	}
+}
+```
+
+#### Output
+
+```
+FY2024 Q1  report 2024-01-25  EPS $2.18
+FY2024 Q2  report 2024-04-25  EPS n/a
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	earnings, resp, err := client.Stocks.Earnings(ctx, "AAPL")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NoData {
+		fmt.Println("no earnings available")
+		return
+	}
+
+	for _, e := range earnings {
+		fmt.Println(e) // Earning implements Stringer
+	}
+	fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+}
+```
+
+### With options
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/stocks"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// The 4 most recent quarterly reports.
+	earnings, _, err := client.Stocks.Earnings(ctx, "AAPL",
+		stocks.WithEarningsWindow(stocks.LastN(4)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, e := range earnings {
+		est, act := "n/a", "n/a"
+		if e.EstimatedEPS != nil {
+			est = fmt.Sprintf("$%.2f", *e.EstimatedEPS)
+		}
+		if e.ReportedEPS != nil {
+			act = fmt.Sprintf("$%.2f", *e.ReportedEPS)
+		}
+		fmt.Printf("Q%d %d: estimate %s, actual %s\n", e.FiscalQuarter, e.FiscalYear, est, act)
+	}
+}
+```
+
+## Date Windows {#date-windows}
+
+`stocks.WithEarningsWindow` takes a `DateWindow` — the same sealed-union value used by [Candles](./candles.md) and [News](./news.md). Build one with exactly one constructor:
+
+| Constructor                | Selects                              | API parameters      |
+|----------------------------|--------------------------------------|---------------------|
+| `stocks.OnDate(d)`         | a single calendar day                | `date=d`            |
+| `stocks.Between(from, to)` | an explicit closed range (inclusive) | `from=from&to=to`   |
+| `stocks.Since(from)`       | everything from a day onward         | `from=from`         |
+| `stocks.Until(to)`         | up to and including a day            | `to=to`             |
+| `stocks.LastN(n)`          | the `n` most recent reports          | `countback=n`       |
+| `stocks.LastNUntil(n, to)` | the `n` reports ending at a day      | `countback=n&to=to` |
+
+## Earning
+
+```go
+type Earning struct {
+	Symbol             string    `json:"symbol"`        // Stock ticker symbol
+	FiscalYear         int       `json:"fiscalYear"`    // Fiscal year of the report
+	FiscalQuarter      int       `json:"fiscalQuarter"` // Fiscal quarter (1-4)
+	Date               time.Time `json:"date"`          // Last calendar day of the fiscal period
+	ReportDate         time.Time `json:"reportDate"`    // When earnings were / will be reported
+	ReportTime         string    `json:"reportTime"`    // When during the day (before/after market, during hours)
+	Currency           string    `json:"currency"`      // Currency of the report (may be empty for future earnings)
+	ReportedEPS        *float64  `json:"reportedEPS"`   // Actual reported EPS (nil for future earnings)
+	EstimatedEPS       *float64  `json:"estimatedEPS"`  // Consensus analyst estimate
+	SurpriseEPS        *float64  `json:"surpriseEPS"`   // Difference between reported and estimated
+	SurpriseEPSPercent *float64  `json:"surpriseEPSpct"` // Surprise as a percentage
+	Updated            time.Time `json:"updated"`       // When this earnings data was last updated
+}
+```
+
+Represents a single earnings report, one per fiscal quarter. Timestamps are normalized to US Eastern time.
+
+#### Fields
+
+- `Symbol` — the stock ticker symbol.
+- `FiscalYear` / `FiscalQuarter` — the fiscal year and quarter (1-4) of the report.
+- `Date` — the last calendar day of the fiscal period.
+- `ReportDate` — the date the earnings were or will be reported.
+- `ReportTime` — when during the day the report is/was released (before market, after market, or during hours).
+- `Currency` — the currency of the report; may be empty for future earnings.
+- `ReportedEPS` — the actual reported EPS; `nil` for earnings not yet reported.
+- `EstimatedEPS` — the consensus analyst estimate; `nil` when unavailable.
+- `SurpriseEPS` — the difference between reported and estimated EPS; `nil` when unavailable.
+- `SurpriseEPSPercent` — the surprise as a percentage (JSON alias `surpriseEPSpct`); `nil` when unavailable.
+- `Updated` — when this data was last updated.
+
+#### Helper Methods
+
+- `String() string` — a one-line summary of the report (EPS fields render as `n/a` when `nil`).

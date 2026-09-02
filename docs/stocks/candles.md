@@ -1,0 +1,246 @@
+# Candles
+
+Retrieve historical OHLCV (open, high, low, close, volume) candles for a stock symbol across intraday, daily, weekly, monthly, and yearly resolutions.
+
+## Making Requests
+
+Both call styles live on the `Stocks` service (`client.Stocks`). Use `GetCandles` for the simplest call, or `Candles` when you also need the raw response and rate-limit metadata.
+
+| Method                              | Return                                  | Description                                                                          |
+|-------------------------------------|-----------------------------------------|--------------------------------------------------------------------------------------|
+| **`GetCandles(symbol, opts...)`**   | `([]Candle, error)`                     | Convenience wrapper; uses `context.Background()` and discards the response metadata. |
+| **`Candles(ctx, symbol, opts...)`** | `([]Candle, *response.Response, error)` | Context-aware; also returns the raw response + rate-limit metadata.                  |
+
+## Candles
+
+```go
+func (s *Service) Candles(ctx context.Context, symbol string, opts ...CandleOption) ([]Candle, *response.Response, error)
+func (s *Service) GetCandles(symbol string, opts ...CandleOption) ([]Candle, error)
+```
+
+Fetch historical candles for one symbol. The resolution defaults to daily; the date range is expressed as a single [`DateWindow`](#date-windows) value.
+
+#### Parameters
+
+- `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
+- `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
+- Options (`stocks.CandleOption`):
+  - `stocks.WithResolution(r Resolution)` — set the candle timeframe. Defaults to `stocks.ResolutionDaily`. See [Resolution values](#resolution) below.
+  - `stocks.WithCandleWindow(w DateWindow)` — set the date range as a single `DateWindow` value (for example `stocks.Between(from, to)` or `stocks.LastN(30)`). When omitted, the API returns its default recent window. See [Date windows](#date-windows).
+  - `stocks.WithCandleExtended(extended bool)` — include extended-hours data. When omitted, the parameter is not sent and the API default applies. Only meaningful for intraday resolutions.
+  - `stocks.WithCandleAdjustSplits(adjust bool)` — adjust for stock splits. When omitted, the parameter is not sent and the API default applies.
+  - `stocks.WithCandleAdjustDividends(adjust bool)` — adjust for dividends. The API adjusts for dividends by default; pass `false` for raw, unadjusted prices. When omitted, the parameter is not sent.
+
+#### Returns
+
+- `[]Candle` — candles in chronological order.
+- `*response.Response` — raw response + rate-limit metadata (context method only).
+- `error` — non-nil on request/validation failure.
+
+#### Notes
+
+- Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
+- For intraday resolutions (`Resolution1Min` through `Resolution4Hour`), when both `from` and `to` are set and the range spans more than one year, `Candles` automatically splits the range into year-sized chunks, fetches them concurrently, and merges the results in chronological order. In that case the returned `*response.Response` reflects only one of the underlying requests.
+- The date range is a single `DateWindow` value, so the API's mutually-exclusive date parameters (`date`, `from`/`to`, `countback`) can never be combined by mistake.
+- If the API responds with 404 because no data is available, `Candles` returns a `nil` slice, a `nil` error, and a non-nil `*response.Response` whose `NoData` field is `true`.
+
+### Get (simple)
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/stocks"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	from := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2024, 1, 31, 0, 0, 0, 0, time.UTC)
+
+	candles, err := client.Stocks.GetCandles("AAPL",
+		stocks.WithResolution(stocks.ResolutionDaily),
+		stocks.WithCandleWindow(stocks.Between(from, to)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, c := range candles {
+		fmt.Printf("%s  O:%.2f H:%.2f L:%.2f C:%.2f V:%d\n",
+			c.Time.Format("2006-01-02"), c.Open, c.High, c.Low, c.Close, c.Volume)
+	}
+}
+```
+
+#### Output
+
+```
+2024-01-02  O:187.15 H:188.44 L:183.89 C:185.64 V:82488700
+2024-01-03  O:184.22 H:185.88 L:183.43 C:184.25 V:58414500
+...
+```
+
+### Context + Response
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/stocks"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// The 30 most recent daily candles (countback).
+	candles, resp, err := client.Stocks.Candles(ctx, "AAPL",
+		stocks.WithCandleWindow(stocks.LastN(30)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NoData {
+		fmt.Println("no candles available")
+		return
+	}
+
+	fmt.Printf("Fetched %d candles\n", len(candles))
+	fmt.Printf("Requests remaining: %d\n", resp.RateLimit.Remaining)
+}
+```
+
+### With options
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/MarketDataApp/sdk-go/v2/marketdata"
+	"github.com/MarketDataApp/sdk-go/v2/marketdata/stocks"
+)
+
+func main() {
+	client, err := marketdata.NewClient(marketdata.WithToken("YOUR_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	day := time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC)
+
+	// 5-minute candles for a single day, extended hours, unadjusted for splits.
+	candles, _, err := client.Stocks.Candles(ctx, "AAPL",
+		stocks.WithResolution(stocks.Resolution5Min),
+		stocks.WithCandleWindow(stocks.OnDate(day)),
+		stocks.WithCandleExtended(true),
+		stocks.WithCandleAdjustSplits(false),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d intraday candles\n", len(candles))
+	for _, c := range candles[:3] {
+		fmt.Println(c) // Candle implements Stringer
+	}
+}
+```
+
+## Resolution {#resolution}
+
+`Resolution` is a string type selecting the candle timeframe. Pass a constant to `stocks.WithResolution`.
+
+```go
+type Resolution string
+
+const (
+	Resolution1Min   Resolution = "1"   // 1 minute
+	Resolution3Min   Resolution = "3"   // 3 minutes
+	Resolution5Min   Resolution = "5"   // 5 minutes
+	Resolution15Min  Resolution = "15"  // 15 minutes
+	Resolution30Min  Resolution = "30"  // 30 minutes
+	Resolution45Min  Resolution = "45"  // 45 minutes
+	Resolution1Hour  Resolution = "60"  // 1 hour
+	Resolution2Hour  Resolution = "120" // 2 hours
+	Resolution4Hour  Resolution = "240" // 4 hours
+	ResolutionDaily  Resolution = "D"   // daily (default)
+	ResolutionWeekly Resolution = "W"   // weekly
+	ResolutionMonthly Resolution = "M"  // monthly
+	ResolutionYearly Resolution = "Y"   // yearly
+)
+```
+
+Resolutions `Resolution1Min` through `Resolution4Hour` are intraday; these are the resolutions eligible for automatic year-chunk splitting on large ranges.
+
+## Date Windows {#date-windows}
+
+`DateWindow` is a sealed union describing the date range for `Candles` (and shared by [Earnings](./earnings.md) and [News](./news.md)). Build one with exactly one of the constructors below and pass it to `stocks.WithCandleWindow`. Because a window is a single value, illegal combinations such as "from plus countback" are not expressible.
+
+| Constructor                | Selects                              | API parameters      |
+|----------------------------|--------------------------------------|---------------------|
+| `stocks.OnDate(d)`         | a single calendar day                | `date=d`            |
+| `stocks.Between(from, to)` | an explicit closed range (inclusive) | `from=from&to=to`   |
+| `stocks.Since(from)`       | everything from a day onward         | `from=from`         |
+| `stocks.Until(to)`         | up to and including a day            | `to=to`             |
+| `stocks.LastN(n)`          | the `n` most recent periods          | `countback=n`       |
+| `stocks.LastNUntil(n, to)` | the `n` periods ending at a day      | `countback=n&to=to` |
+
+Only the calendar date of each `time.Time` is used; the time-of-day and zone are ignored.
+
+## Candle
+
+```go
+type Candle struct {
+	Time   time.Time `json:"t"` // Candle timestamp (start of period, US Eastern)
+	Open   float64   `json:"o"` // Opening price
+	High   float64   `json:"h"` // Highest price
+	Low    float64   `json:"l"` // Lowest price
+	Close  float64   `json:"c"` // Closing price
+	Volume int64     `json:"v"` // Trading volume
+}
+```
+
+Represents a single OHLCV candle. `Time` marks the start of the candle period and is normalized to US Eastern time.
+
+#### Fields
+
+- `Time` — the candle timestamp (start of the period).
+- `Open` / `High` / `Low` / `Close` — the OHLC prices for the period.
+- `Volume` — trading volume for the period.
+
+#### Helper Methods
+
+- `Range() float64` — the high-low range (`High - Low`).
+- `RangePercent() float64` — the range as a percentage of `Open`.
+- `IsBullish() bool` — true when `Close > Open`.
+- `IsBearish() bool` — true when `Close < Open`.
+- `String() string` — a concise one-line summary of the candle.
