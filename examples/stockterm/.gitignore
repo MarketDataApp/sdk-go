@@ -1,0 +1,4 @@
+# Compiled binary produced by `go build ./...` in this single-main-package
+# module (Go writes an unadorned executable named after the module's last
+# path element when only one main package is being built).
+/stockterm

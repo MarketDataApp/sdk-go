@@ -1,0 +1,11 @@
+┌ Diagnostics ─────────────────────────────────────────────────────────────────────────────────────┐
+│ API Status                                                                                       │
+│ status: online   uptime 30d: 99.95%   uptime 90d: 99.90%                                         │
+│                                                                                                  │
+│ Request Headers                                                                                  │
+│ Authorization: Bearer ***redacted***                                                             │
+│ User-Agent: marketdata-go-sdk/2.0.0                                                              │
+│ X-Request-Id: req-8f3c1e                                                                         │
+│                                                                                                  │
+│ esc to close                                                                                     │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘

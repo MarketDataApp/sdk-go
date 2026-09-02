@@ -1,37 +1,45 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# Binaries
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test binary
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Coverage files
 *.out
 coverage.html
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Go workspace file
-go.work
-
-# Environment variables
-.env
-
-# Compiled binaries
-sdk-go
-
-# CSV files
-*.csv
-
-# Log files & Log Directory
-*.log
-logs/
-
+# OS files
 .DS_Store
+Thumbs.db
+
+# Dependency directories
+vendor/
+
+# Build output
+dist/
+bin/
+
+# Environment / secrets
+.env
+.env.*
+.envrc
+
+# Claude Code (personal settings only; .claude/settings.json is shared)
+.claude/settings.local.json
+# Transient agent worktrees; a stray `git add -A` would otherwise commit them.
+.claude/worktrees/
+
+# CSV exports. The historical-exporter example defaults its output under the
+# OS temp dir, but an explicit -outdir . still lands here.
+*.csv
