@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  # Discussions are not enabled on this repository, so there is deliberately no
+  # "ask a question" link here — it would lead to a dead page. Questions go to
+  # the dashboard or Discord below.
+  - name: Report a security issue
+    url: https://github.com/MarketDataApp/sdk-go/security/policy
+    about: Learn how to privately report a security vulnerability (do not open a public issue)
+  - name: Market Data support & community
+    url: https://www.marketdata.app/dashboard/
+    about: "Account, billing, and API questions. Community chat: https://discord.com/invite/GmdeAVRtnT"
+  - name: API documentation
+    url: https://www.marketdata.app/docs/api
+    about: Endpoint reference — check here before filing an SDK bug, since the SDK returns what the API sends
