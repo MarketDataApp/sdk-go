@@ -1,4 +1,4 @@
-# Logging
+# Logging (Go SDK)
 
 The Go SDK logs through the standard library's [`log/slog`](https://pkg.go.dev/log/slog) package. By default it uses `slog.Default()`, so SDK log records flow into whatever logger your application already configures. You can supply your own `*slog.Logger`, raise the verbosity for debugging, and rely on the SDK never printing your full API token.
 

@@ -1,4 +1,4 @@
-# Candles
+# Fund Candles (Go SDK)
 
 Retrieve historical OHLC candles for a mutual fund. Each candle reports the fund's net asset value (NAV) for one period, with its `Time` normalized to US Eastern.
 
@@ -20,21 +20,21 @@ func (s *Service) GetCandles(symbol string, opts ...funds.CandleOption) ([]funds
 
 Get historical OHLC candles for a mutual fund from the `/v1/funds/candles/{resolution}/{symbol}/` endpoint. Dates are sent to the API in `YYYY-MM-DD` form, so any time-of-day component is ignored.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — request context for cancellation and deadlines (context method only).
 - `symbol` (`string`) — the fund's ticker, for example `"VFINX"`. Required; an empty symbol returns a validation error without making a request.
 - Options:
   - `funds.WithResolution(r funds.Resolution)` — the candle timeframe. Defaults to `funds.ResolutionDaily`. The funds endpoint supports `funds.ResolutionDaily` (`"D"`), `funds.ResolutionWeekly` (`"W"`), `funds.ResolutionMonthly` (`"M"`), and `funds.ResolutionYearly` (`"Y"`) only. The resolution becomes part of the request path, so an unsupported value causes the API to reject the request.
-  - `funds.WithCandleWindow(w funds.DateWindow)` — the date range, expressed as a single [`DateWindow`](#datewindow) value. Omitting it lets the API return its default recent window.
+  - `funds.WithCandleWindow(w funds.DateWindow)` — the date range, expressed as a single `funds.DateWindow` value. Omitting it lets the API return its default recent window.
 
-#### Returns
+### Returns
 
 - `[]funds.Candle` — one [`Candle`](#candle) per period, oldest first.
 - `*response.Response` — raw response plus rate-limit metadata (context method only).
 - `error` — non-nil on request or decoding failure. A missing symbol returns a `*marketdata.ValidationError`.
 
-#### Notes
+### Notes
 
 - Mutual funds price once per day at market close, so daily resolution is the most common choice.
 - When the API responds `404` because no data exists for the requested symbol or range, both call styles return a `nil` slice and a `nil` error. With the context method, the returned `*response.Response` has its `NoData` field set to `true`.
@@ -73,7 +73,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76
@@ -126,7 +126,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76
@@ -169,7 +169,7 @@ type Candle struct {
 
 `Candle` represents an OHLC candle for a fund. Because mutual funds report a single NAV per period, the open, high, low, and close are typically identical.
 
-#### Fields
+### Fields
 
 - `Time` (`time.Time`) — the candle timestamp, normalized to US Eastern.
 - `Open` (`float64`) — the opening NAV.
@@ -177,13 +177,13 @@ type Candle struct {
 - `Low` (`float64`) — the lowest price during the period.
 - `Close` (`float64`) — the closing NAV.
 
-#### Methods
+### Methods
 
 - `String() string` — a concise one-line summary, e.g. `2023-01-03 O: 352.76 H: 352.76 L: 352.76 C: 352.76`.
 - `Range() float64` — the high-low range (`High - Low`).
 
 > [!NOTE]
-> **Zero values and null data**
+> **[Zero values and null data]**
 >
 > Numeric fields are value types, not pointers. When the API returns `null` for a field, it decodes as the zero value, so a `0` may represent either an actual zero or the absence of data.
 
