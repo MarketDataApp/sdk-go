@@ -1,4 +1,4 @@
-# Error Handling
+# Error Handling (Go SDK)
 
 The Go SDK returns typed errors that you inspect with the standard library's `errors.Is` and `errors.As`. Each API failure maps to a specific error type carrying request details for troubleshooting, and each type matches a sentinel value for quick classification.
 
@@ -54,7 +54,7 @@ type SupportContext struct {
 All of these types are exported from the `marketdata` package (they are aliases for the SDK's internal error types), so you refer to them as `marketdata.RateLimitError`, `marketdata.AuthenticationError`, and so on.
 
 > [!NOTE]
-> **404 is not always an error**
+> **[404 is not always an error]**
 >
 > A `404` that means "no data for this valid request" is **not** returned as an error. It is surfaced through the `NoData` field of the [`*marketdata.Response`](./client.md#no-data-responses). A `NotFoundError` is only returned for a genuinely missing resource.
 

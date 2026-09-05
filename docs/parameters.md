@@ -1,4 +1,4 @@
-# Parameters
+# Parameters (Go SDK)
 
 The Market Data API supports a set of **universal parameters** that work on every endpoint. In the Go SDK these are configured as **client-level functional options** passed to `NewClient`; once set, they are attached to every request that client makes.
 
@@ -24,7 +24,7 @@ Universal parameters are merged from three sources, lowest priority first:
 3. **Endpoint method-level parameters** (highest) — some endpoints set a specific value themselves (for example, candle endpoints pin the `dateformat` they need for correct decoding). A method-level value always wins over the client default.
 
 > [!NOTE]
-> **Client-level, not per-call**
+> **[Client-level, not per-call]**
 >
 > Unlike the PHP SDK, the Go SDK does not accept a universal-parameter object on each method call. Universal parameters are set on the client. If you need different values for different calls — for example a cached client for bulk quotes and a live client for time-sensitive calls — create separate clients.
 
@@ -56,7 +56,7 @@ client, err := marketdata.NewClient(marketdata.WithMode(marketdata.ModeLive))
 ```
 
 > [!NOTE]
-> **Premium parameter**
+> **[Premium parameter]**
 >
 > `mode` is available only on paid plans. Free and trial plans receive historical data (the last fully-closed session) regardless of this setting. See [Data Freshness](https://www.marketdata.app/docs/account/data-freshness).
 
@@ -110,7 +110,7 @@ Sets the wire representation of date/time fields.
 - **Values:** `"timestamp"`, `"unix"`, `"spreadsheet"`
 
 > [!WARNING]
-> **Advanced use only**
+> **[Advanced use only]**
 >
 > The SDK decodes dates from the API's default numeric (unix) representation. Overriding `dateformat` globally can change the wire format of date fields and cause typed responses (candles, quotes, earnings) to fail decoding. Endpoints that require a specific format set it themselves at the method level. Only set this when you consume the raw response yourself.
 
@@ -121,7 +121,7 @@ Requests human-readable field names and value formatting via the `human` paramet
 - **Option:** `WithHumanReadable(enabled bool)`
 
 > [!WARNING]
-> **Advanced use only**
+> **[Advanced use only]**
 >
 > Human-readable output changes field names and value formatting and is incompatible with the SDK's typed decoding. Enable it only when you read the raw `*marketdata.Response` body yourself instead of using the typed result.
 

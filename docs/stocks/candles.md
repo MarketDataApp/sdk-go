@@ -1,4 +1,4 @@
-# Candles
+# Stock Candles (Go SDK)
 
 Retrieve historical OHLCV (open, high, low, close, volume) candles for a stock symbol across intraday, daily, weekly, monthly, and yearly resolutions.
 
@@ -20,7 +20,7 @@ func (s *Service) GetCandles(symbol string, opts ...CandleOption) ([]Candle, err
 
 Fetch historical candles for one symbol. The resolution defaults to daily; the date range is expressed as a single [`DateWindow`](#date-windows) value.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
 - `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
@@ -31,13 +31,13 @@ Fetch historical candles for one symbol. The resolution defaults to daily; the d
   - `stocks.WithCandleAdjustSplits(adjust bool)` — adjust for stock splits. When omitted, the parameter is not sent and the API default applies.
   - `stocks.WithCandleAdjustDividends(adjust bool)` — adjust for dividends. The API adjusts for dividends by default; pass `false` for raw, unadjusted prices. When omitted, the parameter is not sent.
 
-#### Returns
+### Returns
 
 - `[]Candle` — candles in chronological order.
 - `*response.Response` — raw response + rate-limit metadata (context method only).
 - `error` — non-nil on request/validation failure.
 
-#### Notes
+### Notes
 
 - Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
 - For intraday resolutions (`Resolution1Min` through `Resolution4Hour`), when both `from` and `to` are set and the range spans more than one year, `Candles` automatically splits the range into year-sized chunks, fetches them concurrently, and merges the results in chronological order. In that case the returned `*response.Response` reflects only one of the underlying requests.
@@ -83,7 +83,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 2024-01-02  O:187.15 H:188.44 L:183.89 C:185.64 V:82488700
@@ -175,8 +175,7 @@ func main() {
 }
 ```
 
-## Resolution {#resolution}
-
+## Resolution 
 `Resolution` is a string type selecting the candle timeframe. Pass a constant to `stocks.WithResolution`.
 
 ```go
@@ -201,8 +200,7 @@ const (
 
 Resolutions `Resolution1Min` through `Resolution4Hour` are intraday; these are the resolutions eligible for automatic year-chunk splitting on large ranges.
 
-## Date Windows {#date-windows}
-
+## Date Windows 
 `DateWindow` is a sealed union describing the date range for `Candles` (and shared by [Earnings](./earnings.md) and [News](./news.md)). Build one with exactly one of the constructors below and pass it to `stocks.WithCandleWindow`. Because a window is a single value, illegal combinations such as "from plus countback" are not expressible.
 
 | Constructor                | Selects                              | API parameters      |
@@ -231,13 +229,13 @@ type Candle struct {
 
 Represents a single OHLCV candle. `Time` marks the start of the candle period and is normalized to US Eastern time.
 
-#### Fields
+### Fields
 
 - `Time` — the candle timestamp (start of the period).
 - `Open` / `High` / `Low` / `Close` — the OHLC prices for the period.
 - `Volume` — trading volume for the period.
 
-#### Helper Methods
+### Helper Methods
 
 - `Range() float64` — the high-low range (`High - Low`).
 - `RangePercent() float64` — the range as a percentage of `Open`.

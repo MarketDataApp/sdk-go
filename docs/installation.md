@@ -1,4 +1,4 @@
-# Installation
+# Installation (Go SDK)
 
 The Market Data Go SDK is installed with the standard `go get` command. It is a normal Go module with a `/v2` major-version suffix on its import path.
 
@@ -18,7 +18,7 @@ go get github.com/MarketDataApp/sdk-go/v2
 This adds the SDK to your `go.mod` and downloads it into the module cache.
 
 > [!NOTE]
-> **Version suffix matters**
+> **[Version suffix matters]**
 >
 > Because this is a `/v2` module, the import path **must** include `/v2`. Dropping it would resolve to the older v1 SDK, which has a different (fluent-builder) API.
 
