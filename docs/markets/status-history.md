@@ -11,7 +11,7 @@ Fetch a range of days with the `StatusHistory` method on the `client.Markets` se
 | **`StatusHistory(ctx, ...opts)`** | `([]markets.MarketStatus, *response.Response, error)` | Context-aware; returns one entry per day plus the raw response and rate-limit metadata. |
 
 > [!NOTE]
-> **Context method only**
+> **[Context method only]**
 >
 > Unlike most SDK endpoints, `StatusHistory` has no `Get*` convenience wrapper — it is only available as a context-aware method. For a single day, use [Status](./status.md), which offers both call styles.
 
@@ -23,20 +23,20 @@ func (s *Service) StatusHistory(ctx context.Context, opts ...markets.HistoryOpti
 
 Get the market status for a range of days from the `/v1/markets/status/` endpoint, returning one [`MarketStatus`](./status.md#marketstatus) per day. Dates are sent to the API in `YYYY-MM-DD` form, so any time-of-day component is ignored.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — request context for cancellation and deadlines.
 - Options:
   - `markets.WithHistoryWindow(w markets.HistoryWindow)` — the date range, expressed as a single [`HistoryWindow`](#historywindow) value. Omitting it lets the API return its default recent range. This is a `StatusHistory`-only option; it cannot be passed to `Status`.
   - `markets.WithCountry(country string)` — the market to query, as a two-letter ISO 3166-1 alpha-2 code such as `"US"`. An empty string defaults to the United States. `WithCountry` applies to both `Status` and `StatusHistory`.
 
-#### Returns
+### Returns
 
 - `[]markets.MarketStatus` — one [`MarketStatus`](./status.md#marketstatus) per day in the range, oldest first.
 - `*response.Response` — raw response plus rate-limit metadata.
 - `error` — non-nil on request or decoding failure.
 
-#### Notes
+### Notes
 
 - When the API responds `404` because no data exists for the requested range, `StatusHistory` returns a `nil` slice and a `nil` error; the returned `*response.Response` has its `NoData` field set to `true`.
 - The range parameters (`from`, `to`, `countback`) are mutually exclusive by construction: a `HistoryWindow` is a single sealed value, so an illegal pairing such as "from plus countback" cannot be expressed. There is deliberately no single-date mode — a single calendar day is a [Status](./status.md) concept, selected with `WithDate`.
@@ -87,7 +87,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 2024-01-01: closed
