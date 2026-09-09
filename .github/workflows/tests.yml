@@ -40,7 +40,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go-version }}
           # Stdlib-only module (no go.sum) — nothing to cache; disabling also
@@ -89,7 +89,7 @@ jobs:
         # coverage.out profile from the step above so the README Coverage badge
         # populates. fail_ci_if_error:false keeps CI green if CODECOV_TOKEN is
         # unset; this repo is public, so tokenless upload works either way.
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out
@@ -104,7 +104,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           # govulncheck must analyze the newest patched stdlib: an older
           # toolchain re-flags stdlib CVEs that are fixed only in the latest
@@ -131,7 +131,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: 'stable'
           # Stdlib-only module (no go.sum) — nothing to cache; disabling also
@@ -159,7 +159,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: 'stable'
           # Stdlib-only module (no go.sum) — nothing to cache; disabling also
@@ -183,7 +183,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: 'stable'
           # Stdlib-only module (no go.sum) — nothing to cache; disabling also
@@ -219,7 +219,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: 'stable'
           # Stdlib-only module (no go.sum) — nothing to cache; disabling also
