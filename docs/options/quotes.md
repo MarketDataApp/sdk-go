@@ -1,4 +1,4 @@
-# Option Quotes
+# Option Quotes (Go SDK)
 
 Fetch current or historical end-of-day quotes for one option contract with
 `Quote`, or for many contracts at once with `Quotes`.
@@ -28,7 +28,7 @@ func (s *Service) GetQuote(optionSymbol string, opts ...OptionQuoteOption) (*Opt
 identified by its OCC option symbol (for example `AAPL271217C00250000`). The
 option symbol is required.
 
-#### Parameters
+### Parameters
 
 - `optionSymbol` (`string`) — the OCC option symbol. Required; an empty string is rejected with a `marketdata.ValidationError` before any request is made.
 - Options:
@@ -36,13 +36,13 @@ option symbol is required.
     - `options.QuoteOnDate(t time.Time)` — the contract's quote on a single historical date (`date=YYYY-MM-DD`).
     - `options.QuoteRange(from, to time.Time)` — the contract's quotes across an explicit date range (`from=...&to=...`).
 
-#### Returns
+### Returns
 
 - `*OptionQuote` — the contract quote. `nil` when there is no data (see Notes).
 - `*response.Response` — the raw response plus rate-limit metadata (context method only).
 - `error` — non-nil on a validation failure, transport error, or unexpected API status.
 
-#### Notes
+### Notes
 
 - **The date window is compile-time exclusive.** Because `OptionQuoteWindow` is a single sealed-union value, the API's mutually-exclusive `date` and `from`/`to` parameters can never be combined by mistake (sending both returns HTTP 400).
 - **Validation happens before the network call.** A zero date, or a `from` after its `to`, is rejected with a `marketdata.ValidationError` before any request is made.
@@ -60,17 +60,17 @@ func (s *Service) GetQuotes(optionSymbols ...string) ([]OptionQuote, error)
 pool (at most 50 in-flight requests per client across all services), and merges
 the results into a single slice in the order the symbols were given.
 
-#### Parameters
+### Parameters
 
 - `optionSymbols` (`...string`) — one or more OCC option symbols (variadic). At least one is required; passing none is rejected with a `marketdata.ValidationError`.
 
-#### Returns
+### Returns
 
 - `[]OptionQuote` — one quote per contract that returned data, in input order.
 - `*response.Response` — the raw response for one of the individual requests, not an aggregate (context method only).
 - `error` — non-nil if any request fails with a real error; in that case no quotes are returned.
 
-#### Notes
+### Notes
 
 - **Symbols with no data are omitted.** A contract that returns HTTP 404 is dropped from the result rather than producing an error, so the returned slice may be shorter than the input.
 - **`Quotes` does not accept a quote window.** The multi-symbol method fetches current quotes only; use `Quote` with `WithOptionQuoteWindow` for historical data on a single contract.
@@ -113,7 +113,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 Symbol:        AAPL271217C00250000
@@ -247,14 +247,14 @@ type OptionQuote struct {
 also used for the entries of an [`OptionsChain`](./chain.md).
 Timestamps are normalized to Eastern time.
 
-#### Methods
+### Methods
 
 - `String() string` — a one-line summary of the contract.
 - `Spread() float64` — the bid-ask spread (`Ask` minus `Bid`).
 - `CalcMid() float64` — the bid-ask midpoint computed locally from `Bid` and `Ask`, unlike the `Mid` field, which is the midpoint reported by the API.
 
 > [!NOTE]
-> **Zero values and null data**
+> **[Zero values and null data]**
 >
 > Numeric fields use Go value types (`float64`, `int64`), not pointers. When the
 > API returns null for a field it is decoded as the zero value (`0` or `0.0`). For

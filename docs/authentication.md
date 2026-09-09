@@ -1,4 +1,4 @@
-# Authentication
+# Authentication (Go SDK)
 
 The Market Data API authenticates every request with a **Bearer token**. You can obtain a token from the [Market Data Dashboard](https://www.marketdata.app/dashboard/).
 

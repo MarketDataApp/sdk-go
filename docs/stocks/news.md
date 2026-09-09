@@ -1,9 +1,9 @@
-# News
+# News (Go SDK)
 
 Retrieve news articles for a stock symbol.
 
 > [!CAUTION]
-> **Beta Endpoint**
+> **[Beta Endpoint]**
 >
 > The news endpoint is currently in beta. Features and response formats may change.
 
@@ -25,20 +25,20 @@ func (s *Service) GetNews(symbol string, opts ...NewsOption) ([]NewsArticle, err
 
 Fetch news articles for one symbol. With no options the API returns its default set of recent articles.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
 - `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
 - Options (`stocks.NewsOption`):
   - `stocks.WithNewsWindow(w DateWindow)` — set the publication date range as a single `DateWindow` value. Build the window with any of the shared [date-window constructors](#date-windows), for example `stocks.OnDate(d)` or `stocks.Between(from, to)`.
 
-#### Returns
+### Returns
 
 - `[]NewsArticle` — the matching articles.
 - `*response.Response` — raw response + rate-limit metadata (context method only).
 - `error` — non-nil on request/validation failure.
 
-#### Notes
+### Notes
 
 - Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
 - If the API responds with 404 because no data is available, `News` returns a `nil` slice, a `nil` error, and a non-nil `*response.Response` whose `NoData` field is `true`.
@@ -74,7 +74,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 2024-01-25  Apple Reports Record Q1 Earnings
@@ -162,8 +162,7 @@ func main() {
 }
 ```
 
-## Date Windows {#date-windows}
-
+## Date Windows 
 `stocks.WithNewsWindow` takes a `DateWindow` — the same sealed-union value used by [Candles](./candles.md) and [Earnings](./earnings.md). Build one with exactly one constructor:
 
 | Constructor                | Selects                              | API parameters      |
@@ -189,7 +188,7 @@ type NewsArticle struct {
 
 Represents a single news article about a stock. Timestamps are normalized to US Eastern time.
 
-#### Fields
+### Fields
 
 - `Symbol` — the stock ticker symbol the article relates to.
 - `Headline` — the article headline/title.
@@ -197,6 +196,6 @@ Represents a single news article about a stock. Timestamps are normalized to US 
 - `Source` — the URL where the article was published.
 - `PublicationDate` — when the article was published.
 
-#### Helper Methods
+### Helper Methods
 
 - `String() string` — a one-line summary of the article.
