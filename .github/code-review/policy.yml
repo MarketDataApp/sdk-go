@@ -1,0 +1,38 @@
+# Code review bot, sdk-go. Overrides the bot's defaults; anything absent keeps
+# the default. See MarketData-App/code-review-bot/reviewbot/defaults/policy.yml
+
+# Codex reviews this repository; Claude catches it when Codex cannot.
+#
+# `fallback`, NOT `first`. Under `first` the run is [ready[0].review(brief)]
+# and a BackendError goes straight to _fail -- Claude is never tried, because it
+# was dropped into `missing` the moment Codex probed live. Since
+# CodexBackend.probe() returns true as soon as $CODEX_HOME/auth.json EXISTS, a
+# stale borrowed credential is live-but-broken, and that would end the review
+# with a neutral "Bot error" and no comment.
+#
+# Codex must stay FIRST for a second reason: credential-checkout declines the
+# shared credential lease when codex is not the first backend, because a later
+# backend is reached rarely or never and holding one plan's lease for it starves
+# the repositories that use it on every run.
+backends: [codex, claude]
+mode: fallback
+
+# The check is advisory until someone adds it to a branch rule, so a blocked
+# review costs nothing yet and means something later.
+gate: true
+require_ci_green: true
+
+# No REVIEW.md here yet, so this repository gets the bot's language-agnostic
+# default review. A sdk-go-specific REVIEW.md is worth writing once someone who
+# knows this codebase has read a few reviews and can say what the model keeps
+# missing. Guessing at it first would be inventing house rules nobody agreed.
+
+ignore_paths:
+  - "docs/**"
+  - "*.md"
+  - ".github/**/*.md"
+  - "**/*.lock"
+  - "**/dist/**"
+
+check_name: "Code review"
+timeout_minutes: 15
