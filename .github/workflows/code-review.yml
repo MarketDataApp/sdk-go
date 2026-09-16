@@ -1,0 +1,66 @@
+name: Code review
+
+# DISPATCH ONLY FOR NOW, DELIBERATELY.
+#
+# The automatic trigger is written out below and commented. It is held back so
+# the first review on this repository is read by a person before every open
+# pull request gets one: the default review is language-agnostic, and whether it
+# says useful things about sdk-go is the one thing nobody has measured yet.
+#
+# TO ARM IT: delete the `workflow_run` comment markers below, and delete this
+# banner. Nothing else changes. Read docs/setup.md section 4 in
+# MarketData-App/code-review-bot first -- it explains why the trigger is CI's
+# completion and not the push.
+on:
+  # workflow_run:
+  #   # The `name:` of this repository's pull-request CI, not its filename.
+  #   workflows: ["Tests", "Lint"]
+  #   types: [completed]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+      force:
+        description: >
+          Review a commit that has already been reviewed. The bot skips an
+          unchanged head, so without this a re-dispatch is a no-op that reports
+          success.
+        type: boolean
+        default: false
+
+jobs:
+  review:
+    # Guards, each of which cost a failed run elsewhere to learn:
+    #   1. workflow_run fires for default-branch pushes too, where there is no
+    #      pull request. `workflow_run.event` is what triggered the UPSTREAM
+    #      run, so 'pull_request' is the precise discriminator.
+    #   2. A comment only starts a review when it is addressed to the bot.
+    if: >
+      (github.event_name != 'workflow_run' ||
+       github.event.workflow_run.event == 'pull_request') &&
+      (github.event_name != 'issue_comment' ||
+       (github.event.issue.pull_request != null &&
+        startsWith(github.event.comment.body, '@marketdata-code-review')))
+    uses: MarketData-App/code-review-bot/.github/workflows/review.yml@main
+    # NOT `secrets: inherit`. That only passes secrets to a reusable workflow in
+    # the SAME organisation. This repository is on the MarketDataApp user account
+    # and the bot is owned by MarketData-App, so inherit crosses an owner
+    # boundary and delivers nothing -- the call fails at evaluation naming a
+    # secret that is sitting in this repository's settings.
+    secrets:
+      CODE_REVIEW_APP_PRIVATE_KEY: ${{ secrets.CODE_REVIEW_APP_PRIVATE_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    with:
+      # REQUIRED: this repository is public and on the MarketDataApp user
+      # account, so it can never reach the organisation's self-hosted runner --
+      # that runner group is visibility=all with
+      # allows_public_repositories=false. A job that asks for it is not refused,
+      # it queues forever with no runner and nothing saying why.
+      runs-on: '["ubuntu-latest"]'
+      # `|| false` is load-bearing: `inputs` exists only for workflow_dispatch,
+      # and a null against a boolean-typed input fails the ENTIRE workflow at
+      # evaluation -- no job, no log.
+      force: ${{ inputs.force || false }}
