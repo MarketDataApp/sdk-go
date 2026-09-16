@@ -26,7 +26,8 @@ breaking API change can also need no SDK change at all.
 
 **Do not form an opinion. Compare.**
 
-Build one row for every public symbol the diff touches:
+Section 8 says what counts as a public symbol in this language, and what
+breaks it. Build one row for every public symbol the diff touches:
 
 | symbol | before | after | breaking |
 |--------|--------|-------|----------|
@@ -162,7 +163,7 @@ return type each need, in the same pull request:
 - the README, when the method list or the quick start changes
 - the `CHANGELOG.md` entry
 
-## The public surface of this SDK
+## 8. The public surface of this SDK
 
 The surface is every exported identifier, meaning every name with an initial
 capital, in `marketdata/` and its subpackages. `internal/` is not surface: the
