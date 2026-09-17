@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/MarketDataApp/sdk-go/v2/internal/dotenv"
+	"github.com/MarketDataApp/sdk-go/v2/internal/timezone"
 	"github.com/MarketDataApp/sdk-go/v2/marketdata"
 )
 
@@ -117,6 +118,27 @@ var (
 )
 
 // truncDay reduces a time to its UTC calendar date for date-equality checks.
+//
+// It takes the calendar fields as they read in the value's OWN location, so two
+// values from the API -- both in US/Eastern, per ADR-005 -- compare correctly,
+// and so do the liveHist* fixtures above, which are written as UTC midnights on
+// purpose. Do not "fix" this to convert to Eastern first: those fixtures would
+// shift by their UTC offset and the range checks in reflection_live_test.go
+// would start rejecting candles at the boundary.
 func truncDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+// marketToday is today's date on the MARKET's calendar, comparable with
+// truncDay of any timestamp the API returned.
+//
+// The runner's clock is UTC; the API answers in US/Eastern. Between UTC midnight
+// and ET midnight the two calendars disagree, so a UTC "today" is a day ahead of
+// the market's. Tests that compared an Eastern expiration against a UTC today
+// called the CURRENT session's expiration a past date, and the live suite failed
+// every night for roughly four hours -- TestOptions_Expirations and
+// TestWireShape_StocksEarnings, observed passing at 00:05 UTC and failing at
+// 00:53 UTC on 2026-09-17 with nothing changed in between.
+func marketToday() time.Time {
+	return truncDay(time.Now().In(timezone.Eastern))
 }

@@ -54,10 +54,9 @@ func resolveOptionsFixture(t *testing.T, ctx context.Context, client *marketdata
 	// settles a day early and is skipped by the third-Friday test; the next
 	// month's monthly is picked instead, which stays within the fixture's
 	// needs.
-	now := time.Now()
 	var exp time.Time
 	for _, e := range exps {
-		if truncDay(e).Before(truncDay(now).Add(24 * time.Hour)) {
+		if truncDay(e).Before(marketToday().Add(24 * time.Hour)) {
 			continue // skip today / past
 		}
 		if e.Weekday() == time.Friday && e.Day() >= 15 && e.Day() <= 21 {

@@ -25,12 +25,11 @@ func TestOptions_Expirations(t *testing.T) {
 	}
 	assertTimeInPast(t, expirations.Updated, "expirations update time")
 
-	// All expirations should be in the future (or today)
-	// Compare just the date parts to avoid timezone issues
-	now := time.Now()
-	todayDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	// All expirations should be in the future, or today on the market's
+	// calendar. marketToday is Eastern for the reason its comment gives.
+	todayDate := marketToday()
 	for i, exp := range expirations.Dates {
-		expDate := time.Date(exp.Year(), exp.Month(), exp.Day(), 0, 0, 0, 0, time.UTC)
+		expDate := truncDay(exp)
 		if expDate.Before(todayDate) {
 			t.Errorf("Expiration %d (%v) should not be in the past", i, exp)
 		}
@@ -348,10 +347,9 @@ func TestOptions_Quote(t *testing.T) {
 
 	// Use an expiration in the future
 	var expiration time.Time
-	now := time.Now()
-	todayDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	todayDate := marketToday()
 	for _, exp := range expirations.Dates {
-		expDate := time.Date(exp.Year(), exp.Month(), exp.Day(), 0, 0, 0, 0, time.UTC)
+		expDate := truncDay(exp)
 		if expDate.After(todayDate) {
 			expiration = exp
 			break
@@ -399,11 +397,10 @@ func TestOptions_Lookup(t *testing.T) {
 		exp    time.Time
 		strike float64
 	}
-	now := time.Now()
-	todayDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	todayDate := marketToday()
 	for _, opt := range chain.Options {
 		if opt.Type == options.Call {
-			expDate := time.Date(opt.Expiration.Year(), opt.Expiration.Month(), opt.Expiration.Day(), 0, 0, 0, 0, time.UTC)
+			expDate := truncDay(opt.Expiration)
 			if expDate.After(todayDate) {
 				targetContract = &struct {
 					exp    time.Time
@@ -447,11 +444,10 @@ func TestOptions_Lookup_Put(t *testing.T) {
 		exp    time.Time
 		strike float64
 	}
-	now := time.Now()
-	todayDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	todayDate := marketToday()
 	for _, opt := range chain.Options {
 		if opt.Type == options.Put {
-			expDate := time.Date(opt.Expiration.Year(), opt.Expiration.Month(), opt.Expiration.Day(), 0, 0, 0, 0, time.UTC)
+			expDate := truncDay(opt.Expiration)
 			if expDate.After(todayDate) {
 				targetContract = &struct {
 					exp    time.Time
