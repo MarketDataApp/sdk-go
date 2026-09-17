@@ -296,6 +296,12 @@ Closing due to inactivity. If you can provide the requested information, feel fr
 10. [ ] **Commit** as `fix: description (closes #NNN)`.
 11. [ ] **Open a PR** against `main`. Integration tests run on every PR.
 
+> **Stacking a PR on another PR?** Retarget it to `main` as soon as a reviewer
+> approves it. Do not wait for its base to merge. A PR merged into a base branch that
+> has already merged puts its work on a branch nothing points at, and the work never
+> reaches `main`. **Automatically delete head branches** is on, so GitHub retargets a
+> stacked PR when its base merges — retargeting early keeps the work off that race.
+
 Examples:
 
 - `fix(stocks): decode BulkCandles when the API omits the symbol array (closes #45)`
