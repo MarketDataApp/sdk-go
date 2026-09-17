@@ -1,9 +1,9 @@
-# Earnings
+# Earnings (Go SDK)
 
 Get historical earnings-per-share data and the upcoming earnings calendar for a stock, one report per fiscal quarter.
 
 > [!NOTE]
-> **Premium Endpoint**
+> **[Premium Endpoint]**
 >
 > The earnings endpoint requires a premium subscription. Free and trial accounts cannot access this data.
 
@@ -25,20 +25,20 @@ func (s *Service) GetEarnings(symbol string, opts ...EarningsOption) ([]Earning,
 
 Fetch earnings reports for one symbol. With no options the API returns its default set of recent and upcoming reports.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — controls cancellation and deadlines (context method only).
 - `symbol` (`string`) — the stock ticker symbol, e.g. `"AAPL"`. Required; an empty string returns a validation error without making a request.
 - Options (`stocks.EarningsOption`):
   - `stocks.WithEarningsWindow(w DateWindow)` — set the reporting date range as a single `DateWindow` value. Build the window with any of the shared [date-window constructors](#date-windows), for example `stocks.OnDate(d)`, `stocks.Between(from, to)`, or `stocks.LastN(4)`.
 
-#### Returns
+### Returns
 
 - `[]Earning` — earnings reports, one per fiscal quarter.
 - `*response.Response` — raw response + rate-limit metadata (context method only).
 - `error` — non-nil on request/validation failure.
 
-#### Notes
+### Notes
 
 - EPS fields on the returned `Earning` values are pointers (`*float64`) and are `nil` when the API reports no value, such as for earnings not yet reported. This distinguishes a missing value from a true `$0.00`.
 - Only the calendar date of each `time.Time` in a window is used; the time-of-day and zone are ignored.
@@ -79,7 +79,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 FY2024 Q1  report 2024-01-25  EPS $2.18
@@ -168,8 +168,7 @@ func main() {
 }
 ```
 
-## Date Windows {#date-windows}
-
+## Date Windows 
 `stocks.WithEarningsWindow` takes a `DateWindow` — the same sealed-union value used by [Candles](./candles.md) and [News](./news.md). Build one with exactly one constructor:
 
 | Constructor                | Selects                              | API parameters      |
@@ -202,7 +201,7 @@ type Earning struct {
 
 Represents a single earnings report, one per fiscal quarter. Timestamps are normalized to US Eastern time.
 
-#### Fields
+### Fields
 
 - `Symbol` — the stock ticker symbol.
 - `FiscalYear` / `FiscalQuarter` — the fiscal year and quarter (1-4) of the report.
@@ -216,6 +215,6 @@ Represents a single earnings report, one per fiscal quarter. Timestamps are norm
 - `SurpriseEPSPercent` — the surprise as a percentage (JSON alias `surpriseEPSpct`); `nil` when unavailable.
 - `Updated` — when this data was last updated.
 
-#### Helper Methods
+### Helper Methods
 
 - `String() string` — a one-line summary of the report (EPS fields render as `n/a` when `nil`).

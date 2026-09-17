@@ -1,4 +1,4 @@
-# Client
+# Client (Go SDK)
 
 The `marketdata.Client` is the entry point to the SDK. You create one with `NewClient`, configure it with functional options, and reach every endpoint through its five resource services. A `Client` is safe for concurrent use and caps itself at 50 in-flight requests; additional calls block until a slot frees.
 
@@ -55,7 +55,7 @@ Pass any number of `Option` values to `NewClient`. Options are applied in order 
 The universal-parameter options (`WithMode`, `WithMaxAge`, `WithColumns`, `WithLimit`, `WithOffset`, `WithDateFormat`, `WithHumanReadable`, `WithAddHeaders`) are documented in depth on the [Parameters](./parameters.md) page.
 
 > [!NOTE]
-> **Fixed timeouts and retry behavior**
+> **[Fixed timeouts and retry behavior]**
 >
 > Per-request timeout (99s) and connection dial timeout (2s) are **fixed and cannot be changed**. Only the retry *count* is configurable, via `WithMaxRetries`. Requests are retried only on 501–599 status codes and transient network errors, with exponential backoff starting at 1s and doubling each attempt.
 

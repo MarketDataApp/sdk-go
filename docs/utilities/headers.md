@@ -1,4 +1,4 @@
-# Headers
+# Headers (Go SDK)
 
 Echo back the request headers your application is sending — useful for debugging authentication and proxy issues.
 
@@ -20,19 +20,19 @@ func (s *Service) GetHeaders() (*utilities.Headers, error)
 
 Get the request headers your application is sending, echoed back by the unversioned `/headers/` endpoint. The returned [`Headers`](#headers-type) maps header names to the values the server received, which is useful for debugging authentication and proxy problems.
 
-#### Parameters
+### Parameters
 
 - `ctx` (`context.Context`) — request context for cancellation and deadlines (context method only).
 
 This endpoint takes no functional options.
 
-#### Returns
+### Returns
 
 - `*utilities.Headers` — the echoed [`Headers`](#headers-type).
 - `*response.Response` — raw response plus rate-limit metadata (context method only).
 - `error` — non-nil on request or decoding failure.
 
-#### Notes
+### Notes
 
 - Sensitive header values (such as `Authorization`) are partially redacted by the server for security.
 - In the unlikely event the endpoint responds `404`, both call styles return a `nil` result and a `nil` error; with the context method the returned `*response.Response` has its `NoData` field set to `true`.
@@ -68,7 +68,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 Authorization: Bearer 1AB...***REDACTED***
@@ -111,7 +111,7 @@ func main() {
 }
 ```
 
-#### Output
+**Output**
 
 ```
 Authorization: Bearer 1AB...***REDACTED***
@@ -120,8 +120,7 @@ User-Agent: sdk-go/2.0.0
 Host: api.marketdata.app
 ```
 
-## Headers {#headers-type}
-
+## Headers 
 ```go
 type Headers struct {
 	Headers map[string]string `json:"headers"` // Headers maps header names to values.
@@ -130,10 +129,10 @@ type Headers struct {
 
 `Headers` represents the request headers echoed back by the API. It is useful for debugging authentication issues.
 
-#### Fields
+### Fields
 
 - `Headers` (`map[string]string`) — a map of header name to the value the server received.
 
-#### Methods
+### Methods
 
 - `String() string` — a concise summary of all header name/value pairs, e.g. `Headers{Authorization: Bearer 1AB...***REDACTED***, Host: api.marketdata.app}`.
