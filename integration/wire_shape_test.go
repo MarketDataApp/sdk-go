@@ -210,7 +210,10 @@ func TestWireShape_StocksEarnings(t *testing.T) {
 	// earnings cycle (verified live); anchor with an explicit
 	// to= of today, like the SDK's own Earnings does, so this reliably gets
 	// a real response to check the shape of.
-	to := time.Now().UTC().Format("2006-01-02")
+	// The market's calendar day, not the runner's. A `to=` one day ahead of the
+	// API's own date answers {"s":"no_data"}, which is what failed this test
+	// nightly between UTC midnight and ET midnight.
+	to := marketToday().Format("2006-01-02")
 	live := fetchRawKeys(t, "/v1/stocks/earnings/"+TestStockSymbol+"/?countback=4&to="+to)
 	assertWireKeys(t, "stocks/earnings", live, []string{
 		"s", "symbol", "fiscalYear", "fiscalQuarter", "date", "reportDate",
