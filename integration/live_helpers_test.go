@@ -140,5 +140,12 @@ func truncDay(t time.Time) time.Time {
 // TestWireShape_StocksEarnings, observed passing at 00:05 UTC and failing at
 // 00:53 UTC on 2026-09-17 with nothing changed in between.
 func marketToday() time.Time {
-	return truncDay(time.Now().In(timezone.Eastern))
+	return marketDay(time.Now())
+}
+
+// marketDay is marketToday with the clock injected, so the property can be
+// asserted at a chosen instant instead of only during the four hours a night
+// when getting it wrong shows up.
+func marketDay(now time.Time) time.Time {
+	return truncDay(now.In(timezone.Eastern))
 }
