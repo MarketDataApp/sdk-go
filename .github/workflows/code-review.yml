@@ -1,21 +1,16 @@
 name: Code review
 
-# DISPATCH ONLY FOR NOW, DELIBERATELY.
-#
-# The automatic trigger is written out below and commented. It is held back so
-# the first review on this repository is read by a person before every open
-# pull request gets one: the default review is language-agnostic, and whether it
-# says useful things about sdk-go is the one thing nobody has measured yet.
-#
-# TO ARM IT: delete the `workflow_run` comment markers below, and delete this
-# banner. Nothing else changes. Read docs/setup.md section 4 in
-# MarketData-App/code-review-bot first -- it explains why the trigger is CI's
-# completion and not the push.
 on:
-  # workflow_run:
-  #   # The `name:` of this repository's pull-request CI, not its filename.
-  #   workflows: ["Tests", "Lint"]
-  #   types: [completed]
+  # CI'S COMPLETION, not the push. `require_ci_green` refuses a commit whose
+  # checks are still running, so a push-triggered review would find CI pending,
+  # skip, and never come back -- reporting success having done nothing.
+  workflow_run:
+    # The workflow's `name:`, never its filename. `Tests` is this repository's
+    # ONLY pull-request workflow. The template this file came from also listed
+    # `Lint`, which does not exist here; a name matching no workflow never
+    # fires, so it was silent dead weight rather than a second trigger.
+    workflows: ["Tests"]
+    types: [completed]
   issue_comment:
     types: [created]
   workflow_dispatch:
