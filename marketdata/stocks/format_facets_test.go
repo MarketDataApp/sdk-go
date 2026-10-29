@@ -24,8 +24,8 @@ func TestQuotePath_Params(t *testing.T) {
 	if err != nil {
 		t.Fatalf("quotePath() error = %v", err)
 	}
-	if path != "stocks/bulkquotes/" {
-		t.Errorf("path = %q, want stocks/bulkquotes/", path)
+	if path != "stocks/quotes/" {
+		t.Errorf("path = %q, want stocks/quotes/", path)
 	}
 	if params.Get("symbols") != "AAPL" || params.Get("52week") != "true" || params.Get("extended") != "false" {
 		t.Errorf("params = %v, want symbols=AAPL&52week=true&extended=false", params)
@@ -48,8 +48,8 @@ func TestQuotesPath_Params(t *testing.T) {
 	if err != nil {
 		t.Fatalf("quotesPath() error = %v", err)
 	}
-	if path != "stocks/bulkquotes/" || params.Get("symbols") != "AAPL,MSFT" || params.Get("extended") != "true" {
-		t.Errorf("path=%q params=%v, want bulkquotes with joined symbols and extended=true", path, params)
+	if path != "stocks/quotes/" || params.Get("symbols") != "AAPL,MSFT" || params.Get("extended") != "true" {
+		t.Errorf("path=%q params=%v, want stocks/quotes with joined symbols and extended=true", path, params)
 	}
 	if params.Get("candle") != "false" {
 		t.Errorf("params = %v, want candle=false", params)
@@ -220,8 +220,8 @@ func TestHTMLService_Quote(t *testing.T) {
 		if got := r.URL.Query().Get("format"); got != "html" {
 			t.Errorf("format param = %q, want html", got)
 		}
-		if got := r.URL.Path; got != "/v1/stocks/bulkquotes/" {
-			t.Errorf("path = %q, want /v1/stocks/bulkquotes/", got)
+		if got := r.URL.Path; got != "/v1/stocks/quotes/" {
+			t.Errorf("path = %q, want /v1/stocks/quotes/", got)
 		}
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = w.Write([]byte("<html>AAPL</html>"))

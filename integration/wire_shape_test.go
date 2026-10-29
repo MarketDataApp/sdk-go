@@ -148,11 +148,11 @@ func assertWireKeys(t *testing.T, endpoint string, live map[string]bool, expecte
 	}
 }
 
-func TestWireShape_StocksBulkQuotes(t *testing.T) {
+func TestWireShape_StocksQuotes(t *testing.T) {
 	// Single symbol + 52week=true exercises the full field set: bulk quotes
 	// only honor 52week for a single-symbol request.
-	live := fetchRawKeys(t, "/v1/stocks/bulkquotes/?symbols="+TestStockSymbol+"&52week=true")
-	assertWireKeys(t, "stocks/bulkquotes", live, []string{
+	live := fetchRawKeys(t, "/v1/stocks/quotes/?symbols="+TestStockSymbol+"&52week=true")
+	assertWireKeys(t, "stocks/quotes", live, []string{
 		"s", "symbol", "ask", "askSize", "bid", "bidSize", "mid", "last",
 		"change", "changepct", "volume", "updated", "52weekHigh", "52weekLow",
 	})

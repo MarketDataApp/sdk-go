@@ -62,10 +62,11 @@ func All() []Param {
 	return all
 }
 
+// stocksParams returns the catalogued parameters of every stocks endpoint.
 func stocksParams() []Param {
 	const q = Query
 	return []Param{
-		// stocks/quotes (served by bulkquotes). The API honors 52week only
+		// stocks/quotes. The API honors 52week only
 		// when exactly one symbol is sent (multi-symbol requests silently
 		// ignore it), so the SDK exposes it on Quote — never on Quotes.
 		{"stocks/quotes", "symbols", "[]string", "", "comma-separated tickers", "Stocks.Quotes(ctx, symbols)", q},

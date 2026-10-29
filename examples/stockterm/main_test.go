@@ -177,7 +177,7 @@ func TestRunOnce_ErrorPath(t *testing.T) {
 // block on m.lastErr, but Update clears lastErr on the next successful
 // data message of any kind — so an early error followed by later
 // successes exited 3 with no SUPPORT INFO block at all. Here only the
-// bulkquotes path (hit first, by fetchQuotes) returns 500; every other
+// stocks/quotes path (hit first, by fetchQuotes) returns 500; every other
 // route succeeds, so by the end of the run m.lastErr is nil again. The
 // contract still requires exit 3 AND the SUPPORT INFO block.
 func TestRunOnce_PartialFailure_StillPrintsSupportInfo(t *testing.T) {
@@ -185,7 +185,7 @@ func TestRunOnce_PartialFailure_StillPrintsSupportInfo(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/v1")
 
-		if path == "/stocks/bulkquotes/" {
+		if path == "/stocks/quotes/" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			_ = json.NewEncoder(w).Encode(map[string]string{"s": "error", "errmsg": "boom"})
@@ -267,7 +267,7 @@ func TestRunOnce_FullFetchSurface_NonDemo(t *testing.T) {
 	}
 
 	wantPaths := []string{
-		"/stocks/bulkquotes/",     // fetchQuotes + fetchDetailQuote
+		"/stocks/quotes/",         // fetchQuotes + fetchDetailQuote
 		"/stocks/prices/",         // fetchPrices
 		"/stocks/candles/D/AAPL/", // fetchCandles, selected symbol
 		"/funds/candles/D/VFINX/", // fetchFundCandles, the watchlist's fund symbol

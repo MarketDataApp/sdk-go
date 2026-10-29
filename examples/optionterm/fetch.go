@@ -34,7 +34,7 @@ import (
 const fetchTimeout = 15 * time.Second
 
 // fetchUnderlying loads the current quote for the active underlying symbol
-// via [stocks.Service.Quote] (client.Stocks.Quote), the stocks/bulkquotes
+// via [stocks.Service.Quote] (client.Stocks.Quote), the stocks/quotes
 // endpoint. It takes no options.
 func fetchUnderlying(client *marketdata.Client, symbol string) tea.Cmd {
 	return func() tea.Msg {

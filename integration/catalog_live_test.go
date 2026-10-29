@@ -50,7 +50,7 @@ func TestCatalog_ParamsAcceptedLive(t *testing.T) {
 		},
 		"stocks/quotes|52week": func() (*marketdata.Response, error) {
 			// 52week is single-symbol only, so the SDK routes it through
-			// Quote (which also rides the bulkquotes endpoint).
+			// Quote (which also rides the stocks/quotes endpoint).
 			_, r, e := client.Stocks.Quote(ctx, TestStockSymbol, stocks.WithFiftyTwoWeek(true))
 			return r, e
 		},

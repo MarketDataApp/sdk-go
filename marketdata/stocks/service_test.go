@@ -57,7 +57,7 @@ func newTestService(serverURL string) *stocks.Service {
 
 func TestQuote(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL"},
 			"ask":       []float64{150.25},
@@ -98,7 +98,7 @@ func TestQuote(t *testing.T) {
 
 func TestQuotes(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL", "MSFT", "GOOG"},
 			"ask":       []float64{150.25, 375.50, 140.75},
@@ -137,7 +137,7 @@ func TestQuotes(t *testing.T) {
 
 func TestQuote_WithExtended(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":       "ok",
 			"symbol":  []string{"AAPL"},
 			"ask":     []float64{150.25},
@@ -939,7 +939,7 @@ func TestQuote_SpreadPercent_ZeroMid(t *testing.T) {
 
 func TestQuote_NotFound(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":      "ok",
 			"symbol": []string{}, // Empty response
 		},
@@ -987,7 +987,7 @@ func TestQuote_WithFiftyTwoWeek(t *testing.T) {
 
 func TestQuotes_APIError(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":      "error",
 			"errmsg": "Something went wrong",
 		},
@@ -1881,7 +1881,7 @@ func TestCandles_SplitAllNoData(t *testing.T) {
 
 func TestGetQuote(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL"},
 			"ask":       []float64{150.0},
@@ -1916,7 +1916,7 @@ func TestGetQuote(t *testing.T) {
 
 func TestGetQuotes(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL", "MSFT"},
 			"ask":       []float64{150.0, 375.0},
@@ -2202,7 +2202,7 @@ func TestBulkCandles_404(t *testing.T) {
 
 func TestQuote_WithExtendedFalse(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL"},
 			"ask":       []float64{150.0},
@@ -2228,7 +2228,7 @@ func TestQuote_WithExtendedFalse(t *testing.T) {
 
 func TestQuotes_WithExtendedFalse(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL"},
 			"ask":       []float64{150.0},
@@ -2415,7 +2415,7 @@ func TestCandlesSplit_FirstErrorCancelsSiblings(t *testing.T) {
 func TestQuote_EmptyQuotesList(t *testing.T) {
 	// API returns "ok" but with empty arrays - should return QuoteNotFoundError
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{},
 			"ask":       []float64{},
@@ -2442,7 +2442,7 @@ func TestQuote_EmptyQuotesList(t *testing.T) {
 func TestQuote_APIError(t *testing.T) {
 	// API returns non-ok status
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s": "error",
 		},
 	})
@@ -2489,7 +2489,7 @@ func TestQuotes_404(t *testing.T) {
 
 func TestQuotes_NonOkStatus(t *testing.T) {
 	server := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s": "no_data",
 		},
 	})

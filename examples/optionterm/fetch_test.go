@@ -84,7 +84,7 @@ func mustCmdMsg(t *testing.T, cmd tea.Cmd) tea.Msg {
 // --- success: one per fetch function ---
 
 func TestFetchUnderlying_Success(t *testing.T) {
-	mux := newMux("/v1/stocks/bulkquotes/", jsonHandler(map[string]any{
+	mux := newMux("/v1/stocks/quotes/", jsonHandler(map[string]any{
 		"s":       "ok",
 		"symbol":  []string{"AAPL"},
 		"bid":     []float64{184.50},

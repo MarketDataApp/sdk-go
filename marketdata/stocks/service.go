@@ -45,8 +45,7 @@ func NewService(httpClient *http.Client) *Service {
 // Data and Unknown Symbols" section of the marketdata package
 // documentation.
 //
-// Quote is served by the bulk quotes endpoint. API documentation:
-// https://www.marketdata.app/docs/api/stocks/bulkquotes
+// API documentation: https://www.marketdata.app/docs/api/stocks/quotes
 //
 // Example:
 //
@@ -99,7 +98,7 @@ func (s *Service) Quote(ctx context.Context, symbol string, opts ...QuoteOption)
 // returns a nil slice, a nil error, and a non-nil [response.Response]
 // whose NoData field is true.
 //
-// API documentation: https://www.marketdata.app/docs/api/stocks/bulkquotes
+// API documentation: https://www.marketdata.app/docs/api/stocks/quotes
 //
 // Example:
 //

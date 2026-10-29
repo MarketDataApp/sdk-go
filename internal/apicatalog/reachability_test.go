@@ -57,7 +57,7 @@ func (c *capture) snapshot() []*url.URL {
 func endpointMatches(path, endpoint string) bool {
 	switch endpoint {
 	case "stocks/quotes":
-		return strings.Contains(path, "/stocks/bulkquotes/")
+		return strings.Contains(path, "/stocks/quotes/")
 	case "stocks/candles":
 		return strings.Contains(path, "/stocks/candles/")
 	case "stocks/bulkcandles":
