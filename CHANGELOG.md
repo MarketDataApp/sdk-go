@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [2.0.1] - 2026-10-30
+## [2.1.0] - 2026-10-30
+
+### Added
+- `stocks.WithQuotesFiftyTwoWeek` requests 52-week high/low data on `Stocks.Quotes`, filling `FiftyTwoWeekHigh` and `FiftyTwoWeekLow` on every returned quote in one request. A symbol whose range the API cannot derive keeps zero values. `Stocks.Quote` keeps `WithFiftyTwoWeek`
 
 ### Changed
-- `Stocks.Quote` and `Stocks.Quotes`, and their CSV form, now request `/v1/stocks/quotes/?symbols=` instead of the deprecated `/v1/stocks/bulkquotes/`. Both paths return the same fields and accept the same parameters, so responses are unchanged. The public API did not change: no signature, type or option was added, removed or renamed
+- `Stocks.Quote` and `Stocks.Quotes`, and their CSV form, now request `/v1/stocks/quotes/?symbols=` instead of the deprecated `/v1/stocks/bulkquotes/`. Both paths return the same fields and accept the same parameters, so responses are unchanged. No existing signature, type or option changed
 - The godoc of `Stocks.Quote` and `Stocks.Quotes` links to the stocks/quotes API documentation
+- The `portfolio-monitor`, `watchlist-alerter` and `multi-asset-dashboard` examples fetch 52-week data for the whole watchlist with one `Stocks.Quotes` call
 
 ## [2.0.0] - 2026-09-02
 
@@ -467,6 +471,6 @@ patterns; see docs/MIGRATION.md for migrating from v1.
 - Dead exports that no SDK path used: the `UniversalParams` struct (universal parameters are client options), `stocks.formatInt`, and the internal `Tracker.Exceeded`
 - The v1 strikes endpoint has no v2 equivalent (dropped from the required SDK surface); use Chain with strike filters instead
 
-[Unreleased]: https://github.com/MarketDataApp/sdk-go/compare/v2.0.1...HEAD
-[2.0.1]: https://github.com/MarketDataApp/sdk-go/compare/v2.0.0...v2.0.1
+[Unreleased]: https://github.com/MarketDataApp/sdk-go/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/MarketDataApp/sdk-go/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MarketDataApp/sdk-go/releases/tag/v2.0.0

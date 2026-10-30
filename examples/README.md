@@ -21,8 +21,8 @@ go run ./examples/<name> [flags]      # -h shows each example's flags
 | [historical-exporter](historical-exporter/) | Exports OHLCV candles to CSV files, one per symbol (`-outdir`), for stocks or funds | `Stocks.Candles`, `Funds.Candles`, date windows, automatic intraday range splitting |
 | [multi-asset-dashboard](multi-asset-dashboard/) | One-shot dashboard mixing stocks, options, funds, market status, API status, and account info, fetched concurrently | Every service; concurrent use of one shared client |
 | [response-formats](response-formats/) | The `*Response` most examples discard: the CSV facet, the `IsJSON`/`IsCSV`/`IsHTML` predicates, `Body()`, `SaveToFile()`, and how to total session credits correctly | `Stocks.Candles`, `Stocks.AsCSV().Candles`, `response.Response`/`CSVResponse` |
-| [portfolio-monitor](portfolio-monitor/) | Terminal ticker: full per-symbol quotes (with 52-week data) at start, lightweight price polling afterwards | `Stocks.Quote` (52-week is single-quote only), `Stocks.Prices`, `Markets.Status` |
-| [watchlist-alerter](watchlist-alerter/) | Polls a watchlist and fires alerts on price moves, wide spreads, and proximity to 52-week extremes | `Stocks.Quote` per symbol, typed error handling (`ErrRateLimited`) |
+| [portfolio-monitor](portfolio-monitor/) | Terminal ticker: full quotes (with 52-week data) at start, lightweight price polling afterwards | `Stocks.Quotes` with `WithQuotesFiftyTwoWeek`, `Stocks.Prices`, `Markets.Status` |
+| [watchlist-alerter](watchlist-alerter/) | Polls a watchlist and fires alerts on price moves, wide spreads, and proximity to 52-week extremes | `Stocks.Quotes` with `WithQuotesFiftyTwoWeek`, typed error handling (`ErrRateLimited`) |
 
 Credit note on the footers: every example prints `Credits remaining` plus what
 the *last* request cost. `client.RateLimits()` is a snapshot of the most
@@ -31,10 +31,9 @@ never a running total, and under concurrency it reports whichever request
 finished last. To total a session, sum `resp.RateLimit.Consumed` across your own
 calls, as [response-formats](response-formats/) does.
 
-Credit note: bulk endpoints (`Quotes`, `Prices`) cost 1 credit per request
-regardless of symbol count. 52-week data only exists on the single-quote
-endpoint, so `portfolio-monitor` and `watchlist-alerter` spend 1 credit per
-symbol per refresh — deliberate, and called out in their source.
+Credit note: `Quotes` and `Prices` fetch every symbol in one request, and the
+API bills them per symbol returned, so a refresh of a 10-symbol watchlist costs
+10 credits either way.
 
 ## Terminal (TUI) applications
 

@@ -116,7 +116,7 @@ func TestCatalogReachability(t *testing.T) {
 
 	// --- stocks ---
 	_, _, _ = client.Stocks.Quote(ctx, "AAPL", stocks.WithFiftyTwoWeek(true), stocks.WithExtended(true), stocks.WithCandle(true))
-	_, _, _ = client.Stocks.Quotes(ctx, []string{"AAPL", "MSFT"}, stocks.WithQuotesExtended(true), stocks.WithQuotesCandle(true))
+	_, _, _ = client.Stocks.Quotes(ctx, []string{"AAPL", "MSFT"}, stocks.WithQuotesFiftyTwoWeek(true), stocks.WithQuotesExtended(true), stocks.WithQuotesCandle(true))
 	_, _, _ = client.Stocks.Candles(ctx, "AAPL", stocks.WithResolution(stocks.ResolutionDaily),
 		stocks.WithCandleWindow(stocks.OnDate(d)), stocks.WithCandleExtended(true),
 		stocks.WithCandleAdjustSplits(true), stocks.WithCandleAdjustDividends(false))

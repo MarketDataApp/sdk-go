@@ -54,6 +54,27 @@ func TestQuotesPath_Params(t *testing.T) {
 	if params.Get("candle") != "false" {
 		t.Errorf("params = %v, want candle=false", params)
 	}
+	if params.Has("52week") {
+		t.Errorf("params = %v, want no 52week without WithQuotesFiftyTwoWeek", params)
+	}
+}
+
+func TestQuotesPath_FiftyTwoWeek(t *testing.T) {
+	_, params, err := quotesPath([]string{"AAPL", "MSFT"}, []QuotesOption{WithQuotesFiftyTwoWeek(true)})
+	if err != nil {
+		t.Fatalf("quotesPath() error = %v", err)
+	}
+	if params.Get("52week") != "true" {
+		t.Errorf("params = %v, want 52week=true", params)
+	}
+
+	_, params, err = quotesPath([]string{"AAPL", "MSFT"}, []QuotesOption{WithQuotesFiftyTwoWeek(false)})
+	if err != nil {
+		t.Fatalf("quotesPath() error = %v", err)
+	}
+	if params.Has("52week") {
+		t.Errorf("params = %v, want no 52week for WithQuotesFiftyTwoWeek(false)", params)
+	}
 }
 
 func TestPricesPath_EmptySymbols(t *testing.T) {

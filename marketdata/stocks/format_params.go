@@ -59,6 +59,9 @@ func quotesPath(symbols []string, opts []QuotesOption) (string, url.Values, erro
 	}
 	p := url.Values{}
 	p.Set("symbols", strings.Join(symbols, ","))
+	if options.fiftyTwoWeek {
+		p.Set("52week", "true")
+	}
 	if options.extended != nil {
 		p.Set("extended", boolParam(*options.extended))
 	}

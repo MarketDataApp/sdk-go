@@ -49,9 +49,7 @@ func TestCatalog_ParamsAcceptedLive(t *testing.T) {
 			return r, e
 		},
 		"stocks/quotes|52week": func() (*marketdata.Response, error) {
-			// 52week is single-symbol only, so the SDK routes it through
-			// Quote (which also rides the stocks/quotes endpoint).
-			_, r, e := client.Stocks.Quote(ctx, TestStockSymbol, stocks.WithFiftyTwoWeek(true))
+			_, r, e := client.Stocks.Quotes(ctx, []string{TestStockSymbol, TestStockSymbol2}, stocks.WithQuotesFiftyTwoWeek(true))
 			return r, e
 		},
 		"stocks/quotes|extended": func() (*marketdata.Response, error) {
@@ -59,9 +57,9 @@ func TestCatalog_ParamsAcceptedLive(t *testing.T) {
 			return r, e
 		},
 		"stocks/quotes|candle": func() (*marketdata.Response, error) {
-			// candle is honored on both the single- and multi-symbol forms
-			// (unlike 52week above), so either would do; Quote exercises the
-			// QuoteOption spelling, which is the one users reach for first.
+			// candle is honored on both the single- and multi-symbol forms,
+			// so either would do; Quote exercises the QuoteOption spelling,
+			// which is the one users reach for first.
 			_, r, e := client.Stocks.Quote(ctx, TestStockSymbol, stocks.WithCandle(true))
 			return r, e
 		},

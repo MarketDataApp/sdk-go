@@ -87,12 +87,10 @@ func (s *Service) Quote(ctx context.Context, symbol string, opts ...QuoteOption)
 // API request.
 //
 // At least one symbol is required; an empty slice returns a validation
-// error without making a request. [WithQuotesExtended] controls whether
-// extended-hours data is included.
-//
-// The bulk quotes endpoint does not provide 52-week high/low data (the API
-// ignores the 52week parameter), so [WithFiftyTwoWeek] is not accepted
-// here; use [Service.Quote] per symbol when 52-week data is needed.
+// error without making a request. Optional behavior is controlled by
+// [QuotesOption] values: [WithQuotesFiftyTwoWeek] adds 52-week high/low data
+// to every quote, and [WithQuotesExtended] controls whether extended-hours
+// data is included.
 //
 // If the API responds with 404 because no data is available, Quotes
 // returns a nil slice, a nil error, and a non-nil [response.Response]

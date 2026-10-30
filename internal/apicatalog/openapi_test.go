@@ -109,7 +109,7 @@ var schemaOnly = map[string]map[string]string{
 // behind the handlers; every entry here was verified against the live API.
 var catalogOnly = map[string]map[string]string{
 	"stocks/quotes": {
-		"52week": "honored on the single-symbol form only (verified live)",
+		"52week": "honored on both forms; multi-symbol 52weekHigh/52weekLow verified live 2026-09-04",
 		"candle": "adds session OHLC on both forms (verified live 2026-08-11)",
 	},
 	"stocks/prices": {
