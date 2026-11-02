@@ -36,3 +36,8 @@ ignore_paths:
 
 check_name: "Code review"
 timeout_minutes: 15
+
+# The SDK-sync pipeline (MarketData-App/sdk-bot) opens pull requests here as
+# the GitHub App `marketdata-sdk-sync`. An App is not a member of the
+# organization, so it is trusted by name.
+trusted_authors: ["marketdata-sdk-sync[bot]"]
