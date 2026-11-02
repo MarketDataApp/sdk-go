@@ -289,10 +289,14 @@ jobs:
           # advances: v2.12.2 was built with go1.25.12 and started failing the
           # moment Go 1.27.0 became stable, reporting typecheck errors inside
           # the runner's own stdlib (`could not import math/rand/v2`) rather
-          # than in this repository. v2.13.1 is built with go1.27.0. If Lint
-          # fails with errors whose paths point at hostedtoolcache rather than
-          # at our files, this pin is what needs bumping.
-          version: v2.13.1
+          # than in this repository. A patch release can do it too: v2.13.1,
+          # built with go1.27.0, fails on Go 1.27.3 (`export data version 5 is
+          # greater than maximum supported version 4`), because 1.27.3 writes
+          # its stdlib's export data in a newer format than v2.13.1's
+          # x/tools reads; v2.15.0 reads it. If Lint fails with errors whose
+          # paths point at hostedtoolcache rather than at our files, this pin
+          # is what needs bumping.
+          version: v2.15.0
 
   example-apps:
     needs: changes
