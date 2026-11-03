@@ -232,6 +232,23 @@ chain, _, err = client.Options.Chain(ctx, "AAPL",
 if err != nil {
 	log.Fatal(err)
 }
+
+// Every expiration at most 45 days out.
+chain, _, err = client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.MaxDTE(45)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+// A dte expression the typed constructors above don't expose, such as a
+// strict "<" comparison, passed through verbatim.
+chain, _, err = client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.DTEExpr("<45")),
+)
+if err != nil {
+	log.Fatal(err)
+}
 ```
 
 ### Liquid contracts
