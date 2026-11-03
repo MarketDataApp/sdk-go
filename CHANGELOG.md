@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 - `options.InDTEs`, `options.DTERange`, `options.MinDTE`, `options.MaxDTE`: the chain's dte parameter now accepts a comma-separated list, a closed range, and >= / <= comparison operators (API release 2.0.0); `options.InDTE(days int)` works as before.
+- `options.DTEExpr(expr string)`: an escape hatch that passes a raw dte expression through verbatim, for forms the typed constructors above do not expose — in particular a strict `<` comparison, which `MaxDTE` cannot produce.
 
 ## [2.0.0] - 2026-09-02
 

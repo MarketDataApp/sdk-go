@@ -2045,6 +2045,25 @@ func TestChain_MaxDTEOnly(t *testing.T) {
 	}
 }
 
+// TestChain_DTEExprPassthrough pins the wire form of a raw dte expression,
+// including a strict comparison the typed constructors above do not expose.
+func TestChain_DTEExprPassthrough(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dte := r.URL.Query().Get("dte")
+		if dte != "<45" {
+			t.Errorf("dte = %q, want <45", dte)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(quoteResponse{Status: "ok", OptionSymbol: []string{}})
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(DTEExpr("<45")))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
 func TestChain_MaxStrikeOnly(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		strike := r.URL.Query().Get("strike")

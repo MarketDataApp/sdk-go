@@ -40,9 +40,10 @@ combinations cannot be written.
   - `options.OnExpiration(t time.Time)` — a single expiration date (`expiration=YYYY-MM-DD`). Only the calendar date is used; must not be zero.
   - `options.InDTE(days int)` — the expiration closest to `days` days to expiry, counted from today (`dte=days`). `days` must be zero or greater.
   - `options.InDTEs(days ...int)` — the expiration closest to EACH of the given days-to-expiry values (`dte=d1,d2,...`), deduplicated server-side when two values resolve to the same expiration. At least one value is required and every value must be zero or greater and at most 36500.
-  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry falls within an inclusive range (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500, and `lo` must not exceed `hi`.
+  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry falls between `lo` and `hi` (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500, and `lo` must not exceed `hi`.
   - `options.MinDTE(days int)` — every expiration at least `days` days to expiry (`dte=>=days`). `days` must be zero or greater and at most 36500.
   - `options.MaxDTE(days int)` — every expiration at most `days` days to expiry (`dte=<=days`). `days` must be zero or greater and at most 36500.
+  - `options.DTEExpr(expr string)` — the API's raw dte expression, passed verbatim (`dte=expr`), such as `"45"`, `"15,30,45"`, `"15-45"`, `">=30"`, or `"<45"`. An escape hatch for expressions the typed constructors do not cover — a strict `<` comparison, for instance, which `MaxDTE` does not expose. Must not be empty.
   - `options.InMonth(month int)` — contracts expiring in the given calendar month across all years (`month=month`); `month` is 1 through 12.
   - `options.InYear(year int)` — contracts expiring in the given four-digit year across all months (`year=year`); `year` is at least 1900.
   - `options.InMonthOfYear(month, year int)` — a specific month of a specific year (`month=month&year=year`).

@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sort"
 	"testing"
@@ -466,6 +467,36 @@ func TestReflect_OptionsExpiry(t *testing.T) {
 			if len(distinct) < 2 {
 				t.Errorf("MaxDTE(%d) returned %d distinct expiration(s), want more than 1 — "+
 					"the unfiltered answer also holds exactly one, so this must show more to prove the bound reached the API", x, len(distinct))
+			}
+		})
+
+		// DTEExpr passes a raw expression through verbatim, which is the only
+		// way this SDK can reach a strict "<" comparison: MaxDTE emits only
+		// "<=". The release text enumerates "<45" as an accepted form but
+		// never a bare ">", so only the "<" form is exercised here. The
+		// assertion below is the weak ("<=") reading of the strict bound,
+		// which holds whichever way the server resolves strictness at the
+		// boundary, and reuses the same ceiling choice as MaxDTE above to
+		// tell the result apart from the single-expiration unfiltered
+		// answer.
+		t.Run("DTEExpr=strictBelow", func(t *testing.T) {
+			x := sortedDTEs[2]
+
+			chain, _, err := liveCall(t, "DTEExpr<", func() (*options.OptionsChain, *marketdata.Response, error) {
+				return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.DTEExpr(fmt.Sprintf("<%d", x))))
+			})
+			assertNoError(t, err, "DTEExpr<")
+			assertNotEmpty(t, chain.Options, "dte-expr-strict-below options")
+			distinct := map[int64]bool{}
+			for _, o := range chain.Options {
+				if o.DTE > x {
+					t.Errorf("DTEExpr(%q) returned dte %d above the ceiling", fmt.Sprintf("<%d", x), o.DTE)
+				}
+				distinct[truncDay(o.Expiration).Unix()] = true
+			}
+			if len(distinct) < 2 {
+				t.Errorf("DTEExpr(%q) returned %d distinct expiration(s), want more than 1 — "+
+					"the unfiltered answer also holds exactly one, so this must show more to prove the bound reached the API", fmt.Sprintf("<%d", x), len(distinct))
 			}
 		})
 	})

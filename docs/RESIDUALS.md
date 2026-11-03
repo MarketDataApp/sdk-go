@@ -17,7 +17,7 @@ method-scoped option types):
 |---|---|
 | candles/earnings/news `date`/`from`/`to`/`countback` (stocks, funds) | `DateWindow` sealed union (`OnDate`/`Between`/`Since`/`Until`/`LastN`/`LastNUntil`) |
 | options chain strike vs delta (`strike`/`delta`) | `StrikeFilter` union (`Strike`/`Strikes`/`StrikeRange`/`MinStrike`/`MaxStrike`/`StrikeExpr`/`ByDelta`/`ByDeltas`) |
-| options chain expiry (`expiration`/`dte`/`month`/`year`/`from`+`to`) | `ExpiryFilter` union (`AllExpirations`/`OnExpiration`/`InDTE`/`InDTEs`/`DTERange`/`MinDTE`/`MaxDTE`/`InMonth`/`InYear`/`InMonthOfYear`/`ExpirationBetween`) |
+| options chain expiry (`expiration`/`dte`/`month`/`year`/`from`+`to`) | `ExpiryFilter` union (`AllExpirations`/`OnExpiration`/`InDTE`/`InDTEs`/`DTERange`/`MinDTE`/`MaxDTE`/`DTEExpr`/`InMonth`/`InYear`/`InMonthOfYear`/`ExpirationBetween`) |
 | options chain expiration-type include vs exclude (`weekly`/`monthly`/`quarterly`) | `ExpirationTypeFilter` union (`IncludeExpirationTypes`/`ExcludeExpirationTypes`) — the API forbids mixing include (`true`) and exclude (`false`), and the union makes the mix unrepresentable |
 | options quote historical (`date` vs `from`/`to` vs `countback`) | `OptionQuoteWindow` union (`QuoteOnDate`/`QuoteRange`/`QuoteLastN`/`QuoteLastNUntil`) |
 | markets `Status` (single date) vs `StatusHistory` (range) | distinct `StatusOption` / `HistoryOption` types; `WithDate` and `WithHistoryWindow` are method-exclusive |

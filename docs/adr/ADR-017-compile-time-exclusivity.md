@@ -56,7 +56,7 @@ The unions:
 |---|---|---|
 | stocks/funds date window | `DateWindow` | `OnDate` `Between` `Since` `Until` `LastN` `LastNUntil` |
 | options strike/delta | `StrikeFilter` | `Strike` `StrikeRange` `MinStrike` `MaxStrike` `StrikeExpr` `ByDelta` |
-| options expiry | `ExpiryFilter` | `OnExpiration` `InDTE` `InDTEs` `DTERange` `MinDTE` `MaxDTE` `InMonth` `InYear` `InMonthOfYear` `ExpirationBetween` |
+| options expiry | `ExpiryFilter` | `OnExpiration` `InDTE` `InDTEs` `DTERange` `MinDTE` `MaxDTE` `DTEExpr` `InMonth` `InYear` `InMonthOfYear` `ExpirationBetween` |
 | options expiration-type include/exclude | `ExpirationTypeFilter` | `IncludeExpirationTypes` `ExcludeExpirationTypes` |
 | options quote historical | `OptionQuoteWindow` | `QuoteOnDate` `QuoteRange` |
 

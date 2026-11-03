@@ -34,6 +34,9 @@ func main() {
 	_, _, _ = s.Chain(context.Background(), "AAPL",
 		options.WithExpiry(options.MaxDTE(45)),
 	)
+	_, _, _ = s.Chain(context.Background(), "AAPL",
+		options.WithExpiry(options.DTEExpr("<45")),
+	)
 	// Include-or-exclude expiration types is a single sealed value.
 	_, _, _ = s.Chain(context.Background(), "AAPL",
 		options.WithExpirationTypes(options.IncludeExpirationTypes(options.Weekly, options.Monthly)),
