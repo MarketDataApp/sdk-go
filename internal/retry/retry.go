@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -52,6 +53,15 @@ func ShouldRetryError(err error) bool {
 	// Check for DNS errors first (they also implement net.Error)
 	var dnsErr *net.DNSError
 	if errors.As(err, &dnsErr) {
+		return true
+	}
+
+	// The peer reset or closed the connection mid-request. This is the
+	// transport dropping a connection it already had open, not a verdict on
+	// the request, so it is retried like the dropped-body case below. Both
+	// errno values are net.Error (Temporary() is false for them), so this
+	// has to run before that check, which would otherwise return first.
+	if errors.Is(err, syscall.ECONNRESET) || errors.Is(err, syscall.EPIPE) {
 		return true
 	}
 

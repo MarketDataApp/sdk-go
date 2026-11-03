@@ -8,6 +8,8 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"os"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -283,6 +285,28 @@ func TestParseRetryAfter_Overflow(t *testing.T) {
 func TestMaxRetryAfterIsPinned(t *testing.T) {
 	if MaxRetryAfter != 10*time.Minute {
 		t.Errorf("MaxRetryAfter = %v, want 10m", MaxRetryAfter)
+	}
+}
+
+// TestShouldRetryError_ConnectionReset covers the case the CI's live
+// integration run hit: the peer reset or closed the connection mid-request.
+// Both errors are also net.Error values whose Temporary() is false, so a
+// regression that reorders these checks after the net.Error one would make
+// this false again while leaving TestShouldRetryError_NotRetryable green.
+func TestShouldRetryError_ConnectionReset(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		err  error
+	}{
+		{"ECONNRESET", &net.OpError{Op: "read", Net: "tcp", Err: &os.SyscallError{Syscall: "read", Err: syscall.ECONNRESET}}},
+		{"EPIPE", &net.OpError{Op: "write", Net: "tcp", Err: &os.SyscallError{Syscall: "write", Err: syscall.EPIPE}}},
+		{"wrapped ECONNRESET", fmt.Errorf("Get %q: %w", "https://example.com", &net.OpError{Op: "read", Net: "tcp", Err: &os.SyscallError{Syscall: "read", Err: syscall.ECONNRESET}})},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if !ShouldRetryError(tt.err) {
+				t.Errorf("ShouldRetryError(%v) = false, want true", tt.err)
+			}
+		})
 	}
 }
 

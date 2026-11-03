@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/MarketDataApp/sdk-go/v2/internal/dotenv"
+	"github.com/MarketDataApp/sdk-go/v2/internal/retry"
 	"github.com/MarketDataApp/sdk-go/v2/marketdata/options"
 )
 
@@ -91,7 +92,7 @@ func fetchRawKeys(t *testing.T, path string) map[string]bool {
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := doWithRetry(ctx, req)
 	if err != nil {
 		t.Fatalf("request %s: %v", path, err)
 	}
@@ -114,6 +115,31 @@ func fetchRawKeys(t *testing.T, path string) map[string]bool {
 		keys[k] = true
 	}
 	return keys
+}
+
+// doWithRetry re-issues req on a transient transport error, the same
+// condition the SDK's own retry loop now absorbs on its own client
+// (internal/retry.ShouldRetryError, which includes a connection reset or
+// broken pipe). This helper bypasses that client by design — it is probing
+// the raw wire shape — so without its own bounded retry it fails this test
+// on the first reset the SDK client would have retried past.
+func doWithRetry(ctx context.Context, req *http.Request) (*http.Response, error) {
+	cfg := retry.DefaultConfig()
+	var lastErr error
+	for attempt := 0; attempt <= cfg.MaxRetries; attempt++ {
+		resp, err := http.DefaultClient.Do(req)
+		if err == nil {
+			return resp, nil
+		}
+		lastErr = err
+		if attempt == cfg.MaxRetries || !retry.ShouldRetryError(err) {
+			break
+		}
+		if waitErr := retry.Wait(ctx, retry.CalculateBackoff(cfg, attempt)); waitErr != nil {
+			return nil, waitErr
+		}
+	}
+	return nil, lastErr
 }
 
 // assertWireKeys fails with the specific keys that differ in each

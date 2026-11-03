@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `options.InDTEs`, `options.DTERange`, `options.MinDTE`, `options.MaxDTE`: the chain's dte parameter now accepts a comma-separated list, a closed range, and >= / <= comparison operators (API release 2.0.0); `options.InDTE(days int)` works as before.
 - `options.DTEExpr(expr string)`: an escape hatch that passes a raw dte expression through verbatim, for forms the typed constructors above do not expose — in particular a strict `<` comparison, which `MaxDTE` cannot produce. `expr` is validated only for being non-empty before any request is made; the typed constructors' `0..36500` bound does not apply to it.
 
+### Fixed
+- **A connection reset or broken pipe returned a `NetworkError` immediately instead of being retried.** `ShouldRetryError` only recognized a transport error as transient when it also implemented `net.Error` with `Temporary()` or `Timeout()` true; `ECONNRESET` and `EPIPE` are neither, so the single most common cause of a dropped mid-request connection skipped the retry loop entirely. Such errors are now retried like other transient network errors, up to `WithMaxRetries` with the usual backoff — each retried attempt is a separate, billed request — and an exhausted loop still returns `max retries exceeded: %w` wrapping the last error, same as any other retry exhaustion.
+
 ## [2.0.0] - 2026-09-02
 
 Initial v2 release. A complete rewrite of the SDK following idiomatic Go
