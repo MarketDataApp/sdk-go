@@ -1973,6 +1973,78 @@ func TestQuotes_MultipleWithNilQuote(t *testing.T) {
 	}
 }
 
+// TestChain_DTEList pins the wire form of the comma-separated dte list.
+func TestChain_DTEList(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dte := r.URL.Query().Get("dte")
+		if dte != "15,30,45" {
+			t.Errorf("dte = %q, want 15,30,45", dte)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(quoteResponse{Status: "ok", OptionSymbol: []string{}})
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(InDTEs(15, 30, 45)))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+// TestChain_DTERangeOnly pins the wire form of the closed dte range.
+func TestChain_DTERangeOnly(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dte := r.URL.Query().Get("dte")
+		if dte != "0-45" {
+			t.Errorf("dte = %q, want 0-45", dte)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(quoteResponse{Status: "ok", OptionSymbol: []string{}})
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(DTERange(0, 45)))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+// TestChain_MinDTEOnly pins the wire form of the dte >= comparison operator.
+func TestChain_MinDTEOnly(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dte := r.URL.Query().Get("dte")
+		if dte != ">=30" {
+			t.Errorf("dte = %q, want >=30", dte)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(quoteResponse{Status: "ok", OptionSymbol: []string{}})
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(MinDTE(30)))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+// TestChain_MaxDTEOnly pins the wire form of the dte <= comparison operator.
+func TestChain_MaxDTEOnly(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dte := r.URL.Query().Get("dte")
+		if dte != "<=45" {
+			t.Errorf("dte = %q, want <=45", dte)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(quoteResponse{Status: "ok", OptionSymbol: []string{}})
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(MaxDTE(45)))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
 func TestChain_MaxStrikeOnly(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		strike := r.URL.Query().Get("strike")

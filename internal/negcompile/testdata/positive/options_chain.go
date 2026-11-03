@@ -20,6 +20,20 @@ func main() {
 		options.WithExpiry(options.InDTE(30)),
 		options.WithStrike(options.ByDelta(-0.30)),
 	)
+	// The dte string forms (list, range, comparison operators) are each a
+	// mode of the same sealed ExpiryFilter as InDTE above.
+	_, _, _ = s.Chain(context.Background(), "AAPL",
+		options.WithExpiry(options.InDTEs(15, 30, 45)),
+	)
+	_, _, _ = s.Chain(context.Background(), "AAPL",
+		options.WithExpiry(options.DTERange(0, 45)),
+	)
+	_, _, _ = s.Chain(context.Background(), "AAPL",
+		options.WithExpiry(options.MinDTE(30)),
+	)
+	_, _, _ = s.Chain(context.Background(), "AAPL",
+		options.WithExpiry(options.MaxDTE(45)),
+	)
 	// Include-or-exclude expiration types is a single sealed value.
 	_, _, _ = s.Chain(context.Background(), "AAPL",
 		options.WithExpirationTypes(options.IncludeExpirationTypes(options.Weekly, options.Monthly)),

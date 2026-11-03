@@ -39,6 +39,10 @@ combinations cannot be written.
 - `options.WithExpiry(f ExpiryFilter)` — sets the expiration selector from a single `ExpiryFilter`. Replaces the API's mutually-exclusive `expiration`, `dte`, `month`, and `year` parameters with one value so they can never conflict. Build the filter with exactly one of:
   - `options.OnExpiration(t time.Time)` — a single expiration date (`expiration=YYYY-MM-DD`). Only the calendar date is used; must not be zero.
   - `options.InDTE(days int)` — the expiration closest to `days` days to expiry, counted from today (`dte=days`). `days` must be zero or greater.
+  - `options.InDTEs(days ...int)` — the expiration closest to EACH of the given days-to-expiry values (`dte=d1,d2,...`), deduplicated server-side when two values resolve to the same expiration. At least one value is required and every value must be zero or greater and at most 36500.
+  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry falls within an inclusive range (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500, and `lo` must not exceed `hi`.
+  - `options.MinDTE(days int)` — every expiration at least `days` days to expiry (`dte=>=days`). `days` must be zero or greater and at most 36500.
+  - `options.MaxDTE(days int)` — every expiration at most `days` days to expiry (`dte=<=days`). `days` must be zero or greater and at most 36500.
   - `options.InMonth(month int)` — contracts expiring in the given calendar month across all years (`month=month`); `month` is 1 through 12.
   - `options.InYear(year int)` — contracts expiring in the given four-digit year across all months (`year=year`); `year` is at least 1900.
   - `options.InMonthOfYear(month, year int)` — a specific month of a specific year (`month=month&year=year`).
@@ -93,7 +97,7 @@ combinations cannot be written.
 - **Include vs. exclude expiration types is also compile-time exclusive.** A single `ExpirationTypeFilter` is either an include set or an exclude set, so the API's forbidden `weekly=true&monthly=false` mix cannot be produced.
 - **`am`/`pm` are index-only.** They filter settlement style only for index options; on stocks and ETFs the API tolerates them without effect.
 - **Historical snapshot vs. expiration range.** `WithChainDate` requests the chain *as of* a single day and is independent of the expiration selector. A `from`/`to` date range filters *expirations*, not history — use `options.ExpirationBetween` via `WithExpiry` for that.
-- **Validation happens before the network call.** A strike or delta out of range, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made.
+- **Validation happens before the network call.** A strike or delta out of range, a dte value outside 0..36500 for the list/range/`MinDTE`/`MaxDTE` forms, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made.
 - **No-data behavior.** If the API has no data for the request (HTTP 404), `Chain` returns a `nil` chain, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` chain before use.
 - Requesting a full chain for a large underlying (SPX, SPY, QQQ) can return tens of thousands of contracts; narrow with filters to control credit usage.
 
@@ -193,6 +197,39 @@ if err != nil {
 }
 for _, o := range chain.Options {
 	fmt.Printf("$%.2f  Delta: %.4f  Mid: %.2f\n", o.Strike, o.Delta, o.Mid)
+}
+```
+
+### By days to expiry
+
+```go
+ctx := context.Background()
+
+// Several near-term weeklies, each closest to one of three target horizons.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.InDTEs(7, 14, 21)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+for _, o := range chain.Options {
+	fmt.Printf("%s  DTE: %d\n", o.OptionSymbol, o.DTE)
+}
+
+// Every expiration between 30 and 90 days out.
+chain, _, err = client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.DTERange(30, 90)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Every expiration at least 180 days out (LEAPS territory).
+chain, _, err = client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.MinDTE(180)),
+)
+if err != nil {
+	log.Fatal(err)
 }
 ```
 

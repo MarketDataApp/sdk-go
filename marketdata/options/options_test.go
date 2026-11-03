@@ -76,6 +76,11 @@ func TestExpiryFilter_Serialization(t *testing.T) {
 		{"OnExpiration", OnExpiration(exp), url.Values{"expiration": {"2026-08-28"}}},
 		{"InDTE", InDTE(45), url.Values{"dte": {"45"}}},
 		{"InDTEZero", InDTE(0), url.Values{"dte": {"0"}}},
+		{"InDTEs", InDTEs(15, 30, 45), url.Values{"dte": {"15,30,45"}}},
+		{"InDTEsSingle", InDTEs(30), url.Values{"dte": {"30"}}},
+		{"DTERange", DTERange(0, 45), url.Values{"dte": {"0-45"}}},
+		{"MinDTE", MinDTE(30), url.Values{"dte": {">=30"}}},
+		{"MaxDTE", MaxDTE(45), url.Values{"dte": {"<=45"}}},
 		{"InMonth", InMonth(8), url.Values{"month": {"8"}}},
 		{"InYear", InYear(2027), url.Values{"year": {"2027"}}},
 		{"InMonthOfYear", InMonthOfYear(6, 2026), url.Values{"month": {"6"}, "year": {"2026"}}},
@@ -189,6 +194,21 @@ func TestExpiryFilter_Validate(t *testing.T) {
 		{"DTENegative", InDTE(-1), true},
 		{"DTEZero", InDTE(0), false},
 		{"DTEValid", InDTE(45), false},
+		{"DTEsEmpty", InDTEs(), true},
+		{"DTEsNegativeElement", InDTEs(30, -1), true},
+		{"DTEsOverMaxElement", InDTEs(30, 40000), true},
+		{"DTEsValid", InDTEs(15, 30, 45), false},
+		{"DTERangeNegativeLow", DTERange(-1, 45), true},
+		{"DTERangeOverMaxHigh", DTERange(0, 40000), true},
+		{"DTERangeInverted", DTERange(45, 0), true},
+		{"DTERangeValid", DTERange(0, 45), false},
+		{"DTERangeZeroLowValid", DTERange(0, 0), false},
+		{"MinDTENegative", MinDTE(-1), true},
+		{"MinDTEOverMax", MinDTE(40000), true},
+		{"MinDTEValid", MinDTE(30), false},
+		{"MaxDTENegative", MaxDTE(-1), true},
+		{"MaxDTEOverMax", MaxDTE(40000), true},
+		{"MaxDTEValid", MaxDTE(45), false},
 		{"MonthLow", InMonth(0), true},
 		{"MonthHigh", InMonth(13), true},
 		{"MonthValid", InMonth(6), false},
@@ -268,6 +288,16 @@ func TestChain_RejectsInvalidStrikePreNetwork(t *testing.T) {
 func TestChain_RejectsInvalidExpiryPreNetwork(t *testing.T) {
 	svc := NewService(nil)
 	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(InMonth(13)))
+	if !isValidationError(err) {
+		t.Fatalf("Chain() error = %v, want *ValidationError", err)
+	}
+}
+
+// TestChain_RejectsInvalidDTEPreNetwork proves an out-of-range dte value on
+// one of the new dte filter forms is rejected pre-network.
+func TestChain_RejectsInvalidDTEPreNetwork(t *testing.T) {
+	svc := NewService(nil)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(MinDTE(-1)))
 	if !isValidationError(err) {
 		t.Fatalf("Chain() error = %v, want *ValidationError", err)
 	}

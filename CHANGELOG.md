@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `options.InDTEs`, `options.DTERange`, `options.MinDTE`, `options.MaxDTE`: the chain's dte parameter now accepts a comma-separated list, a closed range, and >= / <= comparison operators (API release 2.0.0); `options.InDTE(days int)` works as before.
+
 ## [2.0.0] - 2026-09-02
 
 Initial v2 release. A complete rewrite of the SDK following idiomatic Go

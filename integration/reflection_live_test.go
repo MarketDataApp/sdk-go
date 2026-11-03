@@ -3,7 +3,9 @@
 package integration
 
 import (
+	"context"
 	"math"
+	"sort"
 	"testing"
 	"time"
 
@@ -328,6 +330,176 @@ func TestReflect_OptionsExpiry(t *testing.T) {
 			}
 		}
 	})
+
+	// The list/range/comparison dte forms are asserted against candidates
+	// drawn from a baseline AllExpirations call — the server's own set of
+	// listed (expiration, dte) pairs — rather than a locally computed day
+	// count, so the check never depends on which definition of "today" the
+	// server used to derive dte.
+	t.Run("DTENewForms", func(t *testing.T) {
+		sortedDTEs, expsByDTE := optionsDTEBaseline(t, ctx, client)
+		if len(sortedDTEs) < 3 {
+			t.Skip("need at least 3 distinct listed dte values to test the new dte forms")
+		}
+
+		t.Run("InDTEs=list", func(t *testing.T) {
+			d1, d2 := sortedDTEs[0], sortedDTEs[len(sortedDTEs)-1]
+			candidates := map[int64]bool{}
+			for _, e := range expsByDTE[d1] {
+				candidates[truncDay(e).Unix()] = true
+			}
+			for _, e := range expsByDTE[d2] {
+				candidates[truncDay(e).Unix()] = true
+			}
+
+			chain, _, err := liveCall(t, "InDTEs list", func() (*options.OptionsChain, *marketdata.Response, error) {
+				return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.InDTEs(d1, d2)))
+			})
+			assertNoError(t, err, "InDTEs")
+			assertNotEmpty(t, chain.Options, "dte-list options")
+
+			gotD1, gotD2 := false, false
+			distinct := map[int64]bool{}
+			for _, o := range chain.Options {
+				key := truncDay(o.Expiration).Unix()
+				distinct[key] = true
+				if !candidates[key] {
+					t.Errorf("InDTEs(%d, %d) returned expiration %v, which is not a listed candidate for either value", d1, d2, o.Expiration)
+				}
+				switch o.DTE {
+				case d1:
+					gotD1 = true
+				case d2:
+					gotD2 = true
+				}
+			}
+			if !gotD1 {
+				t.Errorf("InDTEs(%d, %d) returned nothing at dte=%d", d1, d2, d1)
+			}
+			if !gotD2 {
+				t.Errorf("InDTEs(%d, %d) returned nothing at dte=%d", d1, d2, d2)
+			}
+			if len(distinct) < 2 {
+				t.Errorf("InDTEs(%d, %d) returned %d distinct expiration(s), want more than 1 — "+
+					"the two requested values resolve to different listed expirations", d1, d2, len(distinct))
+			}
+		})
+
+		t.Run("DTERange=within", func(t *testing.T) {
+			n := len(sortedDTEs)
+			if n < 5 {
+				t.Skip("need at least 5 distinct listed dte values so the range excludes the unfiltered front-month value (index 0) and still has two listed values strictly inside it")
+			}
+			// loIdx starts at 1 (never 0) so the unfiltered front-month
+			// answer — whose dte is always sortedDTEs[0] — sits outside the
+			// range and fails the bound check below. hiIdx is kept at least
+			// 3 past loIdx so at least two listed dte values fall strictly
+			// between lo and hi, which is what makes distinct>=2 hold
+			// whether the server reads "lo-hi" inclusively or exclusively.
+			loIdx, hiIdx := 1, n-1
+			if n >= 8 {
+				loIdx, hiIdx = n/4, 3*n/4
+			}
+			lo, hi := sortedDTEs[loIdx], sortedDTEs[hiIdx]
+
+			chain, _, err := liveCall(t, "DTERange", func() (*options.OptionsChain, *marketdata.Response, error) {
+				return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.DTERange(lo, hi)))
+			})
+			assertNoError(t, err, "DTERange")
+			assertNotEmpty(t, chain.Options, "dte-range options")
+
+			distinct := map[int64]bool{}
+			for _, o := range chain.Options {
+				if o.DTE < lo || o.DTE > hi {
+					t.Errorf("DTERange(%d, %d) returned dte %d outside the bounds", lo, hi, o.DTE)
+				}
+				distinct[truncDay(o.Expiration).Unix()] = true
+			}
+			if len(distinct) < 2 {
+				t.Errorf("DTERange(%d, %d) returned %d distinct expiration(s), want more than 1 — "+
+					"the range spans several listed dte values", lo, hi, len(distinct))
+			}
+		})
+
+		t.Run("MinDTE=atOrAbove", func(t *testing.T) {
+			// The nearest listed dte (sortedDTEs[0]) is what the unfiltered
+			// (no expiry filter) chain resolves to, so the floor is set one
+			// step above it: the unfiltered front-month row would violate
+			// this bound, which is what proves the filter reached the API.
+			x := sortedDTEs[1]
+
+			chain, _, err := liveCall(t, "MinDTE", func() (*options.OptionsChain, *marketdata.Response, error) {
+				return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.MinDTE(x)))
+			})
+			assertNoError(t, err, "MinDTE")
+			assertNotEmpty(t, chain.Options, "min-dte options")
+			for _, o := range chain.Options {
+				if o.DTE < x {
+					t.Errorf("MinDTE(%d) returned dte %d below the floor", x, o.DTE)
+				}
+			}
+		})
+
+		t.Run("MaxDTE=atOrBelow", func(t *testing.T) {
+			// A per-row bound alone cannot distinguish this from the
+			// unfiltered front-month answer, which always has the smallest
+			// listed dte and so always satisfies any ceiling >= it. The
+			// ceiling is set two steps above the nearest listed value, not
+			// one, so that two listed dte values (sortedDTEs[0] and
+			// sortedDTEs[1]) sit STRICTLY below it: distinct>=2 then holds
+			// whether the server reads "<=N" inclusively or exclusively,
+			// rather than depending on the row at exactly N coming back.
+			x := sortedDTEs[2]
+
+			chain, _, err := liveCall(t, "MaxDTE", func() (*options.OptionsChain, *marketdata.Response, error) {
+				return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.MaxDTE(x)))
+			})
+			assertNoError(t, err, "MaxDTE")
+			assertNotEmpty(t, chain.Options, "max-dte options")
+			distinct := map[int64]bool{}
+			for _, o := range chain.Options {
+				if o.DTE > x {
+					t.Errorf("MaxDTE(%d) returned dte %d above the ceiling", x, o.DTE)
+				}
+				distinct[truncDay(o.Expiration).Unix()] = true
+			}
+			if len(distinct) < 2 {
+				t.Errorf("MaxDTE(%d) returned %d distinct expiration(s), want more than 1 — "+
+					"the unfiltered answer also holds exactly one, so this must show more to prove the bound reached the API", x, len(distinct))
+			}
+		})
+	})
+}
+
+// optionsDTEBaseline fetches every listed expiration's server-reported dte via
+// one AllExpirations chain call, so the new dte filter forms (list, range,
+// comparison operators) can be asserted against real candidates instead of a
+// locally computed day count. WithStrikeLimit(1) keeps the response small:
+// only the (expiration, dte) pairing is needed, not every contract.
+func optionsDTEBaseline(t *testing.T, ctx context.Context, client *marketdata.Client) (sortedDTEs []int, expsByDTE map[int][]time.Time) {
+	t.Helper()
+
+	chain, _, err := liveCall(t, "AllExpirations baseline", func() (*options.OptionsChain, *marketdata.Response, error) {
+		return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.AllExpirations()), options.WithStrikeLimit(1))
+	})
+	assertNoError(t, err, "AllExpirations baseline")
+	assertNotEmpty(t, chain.Options, "baseline options")
+
+	expsByDTE = map[int][]time.Time{}
+	seen := map[int64]bool{}
+	for _, o := range chain.Options {
+		key := truncDay(o.Expiration).Unix()
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		expsByDTE[o.DTE] = append(expsByDTE[o.DTE], o.Expiration)
+	}
+	for d := range expsByDTE {
+		sortedDTEs = append(sortedDTEs, d)
+	}
+	sort.Ints(sortedDTEs)
+	return sortedDTEs, expsByDTE
 }
 
 // TestReflect_OptionsFilters exercises the independent (free) options.Chain
