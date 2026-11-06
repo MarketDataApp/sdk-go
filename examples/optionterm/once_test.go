@@ -64,7 +64,7 @@ func onceChainPayload() map[string]any {
 	}
 }
 
-// onceMux builds the full six-endpoint happy-path mock: bulkquotes,
+// onceMux builds the full six-endpoint happy-path mock: stock quotes,
 // expirations, chain, options quotes (used for both the single-contract
 // fetch and the one-symbol pin fan-out), and lookup. counts tracks how many
 // times each endpoint was hit, keyed "underlying", "expirations", "chain",
@@ -72,7 +72,7 @@ func onceChainPayload() map[string]any {
 func onceMux(counts *hitCounter) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/v1/stocks/bulkquotes/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/stocks/quotes/", func(w http.ResponseWriter, r *http.Request) {
 		counts.mark("underlying")
 		writeJSON(w, map[string]any{
 			"s": "ok", "symbol": []string{"AAPL"}, "bid": []float64{184.50}, "ask": []float64{184.55},
@@ -306,7 +306,7 @@ func TestRunOnce_NoDataChain_SkipsContractPinLookup(t *testing.T) {
 	counts := newHitCounter()
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/v1/stocks/bulkquotes/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/stocks/quotes/", func(w http.ResponseWriter, r *http.Request) {
 		counts.mark("underlying")
 		writeJSON(w, map[string]any{
 			"s": "ok", "symbol": []string{"AAPL"}, "bid": []float64{184.50}, "ask": []float64{184.55},

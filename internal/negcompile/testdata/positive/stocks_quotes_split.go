@@ -1,6 +1,6 @@
-// Legal quote calls after the Quote/Quotes option split: 52-week data on the
-// single-quote endpoint (where the API honors it) and extended-hours on both
-// endpoints via their respective option types. This must build.
+// Legal quote calls after the Quote/Quotes option split: 52-week data and
+// extended-hours on both methods, each through its own option type. This
+// must build.
 package main
 
 import (
@@ -16,6 +16,7 @@ func main() {
 		stocks.WithExtended(true),
 	)
 	_, _, _ = s.Quotes(context.Background(), []string{"AAPL", "MSFT"},
+		stocks.WithQuotesFiftyTwoWeek(true),
 		stocks.WithQuotesExtended(true),
 	)
 }

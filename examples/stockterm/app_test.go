@@ -27,7 +27,7 @@ var fixedNow = time.Date(2026, 7, 11, 12, 0, 0, 0, time.UTC)
 // against one shared mock server. Payload shapes mirror fetch_test.go.
 func fullRoutes() map[string]any {
 	return map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL", "MSFT"},
 			"ask":       []float64{150.25, 375.50},
@@ -282,7 +282,7 @@ func TestRefreshCmds_AllFundSymbols_ReturnsNoCommand(t *testing.T) {
 func TestRefreshCmds_ExcludesFundSymbols(t *testing.T) {
 	var gotQuery url.Values
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/stocks/bulkquotes/" || r.URL.Path == "/v1/stocks/bulkquotes/" {
+		if r.URL.Path == "/stocks/quotes/" || r.URL.Path == "/v1/stocks/quotes/" {
 			gotQuery = r.URL.Query()
 		}
 		w.Header().Set("X-Api-Ratelimit-Limit", "100000")
@@ -307,7 +307,7 @@ func TestRefreshCmds_ExcludesFundSymbols(t *testing.T) {
 	_ = cmds[0]()
 
 	if gotQuery.Get("symbols") != "AAPL" {
-		t.Errorf("bulkquotes symbols query = %q, want %q (VFINX excluded)", gotQuery.Get("symbols"), "AAPL")
+		t.Errorf("stocks/quotes symbols query = %q, want %q (VFINX excluded)", gotQuery.Get("symbols"), "AAPL")
 	}
 }
 
@@ -1158,7 +1158,7 @@ func TestAddSymbol_SubmittingBlankInputClosesWithoutValidating(t *testing.T) {
 
 func TestAddValidatedMsg_AlreadyOnWatchlist_NotDuplicated(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s": "ok", "symbol": []string{"AAPL"}, "ask": []float64{150},
 			"bid": []float64{149}, "mid": []float64{149.5}, "last": []float64{149.8},
 			"updated": []int64{1704067200},
@@ -1281,7 +1281,7 @@ func TestAddValidatedMsg_NoData_SetsStatusNoteAndDoesNotAdd(t *testing.T) {
 
 func TestAddValidatedMsg_Success_AppendsAndStoresQuote(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s": "ok", "symbol": []string{"TSLA"}, "ask": []float64{250},
 			"bid": []float64{249}, "mid": []float64{249.5}, "last": []float64{249.8},
 			"updated": []int64{1704067200},
@@ -1312,7 +1312,7 @@ func TestAddValidatedMsg_Success_AppendsAndStoresQuote(t *testing.T) {
 // carries meta == nil, and Update must not panic dereferencing it.
 func TestAddValidatedMsg_NilMeta_NoDataStillHandled(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{"s": "ok", "symbol": []string{}},
+		"/stocks/quotes/": map[string]any{"s": "ok", "symbol": []string{}},
 	})
 	defer srv.Close()
 	client := newTestClient(t, srv)

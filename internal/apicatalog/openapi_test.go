@@ -56,11 +56,11 @@ var schemaPathToEndpoint = map[string]string{
 	"/v1/options/lookup/{userInput}/":           "options/lookup",
 	"/v1/options/quotes/{optionSymbol}/":        "options/quotes",
 	"/v1/stocks/bulkcandles/{resolution}/":      "stocks/bulkcandles",
-	"/v1/stocks/bulkquotes/":                    "stocks/quotes",
 	"/v1/stocks/candles/{resolution}/{symbol}/": "stocks/candles",
 	"/v1/stocks/earnings/{symbol}/":             "stocks/earnings",
 	"/v1/stocks/news/{symbol}/":                 "stocks/news",
 	"/v1/stocks/prices/":                        "stocks/prices",
+	"/v1/stocks/quotes/":                        "stocks/quotes",
 }
 
 // marketsPath is compared against the union of two catalog endpoints: the API
@@ -78,8 +78,8 @@ var marketsEndpoints = []string{"markets/status", "markets/status-history"}
 var outOfScopePaths = map[string]string{
 	"/v1/options/strikes/{underlying}/": "requirements §2.2 does not list a strikes capability; Chain with strike filters covers the use case (see docs/COMPARISON.md)",
 	"/v1/stocks/prices/{symbol}/":       "single-symbol prices; the SDK serves Prices from the bulk /v1/stocks/prices/ path for one symbol or many",
-	"/v1/stocks/quotes/{symbol}/":       "single-symbol quotes; the SDK serves both Quote and Quotes from /v1/stocks/bulkquotes/",
-	"/v1/stocks/quotes/":                "bulk quotes without the 52week/candle support the SDK needs; it uses /v1/stocks/bulkquotes/ instead",
+	"/v1/stocks/quotes/{symbol}/":       "single-symbol quotes; the SDK serves both Quote and Quotes from the multi-symbol /v1/stocks/quotes/ path",
+	"/v1/stocks/bulkquotes/":            "deprecated and no longer in the public API documentation; Quote and Quotes use /v1/stocks/quotes/, which declares the same parameters",
 }
 
 // schemaOnly lists parameters the schema declares that the SDK deliberately
@@ -109,7 +109,7 @@ var schemaOnly = map[string]map[string]string{
 // behind the handlers; every entry here was verified against the live API.
 var catalogOnly = map[string]map[string]string{
 	"stocks/quotes": {
-		"52week": "honored on the single-symbol form only (verified live)",
+		"52week": "honored on both forms; multi-symbol 52weekHigh/52weekLow verified live 2026-09-04",
 		"candle": "adds session OHLC on both forms (verified live 2026-08-11)",
 	},
 	"stocks/prices": {

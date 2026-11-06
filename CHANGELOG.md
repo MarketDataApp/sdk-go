@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `stocks.WithQuotesFiftyTwoWeek` requests 52-week high/low data on `Stocks.Quotes`, filling `FiftyTwoWeekHigh` and `FiftyTwoWeekLow` on every returned quote in one request. A symbol whose range the API cannot derive keeps zero values. `Stocks.Quote` keeps `WithFiftyTwoWeek`
+
+### Changed
+- `Stocks.Quote` and `Stocks.Quotes`, and their CSV form, now request `/v1/stocks/quotes/?symbols=` instead of the deprecated `/v1/stocks/bulkquotes/`. Both paths return the same fields and accept the same parameters, so responses are unchanged. No existing signature, type or option changed
+- The godoc of `Stocks.Quote` and `Stocks.Quotes` links to the stocks/quotes API documentation
+- The `portfolio-monitor`, `watchlist-alerter` and `multi-asset-dashboard` examples fetch 52-week data for the whole watchlist with one `Stocks.Quotes` call
+
 ## [2.0.0] - 2026-09-02
 
 Initial v2 release. A complete rewrite of the SDK following idiomatic Go

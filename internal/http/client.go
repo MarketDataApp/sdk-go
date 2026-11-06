@@ -315,14 +315,9 @@ type Response struct {
 // exception type. Used for errors raised outside the >=400 status mapping
 // in parseAPIError — e.g. an HTTP 200 whose body reports its own failure.
 //
-// RequestURL goes through wireURL like the >=400 and ParseError blocks do.
-// It used to report Raw.Request.URL.Path, so all fifteen StatusError sites
-// produced a support block stripped of the query — and Quote is served by
-// bulkquotes, which addresses by query, so the block for a failed
-// Quote(ctx, "AAPL") did not even say which symbol was asked for. A block
-// exists to be pasted into a ticket, and this is the error class where the
-// merged universal parameters matter most: a 200 whose body reports its own
-// failure is the one most likely to have been caused by them.
+// RequestURL goes through wireURL like the >=400 and ParseError blocks do,
+// so it keeps the query that was sent: the symbols of a query-addressed
+// request such as Quote, and the merged universal parameters.
 func (r *Response) SupportContext(message, exceptionType string) sdkerrors.SupportContext {
 	return sdkerrors.SupportContext{
 		RequestID:     r.RequestID,
