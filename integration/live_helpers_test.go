@@ -149,3 +149,57 @@ func marketToday() time.Time {
 func marketDay(now time.Time) time.Time {
 	return truncDay(now.In(timezone.Eastern))
 }
+
+// absInt returns the absolute value of n.
+func absInt(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+// intSliceContains reports whether v appears in set.
+func intSliceContains(set []int, v int) bool {
+	for _, s := range set {
+		if s == v {
+			return true
+		}
+	}
+	return false
+}
+
+// closestDTEs returns every value in dtes tied for nearest to want, mirroring
+// how the API resolves a single dte value to an expiration. It is the shared
+// "values the API offers" candidate computation the dte live tests anchor on,
+// never the unfiltered chain (see dteLadder in reflection_live_test.go).
+func closestDTEs(dtes []int, want int) []int {
+	best := dtes[0]
+	for _, d := range dtes {
+		if absInt(d-want) < absInt(best-want) {
+			best = d
+		}
+	}
+	var out []int
+	for _, d := range dtes {
+		if absInt(d-want) == absInt(best-want) {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
+// sameDTECandidates reports whether a and b are the same set of DTE
+// candidates (order-insensitive), used to detect when two requested dte
+// values would resolve to an identical offered expiration and so could not
+// distinguish an honored filter from an ignored one.
+func sameDTECandidates(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for _, x := range a {
+		if !intSliceContains(b, x) {
+			return false
+		}
+	}
+	return true
+}

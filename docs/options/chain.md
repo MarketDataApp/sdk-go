@@ -38,12 +38,18 @@ combinations cannot be written.
 
 - `options.WithExpiry(f ExpiryFilter)` — sets the expiration selector from a single `ExpiryFilter`. Replaces the API's mutually-exclusive `expiration`, `dte`, `month`, and `year` parameters with one value so they can never conflict. Build the filter with exactly one of:
   - `options.OnExpiration(t time.Time)` — a single expiration date (`expiration=YYYY-MM-DD`). Only the calendar date is used; must not be zero.
-  - `options.InDTE(days int)` — the expiration closest to `days` days to expiry, counted from today (`dte=days`). `days` must be zero or greater.
+  - `options.InDTE(days int)` — the expiration closest to `days` days to expiry (`dte=days`), counted from today, or from `WithChainDate`'s date when that option is also set. `days` must be zero or greater.
+  - `options.InDTEs(days ...int)` — the expiration closest to EACH of the given days-to-expiry values, deduplicated by the API (`dte=d1,d2,...`), each counted the same way as `InDTE`. At least one value is required, and every value must be zero or greater and at most 36500 days.
+  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry, counted the same way as `InDTE`, falls within an inclusive bound (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500 days, and `lo` must not exceed `hi`.
+  - `options.MinDTE(days int)` — every expiration at least `days` days to expiry (`dte=>=days`), counted the same way as `InDTE`. `days` must be zero or greater and at most 36500.
+  - `options.MaxDTE(days int)` — every expiration at most `days` days to expiry (`dte=<=days`), counted the same way as `InDTE`. `days` must be zero or greater and at most 36500.
   - `options.InMonth(month int)` — contracts expiring in the given calendar month across all years (`month=month`); `month` is 1 through 12.
   - `options.InYear(year int)` — contracts expiring in the given four-digit year across all months (`year=year`); `year` is at least 1900.
   - `options.InMonthOfYear(month, year int)` — a specific month of a specific year (`month=month&year=year`).
   - `options.ExpirationBetween(from, to time.Time)` — contracts expiring within an inclusive date range (`from=YYYY-MM-DD&to=YYYY-MM-DD`). Both dates are required and `from` must not be after `to`. This filters which expirations are returned, so it is an expiry mode, not a historical snapshot.
-- `options.WithChainDate(t time.Time)` — request the chain as it stood on a single historical trading day (`date=YYYY-MM-DD`). Only the calendar date is used; a zero time returns the current chain. Independent of the expiration selector, so a historical chain can still be narrowed by expiration or strike.
+- `options.WithChainDate(t time.Time)` — request the chain as it stood on a single historical trading day (`date=YYYY-MM-DD`). Only the calendar date is used; a zero time returns the current chain. Independent of the expiration selector, so a historical chain can still be narrowed by expiration or strike. Any `dte` form combined with it counts days from this date instead of from today.
+
+Any `dte` form combined with `options.WithExpirationTypes` is narrowed to whatever that filter leaves: `dte` can only match among the expirations `WithExpirationTypes` does not exclude, which can change or eliminate what `dte` would otherwise return.
 
 #### Strike filters
 
@@ -93,7 +99,7 @@ combinations cannot be written.
 - **Include vs. exclude expiration types is also compile-time exclusive.** A single `ExpirationTypeFilter` is either an include set or an exclude set, so the API's forbidden `weekly=true&monthly=false` mix cannot be produced.
 - **`am`/`pm` are index-only.** They filter settlement style only for index options; on stocks and ETFs the API tolerates them without effect.
 - **Historical snapshot vs. expiration range.** `WithChainDate` requests the chain *as of* a single day and is independent of the expiration selector. A `from`/`to` date range filters *expirations*, not history — use `options.ExpirationBetween` via `WithExpiry` for that.
-- **Validation happens before the network call.** A strike or delta out of range, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made.
+- **Validation happens before the network call.** A strike or delta out of range, a dte value outside 0..36500 or an inverted/empty dte list or range, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made. `InDTE` predates the 36500-day cap and keeps accepting any zero-or-greater value, unchanged.
 - **No-data behavior.** If the API has no data for the request (HTTP 404), `Chain` returns a `nil` chain, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` chain before use.
 - Requesting a full chain for a large underlying (SPX, SPY, QQQ) can return tens of thousands of contracts; narrow with filters to control credit usage.
 
@@ -194,6 +200,42 @@ if err != nil {
 for _, o := range chain.Options {
 	fmt.Printf("$%.2f  Delta: %.4f  Mid: %.2f\n", o.Strike, o.Delta, o.Mid)
 }
+```
+
+### DTE window
+
+```go
+ctx := context.Background()
+
+// Every expiration within 30 to 45 days out — a "monthly roll" window.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.DTERange(30, 45)),
+	options.WithSide(options.SideCall),
+)
+if err != nil {
+	log.Fatal(err)
+}
+for _, o := range chain.Options {
+	fmt.Printf("%s  DTE: %d  Strike: %.2f\n", o.OptionSymbol, o.DTE, o.Strike)
+}
+
+// Everything 60 days out or further.
+far, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.MinDTE(60)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d contracts at 60+ DTE\n", len(far.Options))
+
+// The expirations closest to 7, 30, and 60 days out, in one request.
+multi, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithExpiry(options.InDTEs(7, 30, 60)),
+)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d contracts across the requested DTEs\n", len(multi.Options))
 ```
 
 ### Liquid contracts

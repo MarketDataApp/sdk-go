@@ -253,6 +253,27 @@ func TestReflect_OptionsExpiry(t *testing.T) {
 	ctx := liveContext(t, 3*time.Minute)
 	fx := resolveOptionsFixture(t, ctx, client)
 
+	// dteLadder fetches a fresh baseline of every listed expiration and
+	// returns their DTE (days to expiry from today), sorted ascending by
+	// construction (Expirations returns sorted dates). It is the "values the
+	// API offers" baseline the range/bound/candidate checks below are
+	// anchored to — never the unfiltered chain, which only ever shows the
+	// front month.
+	dteLadder := func(t *testing.T) []int {
+		t.Helper()
+		expResult, _, err := liveCall(t, "Expirations for dte bounds", func() (*options.Expirations, *marketdata.Response, error) {
+			return client.Options.Expirations(ctx, TestStockSymbol)
+		})
+		assertNoError(t, err, "Expirations for dte bounds")
+		assertNotEmpty(t, expResult.Dates, "expirations for dte bounds")
+		today := marketToday()
+		dtes := make([]int, len(expResult.Dates))
+		for i, e := range expResult.Dates {
+			dtes[i] = int(truncDay(e).Sub(today).Hours() / 24)
+		}
+		return dtes
+	}
+
 	t.Run("OnExpiration=matches", func(t *testing.T) {
 		chain, _, err := liveCall(t, "OnExpiration", func() (*options.OptionsChain, *marketdata.Response, error) {
 			return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.OnExpiration(fx.exp)))
@@ -267,23 +288,118 @@ func TestReflect_OptionsExpiry(t *testing.T) {
 	})
 
 	t.Run("InDTE=nearN", func(t *testing.T) {
-		const want = 30
+		dtes := dteLadder(t)
+		if len(dtes) < 2 {
+			t.Skip("need at least 2 listed expirations so the requested dte does not trivially match the front month")
+		}
+		// want is the furthest listed expiration's own dte, not a guessed
+		// value: its nearest-offered candidate is itself, so an unfiltered or
+		// ignored-filter answer (the front month alone, at dtes[0]) cannot
+		// satisfy the candidate check below unless dtes[0] ties with it.
+		want := dtes[len(dtes)-1]
+		cand := closestDTEs(dtes, want)
+		if intSliceContains(cand, dtes[0]) {
+			t.Skip("the front-month expiration ties for nearest to the requested dte")
+		}
+
 		chain, _, err := liveCall(t, "InDTE", func() (*options.OptionsChain, *marketdata.Response, error) {
 			return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.InDTE(want)))
 		})
 		assertNoError(t, err, "InDTE")
 		assertNotEmpty(t, chain.Options, "dte options")
-		// The API resolves to the single nearest expiration; all contracts share
-		// one DTE close to the requested value.
+		// The API resolves to the single nearest expiration; all contracts
+		// share one DTE, and it must be one of the candidates the baseline
+		// ladder offers for the requested value — never a guessed tolerance.
 		exps := map[int64]bool{}
 		for _, o := range chain.Options {
 			exps[o.Expiration.Unix()] = true
-			if d := int(math.Abs(float64(o.DTE - want))); d > 12 {
-				t.Errorf("InDTE(%d) returned DTE %d, too far from requested", want, o.DTE)
+			if !intSliceContains(cand, o.DTE) {
+				t.Errorf("InDTE(%d) returned DTE %d, want one of the candidates %v", want, o.DTE, cand)
 			}
 		}
 		if len(exps) != 1 {
 			t.Errorf("InDTE should resolve to a single expiration, got %d", len(exps))
+		}
+	})
+
+	t.Run("DTERange=spansMultiple", func(t *testing.T) {
+		dtes := dteLadder(t)
+		if len(dtes) < 2 {
+			t.Skip("need at least 2 listed expirations to test a range spanning more than one")
+		}
+		// hi sits one day above the second-nearest expiration rather than
+		// exactly on it: the inclusion of that expiration then holds whether
+		// the server reads a range's upper end inclusively or exclusively at
+		// the exact boundary value, which the response alone cannot establish.
+		lo, hi := dtes[0], dtes[1]+1
+
+		chain, _, err := liveCall(t, "DTERange", func() (*options.OptionsChain, *marketdata.Response, error) {
+			return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.DTERange(lo, hi)))
+		})
+		assertNoError(t, err, "DTERange")
+		assertNotEmpty(t, chain.Options, "dte-range options")
+		distinct := map[int]bool{}
+		for _, o := range chain.Options {
+			if o.DTE < lo || o.DTE > hi {
+				t.Errorf("DTERange(%d, %d) returned DTE %d outside the bounds", lo, hi, o.DTE)
+			}
+			distinct[o.DTE] = true
+		}
+		if len(distinct) < 2 {
+			t.Errorf("DTERange(%d, %d) spans 2 listed expirations but returned only %d distinct DTE(s)", lo, hi, len(distinct))
+		}
+	})
+
+	t.Run("MinDTE=atOrAbove", func(t *testing.T) {
+		dtes := dteLadder(t)
+		if len(dtes) < 2 {
+			t.Skip("need at least 2 listed expirations to test a bound above the front month")
+		}
+		// The bound sits above the nearest (front-month) expiration, so an
+		// ignored filter — which would answer with the front month alone —
+		// fails the per-row bound check below on its own.
+		bound := dtes[1]
+
+		chain, _, err := liveCall(t, "MinDTE", func() (*options.OptionsChain, *marketdata.Response, error) {
+			return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.MinDTE(bound)))
+		})
+		assertNoError(t, err, "MinDTE")
+		assertNotEmpty(t, chain.Options, "min-dte options")
+		for _, o := range chain.Options {
+			if o.DTE < bound {
+				t.Errorf("MinDTE(%d) returned DTE %d below the floor", bound, o.DTE)
+			}
+		}
+	})
+
+	t.Run("MaxDTE=atOrBelow", func(t *testing.T) {
+		dtes := dteLadder(t)
+		if len(dtes) < 2 {
+			t.Skip("need at least 2 listed expirations to test a bound admitting more than one")
+		}
+		// The bound sits one day above the second-nearest expiration rather
+		// than exactly on it, so that expiration's inclusion holds whether the
+		// server reads <= as inclusive or exclusive at the exact boundary
+		// value — which the response alone cannot establish. The bound still
+		// admits the two nearest expirations, so a correctly filtered answer
+		// holds more than the single front-month expiration the unfiltered
+		// default (and an ignored filter) would return.
+		bound := dtes[1] + 1
+
+		chain, _, err := liveCall(t, "MaxDTE", func() (*options.OptionsChain, *marketdata.Response, error) {
+			return client.Options.Chain(ctx, TestStockSymbol, options.WithExpiry(options.MaxDTE(bound)))
+		})
+		assertNoError(t, err, "MaxDTE")
+		assertNotEmpty(t, chain.Options, "max-dte options")
+		distinct := map[int]bool{}
+		for _, o := range chain.Options {
+			if o.DTE > bound {
+				t.Errorf("MaxDTE(%d) returned DTE %d above the ceiling", bound, o.DTE)
+			}
+			distinct[o.DTE] = true
+		}
+		if len(distinct) < 2 {
+			t.Errorf("MaxDTE(%d) admits the two nearest expirations but returned only %d distinct DTE(s) — the filter may not be reaching the API", bound, len(distinct))
 		}
 	})
 
