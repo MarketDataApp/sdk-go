@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `options.InDTEs(days ...int)`, `options.DTERange(lo, hi int)`, `options.MinDTE(days int)`, and `options.MaxDTE(days int)`: new [ExpiryFilter] constructors for the dte parameter's new string-syntax forms — comma-separated list, closed range, and >= / <= comparisons (API release 2.0.0). `options.InDTE(days int)` remains unchanged.
+
 ## [2.0.0] - 2026-09-02
 
 Initial v2 release. A complete rewrite of the SDK following idiomatic Go

@@ -281,6 +281,98 @@ func TestChain_StrikeExprPassthrough(t *testing.T) {
 	}
 }
 
+func TestChain_DTEListExpression(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("dte") != "15,30,45" {
+			t.Errorf("dte = %q, want 15,30,45", r.URL.Query().Get("dte"))
+		}
+
+		resp := quoteResponse{
+			Status:       "ok",
+			OptionSymbol: []string{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL",
+		WithExpiry(InDTEs(15, 30, 45)),
+	)
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+func TestChain_DTERangeExpression(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("dte") != "0-45" {
+			t.Errorf("dte = %q, want 0-45", r.URL.Query().Get("dte"))
+		}
+
+		resp := quoteResponse{
+			Status:       "ok",
+			OptionSymbol: []string{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL",
+		WithExpiry(DTERange(0, 45)),
+	)
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+func TestChain_DTEMinExpression(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("dte") != ">=30" {
+			t.Errorf("dte = %q, want >=30", r.URL.Query().Get("dte"))
+		}
+
+		resp := quoteResponse{
+			Status:       "ok",
+			OptionSymbol: []string{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL",
+		WithExpiry(MinDTE(30)),
+	)
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+func TestChain_DTEMaxExpression(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("dte") != "<=45" {
+			t.Errorf("dte = %q, want <=45", r.URL.Query().Get("dte"))
+		}
+
+		resp := quoteResponse{
+			Status:       "ok",
+			OptionSymbol: []string{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+
+	svc := newTestService(handler)
+	_, _, err := svc.Chain(context.Background(), "AAPL",
+		WithExpiry(MaxDTE(45)),
+	)
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
 func TestChain_BadStatus(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := map[string]string{"s": "error", "errmsg": "something went wrong"}

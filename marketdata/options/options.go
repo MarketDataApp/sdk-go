@@ -223,6 +223,15 @@ func joinFloats(vals []float64) string {
 	return strings.Join(parts, ",")
 }
 
+// joinInts renders an int value list as the API's comma-separated form.
+func joinInts(vals []int) string {
+	parts := make([]string, len(vals))
+	for i, v := range vals {
+		parts[i] = formatInt(v)
+	}
+	return strings.Join(parts, ",")
+}
+
 // apply writes the strike or delta parameter into v. It assumes the params
 // have already passed [strikeParams.validate].
 func (p strikeParams) apply(v url.Values) {
@@ -262,12 +271,25 @@ func (p strikeParams) apply(v url.Values) {
 //	AllExpirations()       // every listed expiration       -> expiration=all
 //	OnExpiration(t)        // a single expiration date     -> expiration=YYYY-MM-DD
 //	InDTE(days)            // the expiry nearest days out   -> dte=days
+//	InDTEs(days...)        // the expiry nearest EACH value -> dte=d1,d2,...
+//	DTERange(lo, hi)       // every expiry within a range   -> dte=lo-hi
+//	MinDTE(days)           // every expiry at or above days -> dte=>=days
+//	MaxDTE(days)           // every expiry at or below days -> dte=<=days
 //	InMonth(month)         // every year's given month      -> month=month
 //	InYear(year)           // every month of a given year   -> year=year
 //	InMonthOfYear(m, y)    // one specific month and year   -> month=m&year=y
 //
-// month must be 1 through 12, year a four-digit year (at least 1900), and dte
-// zero or greater. Values are checked before any request is made.
+// month must be 1 through 12, year a four-digit year (at least 1900), and a
+// dte value zero or greater and at most 36500 days (the API's day-count cap);
+// InDTE predates that cap and keeps accepting any zero-or-greater value, same
+// as before. Values are checked before any request is made.
+//
+// Every dte form ([InDTE], [InDTEs], [DTERange], [MinDTE], [MaxDTE]) counts
+// days from today, or from [WithChainDate]'s date when that option is also
+// set — the API makes dte relative to whichever date the chain is being read
+// as of. Combining a dte form with [WithExpirationTypes] narrows the
+// expirations dte can match to whatever that filter leaves, which can change
+// or eliminate what dte would otherwise return.
 //
 // Note that omitting the filter entirely is NOT the same as
 // [AllExpirations]: with no expiry filter the chain endpoint returns only the
@@ -287,6 +309,10 @@ type expiryKind uint8
 const (
 	expiryOnDate expiryKind = iota + 1
 	expiryDTE
+	expiryDTEList
+	expiryDTERange
+	expiryDTEMin
+	expiryDTEMax
 	expiryMonth
 	expiryYear
 	expiryMonthOfYear
@@ -294,15 +320,23 @@ const (
 	expiryAll
 )
 
+// maxDTEDays is the API's day-count cap for every dte form except the
+// original [InDTE], which predates the cap and keeps its original
+// zero-or-greater validation (see expiryParams.validate).
+const maxDTEDays = 36500
+
 // expiryParams is the validated internal representation of an [ExpiryFilter].
 type expiryParams struct {
-	kind  expiryKind
-	exp   time.Time
-	dte   int
-	month int
-	year  int
-	from  time.Time
-	to    time.Time
+	kind    expiryKind
+	exp     time.Time
+	dte     int
+	dteList []int
+	dteLow  int
+	dteHigh int
+	month   int
+	year    int
+	from    time.Time
+	to      time.Time
 }
 
 // AllExpirations requests the whole chain across every listed expiration
@@ -328,8 +362,46 @@ func OnExpiration(t time.Time) ExpiryFilter {
 }
 
 // InDTE limits the chain to the expiration closest to the given number of days
-// to expiry, counted from today (dte=days).
+// to expiry (dte=days), counted from today, or from [WithChainDate]'s date
+// when that option is also set. Combining InDTE (or any other dte form) with
+// [WithExpirationTypes] narrows the expirations dte can match to whatever that
+// filter leaves, which can change or eliminate what dte would otherwise
+// return.
 func InDTE(days int) ExpiryFilter { return expiryFilter{expiryParams{kind: expiryDTE, dte: days}} }
+
+// InDTEs limits the chain to the expiration closest to EACH of the given
+// days-to-expiry values, deduplicated by the API (dte=d1,d2,...), each
+// counted from today or from [WithChainDate]'s date; see [InDTE] for how dte
+// interacts with [WithExpirationTypes]. At least one value is required, and
+// every value must be zero or greater and at most 36500 days.
+func InDTEs(days ...int) ExpiryFilter {
+	return expiryFilter{expiryParams{kind: expiryDTEList, dteList: days}}
+}
+
+// DTERange limits the chain to every expiration whose days-to-expiry, counted
+// from today or from [WithChainDate]'s date, falls within an inclusive bound
+// (dte=lo-hi); see [InDTE] for how dte interacts with [WithExpirationTypes].
+// Both bounds must be zero or greater and at most 36500 days, and lo must not
+// exceed hi.
+func DTERange(lo, hi int) ExpiryFilter {
+	return expiryFilter{expiryParams{kind: expiryDTERange, dteLow: lo, dteHigh: hi}}
+}
+
+// MinDTE limits the chain to every expiration at least days days to expiry
+// (dte=>=days), counted from today or from [WithChainDate]'s date; see [InDTE]
+// for how dte interacts with [WithExpirationTypes]. days must be zero or
+// greater and at most 36500.
+func MinDTE(days int) ExpiryFilter {
+	return expiryFilter{expiryParams{kind: expiryDTEMin, dte: days}}
+}
+
+// MaxDTE limits the chain to every expiration at most days days to expiry
+// (dte=<=days), counted from today or from [WithChainDate]'s date; see [InDTE]
+// for how dte interacts with [WithExpirationTypes]. days must be zero or
+// greater and at most 36500.
+func MaxDTE(days int) ExpiryFilter {
+	return expiryFilter{expiryParams{kind: expiryDTEMax, dte: days}}
+}
 
 // InMonth limits the chain to contracts expiring in the given calendar month
 // across all years (month=month), expressed as 1 through 12.
@@ -375,6 +447,20 @@ func validateYear(year int) error {
 	return nil
 }
 
+// validateDTE enforces the API's day-count cap on a single dte value, shared
+// by the list, range, and comparison-operator dte modes. [InDTE] predates this
+// cap and does not call it (see expiryParams.validate), so that an existing
+// call with a value above the cap keeps reaching the API exactly as before.
+func validateDTE(days int) error {
+	if days < 0 {
+		return validationErr("dte", "dte must be zero or greater")
+	}
+	if days > maxDTEDays {
+		return validationErr("dte", "dte must be at most 36500 days")
+	}
+	return nil
+}
+
 // validate enforces the value-range rules an ExpiryFilter cannot encode in its
 // type, returning a [sdkerrors.ValidationError] before any request is built.
 func (p expiryParams) validate() error {
@@ -387,6 +473,27 @@ func (p expiryParams) validate() error {
 		if p.dte < 0 {
 			return validationErr("dte", "dte must be zero or greater")
 		}
+	case expiryDTEList:
+		if len(p.dteList) == 0 {
+			return validationErr("dte", "at least one dte value is required")
+		}
+		for _, d := range p.dteList {
+			if err := validateDTE(d); err != nil {
+				return err
+			}
+		}
+	case expiryDTERange:
+		if err := validateDTE(p.dteLow); err != nil {
+			return err
+		}
+		if err := validateDTE(p.dteHigh); err != nil {
+			return err
+		}
+		if p.dteLow > p.dteHigh {
+			return validationErr("dte", "dte range low must not exceed high")
+		}
+	case expiryDTEMin, expiryDTEMax:
+		return validateDTE(p.dte)
 	case expiryMonth:
 		return validateMonth(p.month)
 	case expiryYear:
@@ -417,6 +524,14 @@ func (p expiryParams) apply(v url.Values) {
 		v.Set("expiration", p.exp.Format(dateLayout))
 	case expiryDTE:
 		v.Set("dte", formatInt(p.dte))
+	case expiryDTEList:
+		v.Set("dte", joinInts(p.dteList))
+	case expiryDTERange:
+		v.Set("dte", formatInt(p.dteLow)+"-"+formatInt(p.dteHigh))
+	case expiryDTEMin:
+		v.Set("dte", ">="+formatInt(p.dte))
+	case expiryDTEMax:
+		v.Set("dte", "<="+formatInt(p.dte))
 	case expiryMonth:
 		v.Set("month", formatInt(p.month))
 	case expiryYear:
@@ -680,7 +795,9 @@ func WithExpiry(f ExpiryFilter) ChainOption {
 // returns the current chain. It is independent of the expiration selectors, so
 // a historical chain can still be narrowed by expiration or strike. (A from/to
 // date range filters expirations, not history — use
-// options.ExpirationBetween via [WithExpiry] for that.)
+// options.ExpirationBetween via [WithExpiry] for that.) Any dte form passed to
+// [WithExpiry] (see [InDTE]) counts its days from this date instead of from
+// today when the two are combined.
 func WithChainDate(t time.Time) ChainOption {
 	return chainOptionFunc(func(o *chainOptions) {
 		o.date = t
