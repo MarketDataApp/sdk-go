@@ -26,7 +26,7 @@ Get historical OHLC candles for a mutual fund from the `/v1/funds/candles/{resol
 - `symbol` (`string`) — the fund's ticker, for example `"VFINX"`. Required; an empty symbol returns a validation error without making a request.
 - Options:
   - `funds.WithResolution(r funds.Resolution)` — the candle timeframe. Defaults to `funds.ResolutionDaily`. The funds endpoint supports `funds.ResolutionDaily` (`"D"`), `funds.ResolutionWeekly` (`"W"`), `funds.ResolutionMonthly` (`"M"`), and `funds.ResolutionYearly` (`"Y"`) only. The resolution becomes part of the request path, so an unsupported value causes the API to reject the request.
-  - `funds.WithCandleWindow(w funds.DateWindow)` — the date range, expressed as a single `funds.DateWindow` value. Omitting it lets the API return its default recent window.
+  - `funds.WithCandleWindow(w funds.DateWindow)` — the date range, expressed as a single [`DateWindow`](#date-windows) value. Omitting it lets the API return its default recent window.
 
 ### Returns
 
@@ -201,3 +201,18 @@ const (
 ```
 
 `Resolution` selects the candle timeframe passed to [`WithResolution`](#candles). The funds candles endpoint supports daily, weekly, monthly, and yearly only (quarterly is not accepted). `Resolution` has a `String()` method that returns the underlying code.
+
+## Date Windows 
+
+`DateWindow` is a sealed union describing the date range for `Candles`. Build one with exactly one of the constructors below and pass it to `funds.WithCandleWindow`. Because a window is a single value, illegal combinations such as "from plus countback" are not expressible.
+
+| Constructor               | Selects                              | API parameters      |
+|---------------------------|--------------------------------------|---------------------|
+| `funds.OnDate(d)`         | a single calendar day                | `date=d`            |
+| `funds.Between(from, to)` | an explicit closed range (inclusive) | `from=from&to=to`   |
+| `funds.Since(from)`       | everything from a day onward         | `from=from`         |
+| `funds.Until(to)`         | up to and including a day            | `to=to`             |
+| `funds.LastN(n)`          | the `n` most recent periods          | `countback=n`       |
+| `funds.LastNUntil(n, to)` | the `n` periods ending at a day      | `countback=n&to=to` |
+
+Only the calendar date of each `time.Time` is used; the time-of-day and zone are ignored.
