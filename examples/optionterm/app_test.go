@@ -127,7 +127,7 @@ func TestWindowSizeMsg_StoresWidthAndHeight(t *testing.T) {
 
 func TestInit_LoadsSymbolAndSchedulesTick(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/stocks/bulkquotes/", jsonHandler(map[string]any{
+	mux.HandleFunc("/v1/stocks/quotes/", jsonHandler(map[string]any{
 		"s": "ok", "symbol": []string{"AAPL"}, "bid": []float64{184.50}, "ask": []float64{184.55},
 		"mid": []float64{184.525}, "last": []float64{184.52}, "volume": []int64{1000000}, "updated": []int64{1704067200},
 	}))
@@ -783,7 +783,7 @@ func TestErrMsg_RateLimitErrorSuspendsRefresh(t *testing.T) {
 
 func TestSymbolInput_EnterResetsStateAndReloads(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/stocks/bulkquotes/", jsonHandler(map[string]any{
+	mux.HandleFunc("/v1/stocks/quotes/", jsonHandler(map[string]any{
 		"s": "ok", "symbol": []string{"MSFT"}, "bid": []float64{1}, "ask": []float64{2},
 		"mid": []float64{1.5}, "last": []float64{1.5}, "volume": []int64{1}, "updated": []int64{1704067200},
 	}))

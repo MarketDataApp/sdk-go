@@ -1,9 +1,8 @@
 // want: (cannot use|does not implement|QuotesOption)
 //
-// 52-week high/low data is a single-quote capability: the bulk quotes API
-// endpoint ignores the 52week parameter, so the SDK only accepts
-// WithFiftyTwoWeek on Quote. Passing it to Quotes (bulk) — which would
-// silently return zero values — must not compile.
+// QuoteOption and QuotesOption are distinct types: the single-quote
+// WithFiftyTwoWeek must not compile as an option to Quotes, which takes
+// WithQuotesFiftyTwoWeek instead.
 package main
 
 import (

@@ -130,13 +130,13 @@ func main() {
 		mu.Unlock()
 	}()
 
-	// 4. Stock quotes — one bulk request for the whole board. Bulk quotes
-	// carry no 52-week data (single-quote only), so the renderer's 52-week
-	// section simply stays hidden (see has52w below).
+	// 4. Stock quotes: one request for the whole board, with 52-week data.
+	// The renderer falls back to bid/ask columns when no symbol came back
+	// with a 52-week range (see has52w below).
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		quotes, _, fetchErr := client.Stocks.Quotes(ctx, stockSymbols)
+		quotes, _, fetchErr := client.Stocks.Quotes(ctx, stockSymbols, stocks.WithQuotesFiftyTwoWeek(true))
 		if fetchErr != nil {
 			log.Printf("Stock quotes: %v", fetchErr)
 			return
