@@ -76,6 +76,11 @@ func TestExpiryFilter_Serialization(t *testing.T) {
 		{"OnExpiration", OnExpiration(exp), url.Values{"expiration": {"2026-08-28"}}},
 		{"InDTE", InDTE(45), url.Values{"dte": {"45"}}},
 		{"InDTEZero", InDTE(0), url.Values{"dte": {"0"}}},
+		{"InDTEs", InDTEs(15, 30, 45), url.Values{"dte": {"15,30,45"}}},
+		{"InDTEsSingle", InDTEs(30), url.Values{"dte": {"30"}}},
+		{"DTERange", DTERange(0, 45), url.Values{"dte": {"0-45"}}},
+		{"MinDTE", MinDTE(30), url.Values{"dte": {">=30"}}},
+		{"MaxDTE", MaxDTE(45), url.Values{"dte": {"<=45"}}},
 		{"InMonth", InMonth(8), url.Values{"month": {"8"}}},
 		{"InYear", InYear(2027), url.Values{"year": {"2027"}}},
 		{"InMonthOfYear", InMonthOfYear(6, 2026), url.Values{"month": {"6"}, "year": {"2026"}}},
@@ -189,6 +194,24 @@ func TestExpiryFilter_Validate(t *testing.T) {
 		{"DTENegative", InDTE(-1), true},
 		{"DTEZero", InDTE(0), false},
 		{"DTEValid", InDTE(45), false},
+		// InDTE predates the API's 36500-day cap and must keep accepting a
+		// value beyond it: a call that reaches the API today must still reach
+		// it, not fail client-side with a different error type than before.
+		{"DTEAboveCapStillClientValid", InDTE(50000), false},
+		{"InDTEsEmpty", InDTEs(), true},
+		{"InDTEsNegativeElement", InDTEs(30, -1), true},
+		{"InDTEsTooLargeElement", InDTEs(30, 40000), true},
+		{"InDTEsValid", InDTEs(15, 30, 45), false},
+		{"DTERangeLowNegative", DTERange(-1, 45), true},
+		{"DTERangeHighTooLarge", DTERange(0, 40000), true},
+		{"DTERangeInverted", DTERange(45, 0), true},
+		{"DTERangeValid", DTERange(0, 45), false},
+		{"MinDTENegative", MinDTE(-1), true},
+		{"MinDTETooLarge", MinDTE(40000), true},
+		{"MinDTEValid", MinDTE(30), false},
+		{"MaxDTENegative", MaxDTE(-1), true},
+		{"MaxDTETooLarge", MaxDTE(40000), true},
+		{"MaxDTEValid", MaxDTE(45), false},
 		{"MonthLow", InMonth(0), true},
 		{"MonthHigh", InMonth(13), true},
 		{"MonthValid", InMonth(6), false},
@@ -280,6 +303,26 @@ func TestChain_RejectsInvalidExpiryRangePreNetwork(t *testing.T) {
 	from := time.Date(2024, 6, 30, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(ExpirationBetween(from, to)))
+	if !isValidationError(err) {
+		t.Fatalf("Chain() error = %v, want *ValidationError", err)
+	}
+}
+
+// TestChain_RejectsInvalidDTEListPreNetwork proves an empty InDTEs list is
+// rejected pre-network.
+func TestChain_RejectsInvalidDTEListPreNetwork(t *testing.T) {
+	svc := NewService(nil)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(InDTEs()))
+	if !isValidationError(err) {
+		t.Fatalf("Chain() error = %v, want *ValidationError", err)
+	}
+}
+
+// TestChain_RejectsInvalidDTERangePreNetwork proves an inverted DTE range is
+// rejected pre-network.
+func TestChain_RejectsInvalidDTERangePreNetwork(t *testing.T) {
+	svc := NewService(nil)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithExpiry(DTERange(45, 0)))
 	if !isValidationError(err) {
 		t.Fatalf("Chain() error = %v, want *ValidationError", err)
 	}

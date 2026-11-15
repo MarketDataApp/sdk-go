@@ -177,6 +177,65 @@ func TestOptions_Chain_StrikeAndDeltaLists(t *testing.T) {
 	}
 }
 
+// TestOptions_Chain_DTEList asserts live that the comma-separated dte list
+// form reaches the API and is honored: each requested value must resolve to a
+// returned contract whose DTE matches one of the listed expirations closest to
+// it (computed from a baseline Expirations call, never from the unfiltered
+// chain), and every returned contract's DTE must be a candidate of one of the
+// two requested values.
+func TestOptions_Chain_DTEList(t *testing.T) {
+	client := setupClient(t)
+	ctx := testContext(t)
+
+	expirations, _, err := client.Options.Expirations(ctx, TestStockSymbol)
+	assertNoError(t, err, "Expirations for DTE list")
+	assertNotNil(t, expirations, "expirations should not be nil")
+	assertNotEmpty(t, expirations.Dates, "expirations should not be empty")
+
+	today := marketToday()
+	var dtes []int
+	for _, e := range expirations.Dates {
+		dtes = append(dtes, int(truncDay(e).Sub(today).Hours()/24))
+	}
+	if len(dtes) < 2 {
+		t.Skipf("need at least 2 listed expirations to test the list form, got %d", len(dtes))
+	}
+
+	want1, want2 := dtes[0], dtes[len(dtes)-1]
+	cand1, cand2 := closestDTEs(dtes, want1), closestDTEs(dtes, want2)
+	if sameDTECandidates(cand1, cand2) {
+		t.Skip("the two requested DTE values resolve to the same offered expiration")
+	}
+
+	chain, _, err := client.Options.Chain(ctx, TestStockSymbol,
+		options.WithExpiry(options.InDTEs(want1, want2)),
+	)
+	assertNoError(t, err, "Chain with InDTEs list")
+	assertNotNil(t, chain, "dte-list chain should not be nil")
+	assertNotEmpty(t, chain.Options, "dte-list chain should not be empty")
+
+	var sawCand1, sawCand2 bool
+	for _, o := range chain.Options {
+		inCand1 := intSliceContains(cand1, o.DTE)
+		inCand2 := intSliceContains(cand2, o.DTE)
+		if !inCand1 && !inCand2 {
+			t.Errorf("got DTE %d, want one of %v / %v — the list is not being honored", o.DTE, cand1, cand2)
+		}
+		if inCand1 {
+			sawCand1 = true
+		}
+		if inCand2 {
+			sawCand2 = true
+		}
+	}
+	if !sawCand1 {
+		t.Errorf("InDTEs(%d, %d) never returned a contract matching the %d candidates %v", want1, want2, want1, cand1)
+	}
+	if !sawCand2 {
+		t.Errorf("InDTEs(%d, %d) never returned a contract matching the %d candidates %v", want1, want2, want2, cand2)
+	}
+}
+
 // TestOptions_QuotesBySymbol asserts live that a contract with no data comes
 // back as a present nil entry rather than vanishing, which is the entire
 // difference from Quotes.

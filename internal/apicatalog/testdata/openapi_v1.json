@@ -1,6 +1,6 @@
 {
   "_source": "https://api.marketdata.app/schema/?format=json",
-  "_fetched": "2026-08-12",
+  "_fetched": "2026-11-10",
   "_note": "Query parameters the API's published OpenAPI schema declares for each GET path. Regenerate with MARKETDATA_UPDATE_OPENAPI=1 go test ./integration/... -tags=integration -run TestOpenAPI_SchemaMatchesFixture. Do not hand-edit.",
   "paths": {
     "/v1/markets/status/": [

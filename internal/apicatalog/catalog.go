@@ -126,7 +126,7 @@ func optionsParams() []Param {
 		// options/chain
 		{"options/chain", "symbol", "string", "", "underlying ticker", "Options.Chain(ctx, symbol)", Path},
 		{"options/chain", "expiration", "date|all", "expiry", "exact expiration, or \"all\" for every listed expiration (unfiltered returns only the front month)", "options.WithExpiry(options.OnExpiration(t)/options.AllExpirations())", q},
-		{"options/chain", "dte", "int", "expiry", "days to expiry", "options.WithExpiry(options.InDTE(n))", q},
+		{"options/chain", "dte", "string", "expiry", "exact/list/range/>=,<=", "options.WithExpiry(options.InDTE/InDTEs/DTERange/MinDTE/MaxDTE)", q},
 		{"options/chain", "month", "int", "expiry", "1..12", "options.WithExpiry(options.InMonth/InMonthOfYear)", q},
 		{"options/chain", "year", "int", "expiry", "4-digit", "options.WithExpiry(options.InYear/InMonthOfYear)", q},
 		{"options/chain", "strike", "string", "strike", "exact/list/range/>=,<=", "options.WithStrike(options.Strike/Strikes/StrikeRange/Min/Max/Expr)", q},
