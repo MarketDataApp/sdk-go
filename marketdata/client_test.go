@@ -1202,7 +1202,7 @@ func TestWithAPIVersion(t *testing.T) {
 	var gotPath atomic.Value
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Ignore the background /user/ init request; capture the quote call.
-		if strings.Contains(r.URL.Path, "bulkquotes") {
+		if strings.Contains(r.URL.Path, "stocks/quotes") {
 			gotPath.Store(r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")

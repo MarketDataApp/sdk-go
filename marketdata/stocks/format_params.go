@@ -21,6 +21,9 @@ import (
 // the JSON method sent. There is one deliberate exception, dateformat on
 // options expirations, which serves a decoder rather than the request.
 
+// quotePath returns the request path and query for [Service.Quote]: the
+// stocks/quotes/ endpoint with the symbol in the symbols parameter. It
+// returns a [sdkerrors.ValidationError] when symbol is empty.
 func quotePath(symbol string, opts []QuoteOption) (string, url.Values, error) {
 	if symbol == "" {
 		return "", nil, &sdkerrors.ValidationError{Field: "symbol", Message: "symbol is required"}
@@ -40,9 +43,12 @@ func quotePath(symbol string, opts []QuoteOption) (string, url.Values, error) {
 	if options.candle != nil {
 		p.Set("candle", boolParam(*options.candle))
 	}
-	return "stocks/bulkquotes/", p, nil
+	return "stocks/quotes/", p, nil
 }
 
+// quotesPath returns the request path and query for [Service.Quotes]: the
+// stocks/quotes/ endpoint with the symbols joined by commas. It returns a
+// [sdkerrors.ValidationError] when symbols is empty.
 func quotesPath(symbols []string, opts []QuotesOption) (string, url.Values, error) {
 	if len(symbols) == 0 {
 		return "", nil, &sdkerrors.ValidationError{Field: "symbols", Message: "at least one symbol is required"}
@@ -53,13 +59,16 @@ func quotesPath(symbols []string, opts []QuotesOption) (string, url.Values, erro
 	}
 	p := url.Values{}
 	p.Set("symbols", strings.Join(symbols, ","))
+	if options.fiftyTwoWeek {
+		p.Set("52week", "true")
+	}
 	if options.extended != nil {
 		p.Set("extended", boolParam(*options.extended))
 	}
 	if options.candle != nil {
 		p.Set("candle", boolParam(*options.candle))
 	}
-	return "stocks/bulkquotes/", p, nil
+	return "stocks/quotes/", p, nil
 }
 
 func pricesPath(symbols []string, opts []PriceOption) (string, url.Values, error) {

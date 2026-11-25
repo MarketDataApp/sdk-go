@@ -246,28 +246,21 @@ func main() {
 	fmt.Printf("Credits remaining: %d (last request cost %d)\n", limits.Remaining, limits.Consumed)
 }
 
-// fetchQuotes fetches quotes with 52-week data, handling rate limit errors
-// gracefully. The 52-week alerts need per-symbol Quote calls: only the
-// single-quote endpoint returns 52-week data (bulk quotes ignore it), at the
-// cost of one credit per symbol per poll instead of one per poll.
+// fetchQuotes fetches quotes with 52-week data for every symbol in one
+// request, handling rate limit errors gracefully. It returns nil when the
+// request fails or the context is cancelled.
 func fetchQuotes(ctx context.Context, client *marketdata.Client, symbols []string, logger *slog.Logger) []stocks.Quote {
-	quotes := make([]stocks.Quote, 0, len(symbols))
-	for _, symbol := range symbols {
-		q, _, err := client.Stocks.Quote(ctx, symbol, stocks.WithFiftyTwoWeek(true))
-		if err != nil {
-			if errors.Is(err, marketdata.ErrRateLimited) {
-				log(logger, "Rate limited, skipping this poll cycle", "error", err)
-			} else if ctx.Err() != nil {
-				// Context cancelled, shutting down — not an error
-				return nil
-			} else {
-				log(logger, "Error fetching quotes", "error", err)
-			}
+	quotes, _, err := client.Stocks.Quotes(ctx, symbols, stocks.WithQuotesFiftyTwoWeek(true))
+	if err != nil {
+		if errors.Is(err, marketdata.ErrRateLimited) {
+			log(logger, "Rate limited, skipping this poll cycle", "error", err)
+		} else if ctx.Err() != nil {
+			// Context cancelled, shutting down — not an error
 			return nil
+		} else {
+			log(logger, "Error fetching quotes", "error", err)
 		}
-		if q != nil {
-			quotes = append(quotes, *q)
-		}
+		return nil
 	}
 	return quotes
 }

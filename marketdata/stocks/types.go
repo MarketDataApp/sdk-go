@@ -29,7 +29,8 @@ import (
 
 // Quote represents a real-time stock quote returned by [Service.Quote]
 // and [Service.Quotes]. The FiftyTwoWeekHigh and FiftyTwoWeekLow fields
-// are populated only when the quote was requested with [WithFiftyTwoWeek].
+// are populated only when the quote was requested with [WithFiftyTwoWeek]
+// or [WithQuotesFiftyTwoWeek].
 type Quote struct {
 	// Symbol is the stock ticker symbol
 	Symbol string `json:"symbol"`
@@ -66,7 +67,7 @@ type Quote struct {
 	// Updated is when this quote was last updated
 	Updated time.Time `json:"updated"`
 
-	// 52 week data (optional, requested via WithFiftyTwoWeek)
+	// 52 week data (optional, requested via WithFiftyTwoWeek or WithQuotesFiftyTwoWeek)
 	FiftyTwoWeekHigh float64 `json:"52weekHigh,omitempty"`
 	FiftyTwoWeekLow  float64 `json:"52weekLow,omitempty"`
 

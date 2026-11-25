@@ -15,7 +15,7 @@ import (
 )
 
 // mockServer starts an httptest.Server that serves routes keyed by
-// request path (e.g. "/stocks/bulkquotes/"). Both the unversioned path
+// request path (e.g. "/stocks/quotes/"). Both the unversioned path
 // and its "/v1"-prefixed form are matched, since versioned endpoints
 // (stocks, funds, markets) and unversioned ones (utilities) share this
 // helper. Every response carries baseline rate-limit headers, and any
@@ -82,7 +82,7 @@ func newTestClient(t *testing.T, srv *httptest.Server, opts ...marketdata.Option
 
 func TestFetchQuotes_Success(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":         "ok",
 			"symbol":    []string{"AAPL", "MSFT"},
 			"ask":       []float64{150.25, 375.50},
@@ -262,7 +262,7 @@ func TestFetchFundCandles_Success(t *testing.T) {
 
 func TestFetchDetailQuote_Success(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":          "ok",
 			"symbol":     []string{"AAPL"},
 			"ask":        []float64{150.25},
@@ -539,7 +539,7 @@ func TestFetchBulkCandles_Success(t *testing.T) {
 
 func TestValidateSymbol_Success(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":       "ok",
 			"symbol":  []string{"AAPL"},
 			"ask":     []float64{150.25},
@@ -605,7 +605,7 @@ func TestValidateSymbol_NoData_404(t *testing.T) {
 // 404. validateSymbol must still treat this as noData, not errMsg.
 func TestValidateSymbol_NoData_QuoteNotFound(t *testing.T) {
 	srv := mockServer(t, map[string]any{
-		"/stocks/bulkquotes/": map[string]any{
+		"/stocks/quotes/": map[string]any{
 			"s":      "ok",
 			"symbol": []string{},
 		},

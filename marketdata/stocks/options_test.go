@@ -262,3 +262,16 @@ func TestWithQuotesExtended(t *testing.T) {
 		t.Error("extended should be false")
 	}
 }
+
+func TestWithQuotesFiftyTwoWeek(t *testing.T) {
+	opts := &quotesOptions{}
+	WithQuotesFiftyTwoWeek(true).apply(opts)
+	if !opts.fiftyTwoWeek {
+		t.Error("fiftyTwoWeek should be true")
+	}
+
+	WithQuotesFiftyTwoWeek(false).apply(opts)
+	if opts.fiftyTwoWeek {
+		t.Error("fiftyTwoWeek should be false")
+	}
+}

@@ -206,7 +206,7 @@ func TestGolden_ModalError(t *testing.T) {
 	m.lastErr = &marketdata.InternalError{
 		SupportContext: marketdata.SupportContext{
 			RequestID:     "8f3c1e9a-ray",
-			RequestURL:    "https://api.marketdata.app/v1/stocks/bulkquotes/",
+			RequestURL:    "https://api.marketdata.app/v1/stocks/quotes/",
 			StatusCode:    500,
 			Timestamp:     goldenNow,
 			Message:       "unexpected server error",

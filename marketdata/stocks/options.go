@@ -54,11 +54,11 @@ func LastN(n int) DateWindow { return dateWindow{params.LastN(n)} }
 func LastNUntil(n int, to time.Time) DateWindow { return dateWindow{params.LastNUntil(n, to)} }
 
 // QuoteOption is a functional option for [Service.Quote] (single-symbol
-// quotes). Create options with [WithFiftyTwoWeek] and [WithExtended].
+// quotes). Create options with [WithFiftyTwoWeek], [WithExtended], and
+// [WithCandle].
 //
-// It is deliberately distinct from [QuotesOption]: the bulk quotes endpoint
-// ignores the 52week parameter, so requesting 52-week data is only
-// expressible on [Service.Quote], where it works.
+// It is distinct from [QuotesOption], so an option built for one method
+// cannot be passed to the other.
 type QuoteOption interface {
 	apply(*quoteOptions)
 }
@@ -75,10 +75,8 @@ type quoteOptions struct {
 
 // WithFiftyTwoWeek requests 52-week high/low data, populating the
 // FiftyTwoWeekHigh and FiftyTwoWeekLow fields of the returned [Quote].
-// Passing false is equivalent to omitting the option.
-//
-// Only [Service.Quote] supports this: the bulk quotes API endpoint ignores
-// the parameter, which is why it cannot be passed to [Service.Quotes].
+// Passing false is equivalent to omitting the option. For [Service.Quotes],
+// use [WithQuotesFiftyTwoWeek].
 func WithFiftyTwoWeek(enabled bool) QuoteOption {
 	return quoteOptionFunc(func(o *quoteOptions) { o.fiftyTwoWeek = enabled })
 }
@@ -101,11 +99,8 @@ func WithCandle(candle bool) QuoteOption {
 }
 
 // QuotesOption is a functional option for [Service.Quotes] (bulk quotes).
-// Create options with [WithQuotesExtended].
-//
-// There is no bulk equivalent of [WithFiftyTwoWeek]: the bulk quotes API
-// endpoint ignores the 52week parameter, so the option is only accepted by
-// [Service.Quote], where the API honors it.
+// Create options with [WithQuotesFiftyTwoWeek], [WithQuotesExtended], and
+// [WithQuotesCandle].
 type QuotesOption interface {
 	apply(*quotesOptions)
 }
@@ -115,8 +110,17 @@ type quotesOptionFunc func(*quotesOptions)
 func (f quotesOptionFunc) apply(o *quotesOptions) { f(o) }
 
 type quotesOptions struct {
-	extended *bool
-	candle   *bool
+	fiftyTwoWeek bool
+	extended     *bool
+	candle       *bool
+}
+
+// WithQuotesFiftyTwoWeek requests 52-week high/low data for every symbol,
+// populating the FiftyTwoWeekHigh and FiftyTwoWeekLow fields of each
+// returned [Quote]. A symbol whose range the API cannot derive keeps zero
+// values in both fields. Passing false is equivalent to omitting the option.
+func WithQuotesFiftyTwoWeek(enabled bool) QuotesOption {
+	return quotesOptionFunc(func(o *quotesOptions) { o.fiftyTwoWeek = enabled })
 }
 
 // WithQuotesExtended controls whether bulk quotes include extended-hours
@@ -128,8 +132,7 @@ func WithQuotesExtended(extended bool) QuotesOption {
 
 // WithQuotesCandle requests the current session's OHLC alongside each bulk
 // quote, populating the Open, High, Low, and Close fields of every returned
-// [Quote]. Unlike [WithFiftyTwoWeek], the bulk endpoint does honor this
-// parameter. Passing false is equivalent to omitting the option.
+// [Quote]. Passing false is equivalent to omitting the option.
 func WithQuotesCandle(candle bool) QuotesOption {
 	return quotesOptionFunc(func(o *quotesOptions) { o.candle = &candle })
 }

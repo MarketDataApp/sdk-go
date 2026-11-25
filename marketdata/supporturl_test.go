@@ -17,7 +17,7 @@ import (
 // actually sent — query included, with the client's merged universal
 // defaults in it. SupportContext used to report the path alone, so the
 // support block for a 200-with-error-body omitted every query parameter,
-// including the symbol itself on query-addressed endpoints like bulkquotes.
+// including the symbol itself on query-addressed endpoints like stocks/quotes.
 // The unit half of this contract lives in internal/http
 // (TestResponse_SupportContext); this covers the merge of client-level
 // defaults, which no unit test sees.

@@ -61,6 +61,30 @@ func TestStocks_Quote_With52Week(t *testing.T) {
 	}
 }
 
+func TestStocks_Quotes_With52Week(t *testing.T) {
+	client := setupClient(t)
+	ctx := testContext(t)
+
+	symbols := []string{TestStockSymbol, TestStockSymbol2}
+	quotes, _, err := client.Stocks.Quotes(ctx, symbols, stocks.WithQuotesFiftyTwoWeek(true))
+	assertNoError(t, err, "Quotes with 52week")
+	if len(quotes) != len(symbols) {
+		t.Fatalf("Expected %d quotes, got %d", len(symbols), len(quotes))
+	}
+
+	for _, q := range quotes {
+		if q.FiftyTwoWeekHigh <= 0 || q.FiftyTwoWeekLow <= 0 {
+			t.Errorf("%s: 52-week range %f-%f, want both values set on a multi-symbol request",
+				q.Symbol, q.FiftyTwoWeekLow, q.FiftyTwoWeekHigh)
+			continue
+		}
+		if q.FiftyTwoWeekLow > q.FiftyTwoWeekHigh {
+			t.Errorf("%s: 52-week low (%f) should be <= high (%f)",
+				q.Symbol, q.FiftyTwoWeekLow, q.FiftyTwoWeekHigh)
+		}
+	}
+}
+
 func TestStocks_Quotes(t *testing.T) {
 	client := setupClient(t)
 	ctx := testContext(t)

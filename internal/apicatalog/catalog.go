@@ -62,14 +62,13 @@ func All() []Param {
 	return all
 }
 
+// stocksParams returns the catalogued parameters of every stocks endpoint.
 func stocksParams() []Param {
 	const q = Query
 	return []Param{
-		// stocks/quotes (served by bulkquotes). The API honors 52week only
-		// when exactly one symbol is sent (multi-symbol requests silently
-		// ignore it), so the SDK exposes it on Quote — never on Quotes.
+		// stocks/quotes
 		{"stocks/quotes", "symbols", "[]string", "", "comma-separated tickers", "Stocks.Quotes(ctx, symbols)", q},
-		{"stocks/quotes", "52week", "bool", "", "52-week hi/lo; single-symbol only, so Quote-only in the SDK", "Stocks.Quote(ctx, symbol, stocks.WithFiftyTwoWeek(true))", q},
+		{"stocks/quotes", "52week", "bool", "", "52-week hi/lo for every symbol", "stocks.WithFiftyTwoWeek(true) / stocks.WithQuotesFiftyTwoWeek(true)", q},
 		{"stocks/quotes", "extended", "bool", "", "extended-hours data", "stocks.WithExtended(true) / stocks.WithQuotesExtended(true)", q},
 		{"stocks/quotes", "candle", "bool", "", "adds session OHLC to the quote", "stocks.WithCandle(true) / stocks.WithQuotesCandle(true)", q},
 		// stocks/candles

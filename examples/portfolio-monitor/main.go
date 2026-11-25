@@ -82,23 +82,14 @@ func main() {
 	}
 }
 
-// fetchAndDisplayQuotes fetches full quotes and renders a detailed table.
-// 52-week data only exists on the single-quote endpoint (bulk quotes ignore
-// it), so the full view fetches each symbol individually; the lightweight
-// polling path below sticks to the one-request Prices call.
+// fetchAndDisplayQuotes fetches full quotes, with 52-week data, in one
+// request and renders a detailed table. The lightweight polling path below
+// sticks to the Prices call.
 func fetchAndDisplayQuotes(ctx context.Context, client *marketdata.Client, symbols []string) {
-	quotes := make([]stocks.Quote, 0, len(symbols))
-	var resp *marketdata.Response
-	for _, symbol := range symbols {
-		q, r, err := client.Stocks.Quote(ctx, symbol, stocks.WithFiftyTwoWeek(true))
-		if err != nil {
-			log.Printf("Error fetching quote for %s: %v", symbol, err)
-			return
-		}
-		if q != nil {
-			quotes = append(quotes, *q)
-		}
-		resp = r
+	quotes, resp, err := client.Stocks.Quotes(ctx, symbols, stocks.WithQuotesFiftyTwoWeek(true))
+	if err != nil {
+		log.Printf("Error fetching quotes: %v", err)
+		return
 	}
 
 	// Clear screen (ANSI escape)
