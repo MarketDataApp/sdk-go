@@ -77,6 +77,31 @@ func TestUtilities_User(t *testing.T) {
 	t.Logf("User: %s", user)
 }
 
+// TestUtilities_RevokeToken exercises the new DELETE /v1/user/token/
+// endpoint (API release 3.0.0) against a real client, so a signature drift
+// in the implementation breaks this build.
+//
+// It is deliberately never allowed to run to completion: RevokeToken revokes
+// whichever token setupClient resolves, which in this suite is the same
+// shared token every other integration test (and every other pull request's
+// CI run) authenticates with. There is no way to drive the success path
+// here without destroying that credential for every test that runs after
+// it — unlike a missing-token skip (which the SDK conventions treat as a
+// failure, since it silently tests nothing), this skip is unconditional and
+// exists specifically to prevent an otherwise-correct test from making an
+// irreversible change to shared infrastructure. Exercising the success path
+// live needs its own disposable, revocable token, provisioned outside this
+// suite.
+func TestUtilities_RevokeToken(t *testing.T) {
+	t.Skip("RevokeToken would revoke the shared integration-suite token; needs a dedicated disposable token before this can run")
+
+	client := setupClient(t)
+	ctx := testContext(t)
+
+	_, err := client.Utilities.RevokeToken(ctx)
+	assertNoError(t, err, "RevokeToken")
+}
+
 func TestRateLimits_Tracking(t *testing.T) {
 	client := setupClient(t)
 	ctx := testContext(t)

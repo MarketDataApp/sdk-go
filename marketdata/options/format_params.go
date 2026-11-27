@@ -96,6 +96,9 @@ func chainPath(symbol string, opts []ChainOption) (string, url.Values, error) {
 	if cfg.pm != nil {
 		p.Set("pm", formatBool(*cfg.pm))
 	}
+	if cfg.model != "" {
+		p.Set("model", string(cfg.model))
+	}
 
 	return "options/chain/" + http.PathSegment(symbol) + "/", p, nil
 }
@@ -145,6 +148,9 @@ func quotePath(optionSymbol string, opts []QuoteOption) (string, url.Values, err
 			return "", nil, err
 		}
 		w.apply(p)
+	}
+	if cfg.model != "" {
+		p.Set("model", string(cfg.model))
 	}
 
 	return "options/quotes/" + http.PathSegment(optionSymbol) + "/", p, nil

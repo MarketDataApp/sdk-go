@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `(*utilities.Service).RevokeToken` and `GetRevokeToken`: revoke the API token the client is authenticated with, via the new DELETE /v1/user/token/ endpoint (API release 3.0.0). The token is revoked immediately and any subsequent request with this client fails with an AuthenticationError.
+- `options.PricingModel` (new string type), `options.ModelBSM`, `options.ModelBJS`, `options.ModelCRR`, `options.ModelBAW`: select the historical pricing model (Black-Scholes-Merton, Bjerksund-Stensland, Cox-Ross-Rubinstein, Barone-Adesi-Whaley) for `Chain` and `Quote` on historical requests (API release 3.0.0).
+- `options.WithModel` and `options.WithOptionQuoteModel`: functional options to request a specific pricing model when fetching a historical chain or quote (API release 3.0.0).
 - `options.InDTEs(days ...int)`, `options.DTERange(lo, hi int)`, `options.MinDTE(days int)`, and `options.MaxDTE(days int)`: new `options.ExpiryFilter` constructors for the dte parameter's new string-syntax forms — a comma-separated list (`dte=7,30,60`), a range that includes both ends (`dte=30-45`), and at-least / at-most bounds that include the given value (`dte=>=60`, `dte=<=60`) (API release 2.0.0). `options.InDTE(days int)` remains unchanged.
 
 ## [2.0.0] - 2026-09-02

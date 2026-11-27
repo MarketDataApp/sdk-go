@@ -46,7 +46,9 @@ func NewService(httpClient *http.Client) *Service {
 // range. [WithChainDate] requests a historical snapshot as of a day and is
 // independent. Free filters such as [WithSide], [WithStrikeLimit], [WithRange],
 // the bid/ask and liquidity filters, and the expiration-type filters combine
-// freely. See the ChainOption constructors in this package for the complete set.
+// freely. [WithModel] selects the pricing model used to compute iv and the
+// greeks on a historical (WithChainDate) request; see [PricingModel]. See the
+// ChainOption constructors in this package for the complete set.
 //
 // Option values that cannot be encoded in the type system (a strike or delta
 // out of range, a month outside 1..12, a malformed date range) are rejected
@@ -160,7 +162,9 @@ func (s *Service) Expirations(ctx context.Context, symbol string, opts ...Expira
 // to), options.QuoteLastN(n), or options.QuoteLastNUntil(n, to) — to request a
 // historical quote; because it is one value, the API's mutually-exclusive date,
 // from/to, and countback parameters cannot be combined (the API returns HTTP
-// 400 when both a date and a from/to are sent).
+// 400 when both a date and a from/to are sent). The optional
+// [WithOptionQuoteModel] selects the pricing model used to compute iv and the
+// greeks on that historical quote; see [PricingModel].
 //
 // A malformed quote window (a zero date, a from after its to, or a countback
 // at or below zero) is rejected with a [sdkerrors.ValidationError] before any

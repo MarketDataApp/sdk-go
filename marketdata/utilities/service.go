@@ -3,13 +3,16 @@
 // data. [Service.Status] returns an [APIStatus] with the API's current
 // availability and historical uptime statistics, [Service.Headers]
 // echoes back the request headers your application sends (useful for
-// debugging authentication problems), and [Service.User] returns a
+// debugging authentication problems), [Service.User] returns a
 // [UserInfo] describing the authenticated account's API credit state
-// and options data entitlement.
+// and options data entitlement, and [Service.RevokeToken] revokes the
+// token the client is currently authenticated with.
 //
-// All three endpoints are served unversioned: /status/, /headers/, and
-// /user/. See https://www.marketdata.app/docs/api/utilities/status for
-// the API documentation.
+// Status, Headers, and User are served unversioned: /status/, /headers/,
+// and /user/. RevokeToken is versioned instead, at DELETE /v1/user/token/
+// (API release 3.0.0). See
+// https://www.marketdata.app/docs/api/utilities/status for the API
+// documentation.
 package utilities
 
 import (
@@ -164,6 +167,32 @@ func (s *Service) User(ctx context.Context) (*UserInfo, *response.Response, erro
 	return data, response.New(httpResp), nil
 }
 
+// RevokeToken revokes the API token the client is currently authenticated
+// with, from the versioned DELETE /v1/user/token/ endpoint (API release
+// 3.0.0) — unlike Status, Headers, and User, which are served unversioned.
+// It takes no parameters and no functional options.
+//
+// The caller's own token is revoked for every call, with no way to name a
+// different one: a revoked token stops authenticating immediately, so any
+// further request made with this client (including a retry) fails with an
+// [AuthenticationError].
+//
+// API documentation: https://www.marketdata.app/docs/api/utilities/token
+//
+// Example:
+//
+//	_, err := client.Utilities.RevokeToken(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+func (s *Service) RevokeToken(ctx context.Context) (*response.Response, error) {
+	httpResp, err := s.http.Delete(ctx, "user/token/", nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	return response.New(httpResp), nil
+}
+
 // --- Convenience methods (no context, no *Response) ---
 
 // GetStatus is a convenience wrapper around [Service.Status] that uses
@@ -197,4 +226,15 @@ func (s *Service) GetHeaders() (*Headers, error) {
 func (s *Service) GetUser() (*UserInfo, error) {
 	u, _, err := s.User(context.Background())
 	return u, err
+}
+
+// GetRevokeToken is a convenience wrapper around [Service.RevokeToken] that
+// uses context.Background() and discards the response metadata. Use
+// RevokeToken directly when you need request cancellation, deadlines, or
+// access to the Response.
+//
+// API documentation: https://www.marketdata.app/docs/api/utilities/token
+func (s *Service) GetRevokeToken() error {
+	_, err := s.RevokeToken(context.Background())
+	return err
 }

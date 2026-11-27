@@ -69,3 +69,20 @@ func ExampleService_User() {
 	}
 	fmt.Println(user)
 }
+
+// ExampleService_RevokeToken is compile-checked only, like every example in
+// this file (see the package comment): it is never executed by `go test`,
+// since calling it for real would revoke whichever token the caller is
+// authenticated with.
+func ExampleService_RevokeToken() {
+	client, err := marketdata.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = client.Close() }()
+
+	_, err = client.Utilities.RevokeToken(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+}

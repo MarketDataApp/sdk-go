@@ -49,6 +49,7 @@ func TestChainPath_AllFilters(t *testing.T) {
 		WithMaxBidAskSpread(0.5), WithMaxBidAskSpreadPct(10),
 		WithMinOpenInterest(100), WithMinVolume(50),
 		WithNonstandard(true), WithAM(true), WithPM(false),
+		WithModel(ModelCRR),
 	})
 	if err != nil {
 		t.Fatalf("chainPath() error = %v", err)
@@ -62,6 +63,7 @@ func TestChainPath_AllFilters(t *testing.T) {
 		"maxBidAskSpread": "0.5", "maxBidAskSpreadPct": "10",
 		"minOpenInterest": "100", "minVolume": "50",
 		"nonstandard": "true", "am": "true", "pm": "false",
+		"model": "crr",
 	}
 	for k, v := range want {
 		if got := params.Get(k); got != v {
@@ -130,12 +132,16 @@ func TestQuotePath_EmptySymbol(t *testing.T) {
 func TestQuotePath_ValidWindow(t *testing.T) {
 	_, params, err := quotePath("AAPL250117C00150000", []QuoteOption{
 		WithOptionQuoteWindow(QuoteOnDate(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC))),
+		WithOptionQuoteModel(ModelBAW),
 	})
 	if err != nil {
 		t.Fatalf("quotePath() error = %v", err)
 	}
 	if params.Get("date") != "2024-06-01" {
 		t.Errorf("params = %v, want date=2024-06-01", params)
+	}
+	if params.Get("model") != "baw" {
+		t.Errorf("params = %v, want model=baw", params)
 	}
 }
 

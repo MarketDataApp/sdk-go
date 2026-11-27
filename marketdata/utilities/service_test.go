@@ -542,3 +542,62 @@ func TestToUserInfo_EntitlementsFromHeader(t *testing.T) {
 		}
 	})
 }
+
+// TestRevokeToken pins the new DELETE /v1/user/token/ endpoint (API release
+// 3.0.0): it must issue a DELETE, to the versioned "user/token/" path (unlike
+// Status/Headers/User, which are unversioned), and report success with no
+// error when the API confirms the revocation.
+func TestRevokeToken(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("Method = %q, want DELETE", r.Method)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "ok"})
+	})
+
+	svc := newTestService(handler)
+	_, err := svc.RevokeToken(context.Background())
+	if err != nil {
+		t.Fatalf("RevokeToken() error = %v", err)
+	}
+}
+
+// TestRevokeToken_HTTPError asserts a failed revocation (for example an
+// already-invalid token) surfaces the same typed error taxonomy as every
+// other service method, rather than being swallowed as a no-data result.
+func TestRevokeToken_HTTPError(t *testing.T) {
+	svc := newTestService(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "error", "errmsg": "Invalid token"})
+	}))
+	_, err := svc.RevokeToken(context.Background())
+	if err == nil {
+		t.Fatal("RevokeToken() should return error for HTTP error")
+	}
+	if _, ok := err.(*sdkerrors.AuthenticationError); !ok {
+		t.Fatalf("error type = %T, want *sdkerrors.AuthenticationError", err)
+	}
+}
+
+func TestGetRevokeToken(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "ok"})
+	})
+
+	svc := newTestService(handler)
+	if err := svc.GetRevokeToken(); err != nil {
+		t.Fatalf("GetRevokeToken() error = %v", err)
+	}
+}
+
+func TestGetRevokeToken_HTTPError(t *testing.T) {
+	svc := newTestService(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "error", "errmsg": "Invalid token"})
+	}))
+	if err := svc.GetRevokeToken(); err == nil {
+		t.Fatal("GetRevokeToken() should return error for HTTP error")
+	}
+}

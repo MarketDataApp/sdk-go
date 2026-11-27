@@ -87,6 +87,16 @@ Any `dte` form combined with `options.WithExpirationTypes` is narrowed to whatev
 - `options.WithMinOpenInterest(min int)` — minimum open interest, filtering out thinly held contracts.
 - `options.WithMinVolume(min int)` — minimum trading volume, filtering out thinly traded contracts.
 
+#### Pricing model (historical requests)
+
+- `options.WithModel(m PricingModel)` — the pricing model for `iv` and the greeks on a historical request (one that also sets `WithChainDate`). One of:
+  - `options.ModelBSM` — Black-Scholes-Merton, pricing every contract.
+  - `options.ModelBJS` — Bjerksund-Stensland 2002, pricing American contracts (European contracts keep BSM).
+  - `options.ModelCRR` — a Cox-Ross-Rubinstein binomial tree, pricing American contracts (European contracts keep BSM).
+  - `options.ModelBAW` — Barone-Adesi-Whaley, pricing American contracts (European contracts keep BSM).
+
+  Leaving this option off is not the same as naming a model: by default American contracts are priced with BJS and European contracts with BSM, with broker conventions layered on top (a contract without a bid is priced from half its ask, a contract priced at or below the model's floor gets the greeks of an option with no time value, a contract on its expiration day gets its greeks at expiration, and delta stays within `[-1, 1]`). Naming a model returns that model's own output instead: those contracts get null `iv`/greeks where the model has none, and `delta` is whatever the named model computes.
+
 ### Returns
 
 - `*OptionsChain` — the chain and its contracts. `nil` when there is no data (see Notes).
@@ -101,6 +111,7 @@ Any `dte` form combined with `options.WithExpirationTypes` is narrowed to whatev
 - **Historical snapshot vs. expiration range.** `WithChainDate` requests the chain *as of* a single day and is independent of the expiration selector. A `from`/`to` date range filters *expirations*, not history — use `options.ExpirationBetween` via `WithExpiry` for that.
 - **Validation happens before the network call.** A strike or delta out of range, a dte value outside 0..36500, an empty dte list, a dte range whose low end exceeds its high end, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made. `InDTE` predates the 36500-day cap and keeps accepting any zero-or-greater value, unchanged.
 - **No-data behavior.** If the API has no data for the request (HTTP 404), `Chain` returns a `nil` chain, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` chain before use.
+- **`WithModel` needs a historical request.** The API requires `WithChainDate` whenever a model is named, and rejects a request that sets `WithModel` without it with HTTP 400. The SDK sends the parameter as given and does not pre-validate the combination, the same way it does not pre-validate any other parameter combination the API itself rejects. The model is also plan-gated: the API answers HTTP 402 on a plan that does not include it.
 - Requesting a full chain for a large underlying (SPX, SPY, QQQ) can return tens of thousands of contracts; narrow with filters to control credit usage.
 
 ### Get (simple)
@@ -277,6 +288,27 @@ if err != nil {
 }
 if chain != nil {
 	fmt.Printf("%d contracts as of the snapshot date\n", len(chain.Options))
+}
+```
+
+### Pricing model
+
+```go
+ctx := context.Background()
+
+// The chain as of 30 days ago, priced with Barone-Adesi-Whaley instead of
+// the API's default model for American contracts.
+chain, _, err := client.Options.Chain(ctx, "AAPL",
+	options.WithChainDate(time.Now().AddDate(0, 0, -30)),
+	options.WithModel(options.ModelBAW),
+)
+if err != nil {
+	log.Fatal(err)
+}
+if chain != nil {
+	for _, o := range chain.Options {
+		fmt.Printf("%s  IV: %.4f  Delta: %.4f\n", o.OptionSymbol, o.IV, o.Delta)
+	}
 }
 ```
 
