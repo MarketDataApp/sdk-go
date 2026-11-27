@@ -40,7 +40,7 @@ combinations cannot be written.
   - `options.OnExpiration(t time.Time)` — a single expiration date (`expiration=YYYY-MM-DD`). Only the calendar date is used; must not be zero.
   - `options.InDTE(days int)` — the expiration closest to `days` days to expiry (`dte=days`), counted from today, or from `WithChainDate`'s date when that option is also set. `days` must be zero or greater.
   - `options.InDTEs(days ...int)` — the expiration closest to EACH of the given days-to-expiry values, deduplicated by the API (`dte=d1,d2,...`), each counted the same way as `InDTE`. At least one value is required, and every value must be zero or greater and at most 36500 days.
-  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry, counted the same way as `InDTE`, falls within an inclusive bound (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500 days, and `lo` must not exceed `hi`.
+  - `options.DTERange(lo, hi int)` — every expiration whose days-to-expiry, counted the same way as `InDTE`, is from `lo` to `hi`, both included (`dte=lo-hi`). Both bounds must be zero or greater and at most 36500 days, and `lo` must not exceed `hi`.
   - `options.MinDTE(days int)` — every expiration at least `days` days to expiry (`dte=>=days`), counted the same way as `InDTE`. `days` must be zero or greater and at most 36500.
   - `options.MaxDTE(days int)` — every expiration at most `days` days to expiry (`dte=<=days`), counted the same way as `InDTE`. `days` must be zero or greater and at most 36500.
   - `options.InMonth(month int)` — contracts expiring in the given calendar month across all years (`month=month`); `month` is 1 through 12.
@@ -99,7 +99,7 @@ Any `dte` form combined with `options.WithExpirationTypes` is narrowed to whatev
 - **Include vs. exclude expiration types is also compile-time exclusive.** A single `ExpirationTypeFilter` is either an include set or an exclude set, so the API's forbidden `weekly=true&monthly=false` mix cannot be produced.
 - **`am`/`pm` are index-only.** They filter settlement style only for index options; on stocks and ETFs the API tolerates them without effect.
 - **Historical snapshot vs. expiration range.** `WithChainDate` requests the chain *as of* a single day and is independent of the expiration selector. A `from`/`to` date range filters *expirations*, not history — use `options.ExpirationBetween` via `WithExpiry` for that.
-- **Validation happens before the network call.** A strike or delta out of range, a dte value outside 0..36500 or an inverted/empty dte list or range, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made. `InDTE` predates the 36500-day cap and keeps accepting any zero-or-greater value, unchanged.
+- **Validation happens before the network call.** A strike or delta out of range, a dte value outside 0..36500, an empty dte list, a dte range whose low end exceeds its high end, a month outside 1..12, a year before 1900, or a malformed date range is rejected with a `marketdata.ValidationError` before any request is made. `InDTE` predates the 36500-day cap and keeps accepting any zero-or-greater value, unchanged.
 - **No-data behavior.** If the API has no data for the request (HTTP 404), `Chain` returns a `nil` chain, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` chain before use.
 - Requesting a full chain for a large underlying (SPX, SPY, QQQ) can return tens of thousands of contracts; narrow with filters to control credit usage.
 
@@ -207,7 +207,7 @@ for _, o := range chain.Options {
 ```go
 ctx := context.Background()
 
-// Every expiration within 30 to 45 days out — a "monthly roll" window.
+// Every expiration 30 to 45 days out, both included — a "monthly roll" window.
 chain, _, err := client.Options.Chain(ctx, "AAPL",
 	options.WithExpiry(options.DTERange(30, 45)),
 	options.WithSide(options.SideCall),

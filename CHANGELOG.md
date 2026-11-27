@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- `options.InDTEs(days ...int)`, `options.DTERange(lo, hi int)`, `options.MinDTE(days int)`, and `options.MaxDTE(days int)`: new [ExpiryFilter] constructors for the dte parameter's new string-syntax forms — comma-separated list, closed range, and >= / <= comparisons (API release 2.0.0). `options.InDTE(days int)` remains unchanged.
+- `options.InDTEs(days ...int)`, `options.DTERange(lo, hi int)`, `options.MinDTE(days int)`, and `options.MaxDTE(days int)`: new `options.ExpiryFilter` constructors for the dte parameter's new string-syntax forms — a comma-separated list (`dte=7,30,60`), a range that includes both ends (`dte=30-45`), and at-least / at-most bounds that include the given value (`dte=>=60`, `dte=<=60`) (API release 2.0.0). `options.InDTE(days int)` remains unchanged.
 
 ## [2.0.0] - 2026-09-02
 

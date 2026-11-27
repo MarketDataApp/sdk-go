@@ -272,7 +272,7 @@ func (p strikeParams) apply(v url.Values) {
 //	OnExpiration(t)        // a single expiration date     -> expiration=YYYY-MM-DD
 //	InDTE(days)            // the expiry nearest days out   -> dte=days
 //	InDTEs(days...)        // the expiry nearest EACH value -> dte=d1,d2,...
-//	DTERange(lo, hi)       // every expiry within a range   -> dte=lo-hi
+//	DTERange(lo, hi)       // every expiry from lo to hi    -> dte=lo-hi
 //	MinDTE(days)           // every expiry at or above days -> dte=>=days
 //	MaxDTE(days)           // every expiry at or below days -> dte=<=days
 //	InMonth(month)         // every year's given month      -> month=month
@@ -379,7 +379,7 @@ func InDTEs(days ...int) ExpiryFilter {
 }
 
 // DTERange limits the chain to every expiration whose days-to-expiry, counted
-// from today or from [WithChainDate]'s date, falls within an inclusive bound
+// from today or from [WithChainDate]'s date, is from lo to hi, both included
 // (dte=lo-hi); see [InDTE] for how dte interacts with [WithExpirationTypes].
 // Both bounds must be zero or greater and at most 36500 days, and lo must not
 // exceed hi.
