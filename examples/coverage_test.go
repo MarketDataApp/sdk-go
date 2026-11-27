@@ -45,6 +45,7 @@ var selectorPattern = regexp.MustCompile(`client\.(Stocks|Options|Funds|Markets|
 // method it had never been told about. The set is now derived from the SDK
 // source, which turns "silently absent" into "must be explicitly decided".
 var exemptMethods = map[string]string{
+	"Utilities.RevokeToken": "revokes whichever token the demo app is running with; wiring it into an interactive TUI would let a casual keypress permanently log the user's real token out",
 	"Options.QuoteHistory":   "a historical window for one contract; optionterm shows the live chain and a pinned contract, neither of which is a time series",
 	"Options.QuotesBySymbol": "a batch keyed by underlying; optionterm works one underlying at a time, so the batch form has no screen",
 	"Options.LookupQuery":    "free-form contract lookup; optionterm's [/] lookup uses the typed Lookup, which is the form its input fields collect",

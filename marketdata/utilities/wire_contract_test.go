@@ -93,3 +93,15 @@ func TestWireContract_User(t *testing.T) {
 		t.Errorf("OptionsDataPermissions = %q, want realtime", user.OptionsDataPermissions)
 	}
 }
+
+// TestWireContract_RevokeToken is the response test for the new DELETE
+// /v1/user/token/ endpoint (API release 3.0.0): a canned {"s":"ok"} body,
+// the shape every typed method already treats as success, must not produce
+// an error.
+func TestWireContract_RevokeToken(t *testing.T) {
+	svc := newTestService(fixtureHandler(t, "token.json", nil))
+	_, err := svc.RevokeToken(context.Background())
+	if err != nil {
+		t.Fatalf("RevokeToken() error = %v", err)
+	}
+}

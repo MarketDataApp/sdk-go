@@ -948,6 +948,63 @@ func (c *Client) get(ctx context.Context, path string, params url.Values, result
 	return resp, nil
 }
 
+// Delete executes a DELETE request and decodes the JSON response, logging
+// any terminal failure at ERROR (see logTerminalFailure).
+//
+// It shares Get's status classification (the same >=400 mapping, through the
+// same apiError) but not Get's NoData handling: a GET's 404 can mean "a
+// valid question with an empty answer", which services translate into a
+// no-data result rather than an error, but a DELETE has no such reading — a
+// 404 here always means the question itself was invalid (the API release
+// that introduced the first DELETE endpoint, 3.0.0's /v1/user/token/, gives
+// no indication otherwise) — so every >=400 status, 404 included, is
+// reported as an error. result may be nil when the caller has nothing to
+// decode, which is also why a response with an empty body is tolerated
+// rather than treated as a decode failure.
+func (c *Client) Delete(ctx context.Context, path string, params url.Values, result any) (*Response, error) {
+	resp, err := c.delete(ctx, path, params, result)
+	if err != nil {
+		c.logTerminalFailure(ctx, err)
+	}
+	return resp, err
+}
+
+func (c *Client) delete(ctx context.Context, path string, params url.Values, result any) (*Response, error) {
+	resp, err := c.Do(ctx, Request{
+		Method:          http.MethodDelete,
+		Path:            path,
+		Params:          params,
+		RequiredColumns: requiredColumns(result),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	requestURL := resp.wireURL(c.buildURL(path, params))
+
+	if resp.StatusCode >= 400 {
+		return resp, c.apiError(resp, requestURL)
+	}
+
+	if result != nil && len(resp.Body) > 0 {
+		if err := json.Unmarshal(resp.Body, result); err != nil {
+			return resp, &sdkerrors.ParseError{
+				SupportContext: sdkerrors.SupportContext{
+					RequestID:     resp.RequestID,
+					RequestURL:    requestURL,
+					StatusCode:    resp.StatusCode,
+					Timestamp:     time.Now().In(timezone.Eastern),
+					Message:       err.Error(),
+					ExceptionType: "ParseError",
+				},
+				Cause: err,
+			}
+		}
+	}
+
+	return resp, nil
+}
+
 // GetUnversioned executes a GET request without API version prefix.
 // Used for endpoints like /status/ that are not versioned. Logs any
 // terminal failure at ERROR (see logTerminalFailure).

@@ -3,6 +3,7 @@
 package integration
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -533,4 +534,121 @@ func TestOptions_Lookup_Put(t *testing.T) {
 	assertNoError(t, err, "Quote for put")
 	assertNotNil(t, quote, "quote should not be nil")
 	assertEqual(t, quote.Type, options.Put, "option should be a put")
+}
+
+// chainBySymbol indexes a chain's contracts by OCC symbol, so two chain
+// snapshots fetched under different pricing models can be compared contract
+// by contract.
+func chainBySymbol(chain *options.OptionsChain) map[string]options.OptionQuote {
+	m := make(map[string]options.OptionQuote, len(chain.Options))
+	for _, o := range chain.Options {
+		m[o.OptionSymbol] = o
+	}
+	return m
+}
+
+// TestOptions_Chain_Model asserts live that the model parameter (API release
+// 3.0.0) reaches the API and changes the computed iv/delta: a historical
+// chain priced under one named model must differ, for at least one contract
+// both snapshots list, from the same chain priced under another. The
+// comparison is always between two EXPLICIT model values — bjs is sent on
+// both sides — never between an explicit value and the unfiltered (no model)
+// call, so it cannot be satisfied by whichever model the API happens to
+// default to for this underlying.
+func TestOptions_Chain_Model(t *testing.T) {
+	client := setupClient(t)
+	ctx := testContext(t)
+
+	bjs, _, err := client.Options.Chain(ctx, TestStockSymbol,
+		options.WithChainDate(liveHistDay), options.WithModel(options.ModelBJS))
+	assertNoError(t, err, "Chain with model=bjs")
+	assertNotNil(t, bjs, "bjs chain should not be nil")
+	assertNotEmpty(t, bjs.Options, "bjs chain should not be empty")
+	bjsBySymbol := chainBySymbol(bjs)
+
+	for _, tc := range []struct {
+		name string
+		m    options.PricingModel
+	}{
+		{"BSM", options.ModelBSM},
+		{"CRR", options.ModelCRR},
+		{"BAW", options.ModelBAW},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, _, err := client.Options.Chain(ctx, TestStockSymbol,
+				options.WithChainDate(liveHistDay), options.WithModel(tc.m))
+			assertNoError(t, err, "Chain with model="+string(tc.m))
+			assertNotNil(t, got, "chain should not be nil")
+			assertNotEmpty(t, got.Options, "chain should not be empty")
+
+			differs := false
+			for _, o := range got.Options {
+				b, ok := bjsBySymbol[o.OptionSymbol]
+				if !ok {
+					continue
+				}
+				if math.Abs(o.IV-b.IV) > 1e-9 || math.Abs(o.Delta-b.Delta) > 1e-9 {
+					differs = true
+					break
+				}
+			}
+			if !differs {
+				t.Errorf("model=%s produced the same iv/delta as model=bjs for every matching contract — "+
+					"the model parameter may not be reaching the API", tc.m)
+			}
+		})
+	}
+}
+
+// TestOptions_Quote_Model is TestOptions_Chain_Model for a single-contract
+// historical quote: model must reach options/quotes too, and change the
+// computed iv/delta relative to an explicit model=bjs request for the same
+// contract and date.
+func TestOptions_Quote_Model(t *testing.T) {
+	client := setupClient(t)
+	ctx := testContext(t)
+
+	// Resolve a contract that actually existed on liveHistDay from a
+	// historical chain snapshot, rather than guessing a symbol. A put is
+	// preferred: early-exercise premium (where the named models disagree
+	// most) is usually more pronounced there than in a call.
+	chain, _, err := client.Options.Chain(ctx, TestStockSymbol, options.WithChainDate(liveHistDay))
+	assertNoError(t, err, "Chain for quote model fixture")
+	assertNotNil(t, chain, "chain should not be nil")
+	assertNotEmpty(t, chain.Options, "chain should not be empty")
+	occSymbol := chain.Options[0].OptionSymbol
+	for _, o := range chain.Options {
+		if o.Type == options.Put {
+			occSymbol = o.OptionSymbol
+			break
+		}
+	}
+
+	bjs, _, err := client.Options.Quote(ctx, occSymbol,
+		options.WithOptionQuoteWindow(options.QuoteOnDate(liveHistDay)),
+		options.WithOptionQuoteModel(options.ModelBJS))
+	assertNoError(t, err, "Quote with model=bjs")
+	assertNotNil(t, bjs, "bjs quote should not be nil")
+
+	for _, tc := range []struct {
+		name string
+		m    options.PricingModel
+	}{
+		{"BSM", options.ModelBSM},
+		{"CRR", options.ModelCRR},
+		{"BAW", options.ModelBAW},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, _, err := client.Options.Quote(ctx, occSymbol,
+				options.WithOptionQuoteWindow(options.QuoteOnDate(liveHistDay)),
+				options.WithOptionQuoteModel(tc.m))
+			assertNoError(t, err, "Quote with model="+string(tc.m))
+			assertNotNil(t, got, "quote should not be nil")
+
+			if math.Abs(got.IV-bjs.IV) <= 1e-9 && math.Abs(got.Delta-bjs.Delta) <= 1e-9 {
+				t.Errorf("model=%s produced the same iv/delta as model=bjs — "+
+					"the model parameter may not be reaching the API", tc.m)
+			}
+		})
+	}
 }

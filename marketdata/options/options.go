@@ -721,6 +721,55 @@ func QuoteLastNUntil(n int, to time.Time) OptionQuoteWindow {
 }
 
 // ---------------------------------------------------------------------------
+// PricingModel — the historical pricing model, shared by Chain and Quote.
+// ---------------------------------------------------------------------------
+
+// PricingModel selects the pricing model the API uses to compute iv and the
+// greeks on a historical [Service.Chain] request (one that sets
+// [WithChainDate]) or a historical [Service.Quote]/[Service.QuoteHistory]
+// request (one whose [OptionQuoteWindow] sets date, from, or to), passed to
+// [WithModel] and [WithOptionQuoteModel] respectively. It is a closed set of
+// API keywords rather than a free string, so a typo cannot reach the wire as
+// a silently-ignored parameter — the same reasoning as [Moneyness].
+//
+// [ModelBSM] (Black-Scholes-Merton) prices every contract. [ModelBJS]
+// (Bjerksund-Stensland 2002), [ModelCRR] (Cox-Ross-Rubinstein binomial tree),
+// and [ModelBAW] (Barone-Adesi-Whaley) price the American contracts, and the
+// European contracts keep BSM.
+//
+// Leaving the parameter unset (the zero value, or simply not calling
+// [WithModel]/[WithOptionQuoteModel]) is not the same as naming a model
+// explicitly: by default, American contracts use BJS and European contracts
+// use BSM, with broker conventions applied on top (a contract without a bid
+// is priced from half its ask, a contract priced at or below the model's
+// floor gets the greeks of an option with no time value, a contract on its
+// expiration day gets its greeks at expiration, and delta stays within
+// [-1, 1]). Naming a model explicitly returns that model's own output
+// instead: those contracts get null iv/greeks where the model has no value
+// for them, and delta is whatever the named model computes, without the
+// broker conventions above.
+//
+// A historical request that omits the required date (on Chain) or
+// date/from/to (on Quote and QuoteHistory) is rejected by the API with HTTP
+// 400 when a model is set; the SDK sends the parameter as given and does not
+// pre-validate the combination — see [Service.Chain] and [Service.Quote].
+type PricingModel string
+
+const (
+	// ModelBSM prices every contract with Black-Scholes-Merton.
+	ModelBSM PricingModel = "bsm"
+	// ModelBJS prices American contracts with Bjerksund-Stensland 2002
+	// (European contracts keep BSM).
+	ModelBJS PricingModel = "bjs"
+	// ModelCRR prices American contracts with a Cox-Ross-Rubinstein binomial
+	// tree (European contracts keep BSM).
+	ModelCRR PricingModel = "crr"
+	// ModelBAW prices American contracts with Barone-Adesi-Whaley (European
+	// contracts keep BSM).
+	ModelBAW PricingModel = "baw"
+)
+
+// ---------------------------------------------------------------------------
 // Chain options.
 // ---------------------------------------------------------------------------
 
@@ -764,6 +813,7 @@ type chainOptions struct {
 	nonstandard        *bool
 	am                 *bool
 	pm                 *bool
+	model              PricingModel
 }
 
 func defaultChainOptions() *chainOptions {
@@ -1011,6 +1061,18 @@ func WithPM(pm bool) ChainOption {
 	})
 }
 
+// WithModel sets the pricing model for a historical chain's (one that also
+// sets [WithChainDate]) iv and greeks, using one of [ModelBSM], [ModelBJS],
+// [ModelCRR], or [ModelBAW]. See [PricingModel] for what each model computes
+// and how an explicit model's output differs from the default. Leaving this
+// option off is not the same as any one of the four values — see
+// [PricingModel].
+func WithModel(m PricingModel) ChainOption {
+	return chainOptionFunc(func(o *chainOptions) {
+		o.model = m
+	})
+}
+
 // ---------------------------------------------------------------------------
 // Expiration options.
 // ---------------------------------------------------------------------------
@@ -1070,6 +1132,7 @@ func (f quoteOptionFunc) apply(o *quoteOptions) {
 
 type quoteOptions struct {
 	window OptionQuoteWindow
+	model  PricingModel
 }
 
 // WithOptionQuoteWindow requests a historical quote for a single contract from
@@ -1079,5 +1142,17 @@ type quoteOptions struct {
 func WithOptionQuoteWindow(w OptionQuoteWindow) QuoteOption {
 	return quoteOptionFunc(func(o *quoteOptions) {
 		o.window = w
+	})
+}
+
+// WithOptionQuoteModel sets the pricing model for a historical quote's (one
+// whose [OptionQuoteWindow] sets date, from, or to) iv and greeks, using one
+// of [ModelBSM], [ModelBJS], [ModelCRR], or [ModelBAW]. See [PricingModel]
+// for what each model computes and how an explicit model's output differs
+// from the default. Leaving this option off is not the same as any one of
+// the four values — see [PricingModel].
+func WithOptionQuoteModel(m PricingModel) QuoteOption {
+	return quoteOptionFunc(func(o *quoteOptions) {
+		o.model = m
 	})
 }

@@ -2464,3 +2464,160 @@ func TestOptionQuote_DecodesRho(t *testing.T) {
 		t.Errorf("Rho = %v, want 0 when the API omits it", q2.Rho)
 	}
 }
+
+// TestChain_ModelIsTyped pins the chain's pricing model query parameter (API
+// release 3.0.0): a closed set of API keywords selecting the pricing model
+// used for iv and the greeks on a historical (date) request. One wire test
+// per accepted value, as the Moneyness precedent (TestChain_MoneynessIsTyped)
+// already established for this package's other closed-set parameters.
+func TestChain_ModelIsTyped(t *testing.T) {
+	cases := []struct {
+		name string
+		m    PricingModel
+		want string
+	}{
+		{"BSM", ModelBSM, "bsm"},
+		{"BJS", ModelBJS, "bjs"},
+		{"CRR", ModelCRR, "crr"},
+		{"BAW", ModelBAW, "baw"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if got := r.URL.Query().Get("model"); got != tc.want {
+					t.Errorf("model = %q, want %q", got, tc.want)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{}})
+			})
+			svc := newTestService(handler)
+			if _, _, err := svc.Chain(context.Background(), "AAPL", WithModel(tc.m)); err != nil {
+				t.Fatalf("Chain() error = %v", err)
+			}
+		})
+	}
+
+	// Omitting WithModel leaves the parameter off entirely (today's
+	// behavior, unchanged by adding the option).
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Has("model") {
+			t.Errorf("model = %q, want the parameter absent", r.URL.Query().Get("model"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{}})
+	})
+	svc := newTestService(handler)
+	if _, _, err := svc.Chain(context.Background(), "AAPL"); err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+// TestChain_WithModelAndDate asserts model combines with the chain's
+// historical "as of" date, the parameter model is documented against.
+func TestChain_WithModelAndDate(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("model") != "crr" {
+			t.Errorf("model = %q, want crr", q.Get("model"))
+		}
+		if q.Get("date") != "2024-01-15" {
+			t.Errorf("date = %q, want 2024-01-15", q.Get("date"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{}})
+	})
+
+	svc := newTestService(handler)
+	date := time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC)
+	_, _, err := svc.Chain(context.Background(), "AAPL", WithChainDate(date), WithModel(ModelCRR))
+	if err != nil {
+		t.Fatalf("Chain() error = %v", err)
+	}
+}
+
+func TestWithModel_StoresModel(t *testing.T) {
+	opts := defaultChainOptions()
+	WithModel(ModelCRR).apply(opts)
+	if opts.model != ModelCRR {
+		t.Errorf("model = %q, want %q", opts.model, ModelCRR)
+	}
+}
+
+// TestQuote_ModelIsTyped pins the single-contract quote's pricing model query
+// parameter (API release 3.0.0), the same closed set of keywords as the
+// chain's, one wire test per accepted value.
+func TestQuote_ModelIsTyped(t *testing.T) {
+	cases := []struct {
+		name string
+		m    PricingModel
+		want string
+	}{
+		{"BSM", ModelBSM, "bsm"},
+		{"BJS", ModelBJS, "bjs"},
+		{"CRR", ModelCRR, "crr"},
+		{"BAW", ModelBAW, "baw"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if got := r.URL.Query().Get("model"); got != tc.want {
+					t.Errorf("model = %q, want %q", got, tc.want)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{"AAPL230120C00150000"}})
+			})
+			svc := newTestService(handler)
+			if _, _, err := svc.Quote(context.Background(), "AAPL230120C00150000", WithOptionQuoteModel(tc.m)); err != nil {
+				t.Fatalf("Quote() error = %v", err)
+			}
+		})
+	}
+
+	// Omitting WithOptionQuoteModel leaves the parameter off entirely.
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Has("model") {
+			t.Errorf("model = %q, want the parameter absent", r.URL.Query().Get("model"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{"AAPL230120C00150000"}})
+	})
+	svc := newTestService(handler)
+	if _, _, err := svc.Quote(context.Background(), "AAPL230120C00150000"); err != nil {
+		t.Fatalf("Quote() error = %v", err)
+	}
+}
+
+// TestQuote_WithModelAndWindow asserts model combines with the quote's
+// historical window, the parameter model is documented against (date, from,
+// or to).
+func TestQuote_WithModelAndWindow(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("model") != "baw" {
+			t.Errorf("model = %q, want baw", q.Get("model"))
+		}
+		if q.Get("date") != "2024-01-15" {
+			t.Errorf("date = %q, want 2024-01-15", q.Get("date"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"s": "ok", "optionSymbol": []string{"AAPL230120C00150000"}})
+	})
+
+	svc := newTestService(handler)
+	date := time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC)
+	_, _, err := svc.Quote(context.Background(), "AAPL230120C00150000",
+		WithOptionQuoteWindow(QuoteOnDate(date)),
+		WithOptionQuoteModel(ModelBAW),
+	)
+	if err != nil {
+		t.Fatalf("Quote() error = %v", err)
+	}
+}
+
+func TestWithOptionQuoteModel_StoresModel(t *testing.T) {
+	opts := &quoteOptions{}
+	WithOptionQuoteModel(ModelBAW).apply(opts)
+	if opts.model != ModelBAW {
+		t.Errorf("model = %q, want %q", opts.model, ModelBAW)
+	}
+}

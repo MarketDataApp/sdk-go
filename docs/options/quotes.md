@@ -35,6 +35,7 @@ option symbol is required.
   - `options.WithOptionQuoteWindow(w OptionQuoteWindow)` — request a historical quote from a single [`OptionQuoteWindow`](#optionquotewindow) value. Omitting it returns the current quote. Build the window with exactly one of:
     - `options.QuoteOnDate(t time.Time)` — the contract's quote on a single historical date (`date=YYYY-MM-DD`).
     - `options.QuoteRange(from, to time.Time)` — the contract's quotes across an explicit date range (`from=...&to=...`).
+  - `options.WithOptionQuoteModel(m PricingModel)` — the pricing model for `iv` and the greeks on a historical request (one that also sets `WithOptionQuoteWindow`). One of `options.ModelBSM`, `options.ModelBJS`, `options.ModelCRR`, or `options.ModelBAW` — see [the chain's pricing model section](./chain.md#pricing-model-historical-requests) for what each computes. Leaving it off is not the same as naming a model; see that section for the default.
 
 ### Returns
 
@@ -47,6 +48,7 @@ option symbol is required.
 - **The date window is compile-time exclusive.** Because `OptionQuoteWindow` is a single sealed-union value, the API's mutually-exclusive `date` and `from`/`to` parameters can never be combined by mistake (sending both returns HTTP 400).
 - **Validation happens before the network call.** A zero date, or a `from` after its `to`, is rejected with a `marketdata.ValidationError` before any request is made.
 - **No-data behavior.** If the API has no data for the request (HTTP 404), `Quote` returns a `nil` quote, a response whose `NoData` field is `true`, and a `nil` error. Check for a `nil` quote before use.
+- **`WithOptionQuoteModel` needs a historical request.** The API requires `WithOptionQuoteWindow` (date, from, or to) whenever a model is named, and rejects a request that sets the model without one with HTTP 400. The SDK sends the parameter as given and does not pre-validate the combination. The model is also plan-gated: the API answers HTTP 402 on a plan that does not include it.
 
 ## Quotes
 
@@ -168,6 +170,26 @@ if err != nil {
 	log.Fatal(err)
 }
 _ = series
+```
+
+### Pricing model
+
+```go
+ctx := context.Background()
+
+// A historical quote priced with Barone-Adesi-Whaley instead of the API's
+// default model for an American contract.
+quote, _, err := client.Options.Quote(ctx, "AAPL271217C00250000",
+	options.WithOptionQuoteWindow(options.QuoteOnDate(
+		time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC))),
+	options.WithOptionQuoteModel(options.ModelBAW),
+)
+if err != nil {
+	log.Fatal(err)
+}
+if quote != nil {
+	fmt.Printf("IV: %.4f  Delta: %.4f\n", quote.IV, quote.Delta)
+}
 ```
 
 ### Multiple symbols

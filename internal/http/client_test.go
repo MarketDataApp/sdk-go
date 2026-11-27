@@ -1456,6 +1456,140 @@ func TestClient_Get_404(t *testing.T) {
 	}
 }
 
+// TestClient_Delete_Success pins the DELETE verb and the versioned path (API
+// release 3.0.0 adds DELETE /v1/user/token/, the first non-GET method the SDK
+// issues) together with ordinary JSON decoding of the response body.
+func TestClient_Delete_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("Method = %q, want DELETE", r.Method)
+		}
+		if r.URL.Path != "/v1/user/token/" {
+			t.Errorf("Path = %q, want /v1/user/token/", r.URL.Path)
+		}
+		if r.Header.Get("Authorization") == "" {
+			t.Error("Authorization header missing")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "ok"})
+	}))
+	defer server.Close()
+
+	client := New(Config{
+		BaseURL:    server.URL,
+		APIVersion: "v1",
+		Token:      "test-key",
+		RetryCfg:   retry.DefaultConfig(),
+		RateLimits: ratelimit.New(),
+	})
+
+	var result struct {
+		Status string `json:"s"`
+	}
+	_, err := client.Delete(context.Background(), "user/token/", nil, &result)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if result.Status != "ok" {
+		t.Errorf("Status = %q, want ok", result.Status)
+	}
+}
+
+// TestClient_Delete_NilResult asserts a caller that has nothing to decode —
+// the shape Service.RevokeToken uses, since the API confirms a revocation
+// with no caller-visible payload — can pass a nil destination.
+func TestClient_Delete_NilResult(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "ok"})
+	}))
+	defer server.Close()
+
+	client := New(Config{
+		BaseURL:    server.URL,
+		APIVersion: "v1",
+		Token:      "test-key",
+		RetryCfg:   retry.DefaultConfig(),
+		RateLimits: ratelimit.New(),
+	})
+
+	if _, err := client.Delete(context.Background(), "user/token/", nil, nil); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+}
+
+// TestClient_Delete_NetworkError asserts a transport failure surfaces
+// through delete's early return exactly like Get's.
+func TestClient_Delete_NetworkError(t *testing.T) {
+	client := New(Config{
+		BaseURL: "http://127.0.0.1:1", APIVersion: "v1", Token: "test-key",
+		RetryCfg: retry.Config{MaxRetries: 0, InitialBackoff: time.Millisecond, Multiplier: 2},
+	})
+
+	_, err := client.Delete(context.Background(), "user/token/", nil, nil)
+	var netErr *sdkerrors.NetworkError
+	if !errors.As(err, &netErr) {
+		t.Fatalf("error type = %T, want *sdkerrors.NetworkError", err)
+	}
+}
+
+// TestClient_Delete_InvalidJSON asserts a malformed body on an otherwise
+// successful response is a ParseError, not a silently empty result.
+func TestClient_Delete_InvalidJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte("not valid json"))
+	}))
+	defer server.Close()
+
+	client := New(Config{
+		BaseURL:    server.URL,
+		APIVersion: "v1",
+		Token:      "test-key",
+		RetryCfg:   retry.DefaultConfig(),
+		RateLimits: ratelimit.New(),
+	})
+
+	var result map[string]string
+	_, err := client.Delete(context.Background(), "user/token/", nil, &result)
+	var parseErr *sdkerrors.ParseError
+	if !errors.As(err, &parseErr) {
+		t.Fatalf("error type = %T, want *sdkerrors.ParseError", err)
+	}
+}
+
+// TestClient_Delete_APIError asserts a >=400 response maps to the same typed
+// error taxonomy as Get, through the same apiError classification.
+func TestClient_Delete_APIError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]string{"s": "error", "errmsg": "Invalid token"})
+	}))
+	defer server.Close()
+
+	client := New(Config{
+		BaseURL:    server.URL,
+		APIVersion: "v1",
+		Token:      "test-key",
+		RetryCfg:   retry.DefaultConfig(),
+		RateLimits: ratelimit.New(),
+	})
+
+	var result map[string]string
+	_, err := client.Delete(context.Background(), "user/token/", nil, &result)
+	if err == nil {
+		t.Fatal("Delete() should return error for 401 status")
+	}
+	authErr, ok := err.(*sdkerrors.AuthenticationError)
+	if !ok {
+		t.Fatalf("error type = %T, want *sdkerrors.AuthenticationError", err)
+	}
+	if authErr.StatusCode != http.StatusUnauthorized {
+		t.Errorf("StatusCode = %d, want %d", authErr.StatusCode, http.StatusUnauthorized)
+	}
+}
+
 func TestParseAPIError_AllStatusCodes(t *testing.T) {
 	tests := []struct {
 		name       string
